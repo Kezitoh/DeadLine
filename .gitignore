@@ -1,5 +1,13 @@
 # Phaser #
+##########
+#Ignora carpetas con nombres que contengan phaser
 phaser*/
+# Assets #
+##########
+#Esto debería ignorar todos los archivos dentro de assets pero mantener la estructura de carpetas
+#assets/**/*
+#!assets/**/*/
+#No funciona porque Git ignora los directorios vacíos, por lo que para no complicarnos simplemente subiremos los assets aunque aumente el peso del proyecto
 # Packages #
 ############
 # it's better to unpack these files and commit the raw source
