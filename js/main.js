@@ -11,6 +11,8 @@ let wfConfig = {
     }
 };
 
+WebFont.load(wfConfig);
+
 function startGame() {
     game = new Phaser.Game(800,800, Phaser.CANVAS, 'gameScreen');
     // Welcome Screen
