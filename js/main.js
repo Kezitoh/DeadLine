@@ -7,8 +7,7 @@ let wfConfig = {
     google: {
         families: ['Titan One']
     },
-    custom: {
-    }
+    custom: {}
 };
 window.onload = startGame;
 WebFont.load(wfConfig);
@@ -19,11 +18,12 @@ function startGame() {
     //game.state.add('welcome', initialState);
     // Instructions Screen
     game.state.add('instructions', instructionState);
+    game.state.add('welcome', initialState);
+    // About Screen (instructions)
+    //game.state.add('about', aboutState);
     // Config Screen
     //game.state.add('config', configState);
     // Play Screen
     //game.state.add('play', playState);
-    
-    game.state.start('instructions');
-    //game.state.start('welcome');
+    game.state.start('welcome');
 }
