@@ -9,7 +9,7 @@ let wfConfig = {
     },
     custom: {}
 };
-
+window.onload = startGame;
 WebFont.load(wfConfig);
 
 function startGame() {
@@ -18,6 +18,9 @@ function startGame() {
     game.state.add('welcome', initialState);
     // About Screen (instructions)
     //game.state.add('about', aboutState);
+    //game.state.add('welcome', initialState);
+    // Instructions Screen
+    game.state.add('instructions', instructionState);
     // Config Screen
     //game.state.add('config', configState);
     // Play Screen
