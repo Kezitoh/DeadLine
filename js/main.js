@@ -25,5 +25,5 @@ function startGame() {
     //game.state.add('config', configState);
     // Play Screen
     //game.state.add('play', playState);
-    game.state.start('welcome');
+    game.state.start('instructions');
 }
