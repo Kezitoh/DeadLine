@@ -14,7 +14,7 @@ let wfConfig = {
 WebFont.load(wfConfig);
 
 function startGame() {
-    game = new Phaser.Game(800,800, Phaser.CANVAS, 'gameScreen');
+    game = new Phaser.Game(800,600, Phaser.CANVAS, 'gameScreen');
     // Welcome Screen
     //game.state.add('welcome', initialState);
     // About Screen (instructions)
@@ -22,7 +22,7 @@ function startGame() {
     // Config Screen
     //game.state.add('config', configState);
     // Play Screen
-    //game.state.add('play', playState);
+    game.state.add('play', playState);
     
-    //game.state.start('welcome');
+    game.state.start('play');
 }
