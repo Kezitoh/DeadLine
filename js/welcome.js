@@ -4,14 +4,24 @@ let initialState = {
 };
 
 let mainTween, downTween1, downTween2;
-let btnAbout, btnConfig, btnPlay;
+let btninstructions, btnConfig, btnPlay;
+let btnEasy, btnNormal, btnHard;
 let levelToPlay;
+
+const DIFFICULTY = {
+    Easy: "Easy",
+    Normal: "Normal",
+    Hard: "Hard"
+}
+let difficulty;
 
 function loadAssets() {
     game.load.image('fondo', '../assets/Nuevos/fondo_espadas.jpeg');
-    game.load.image('aboutButton', '../assets/Nuevos/about.jpeg');
-    game.load.image('configButton', '../assets/Nuevos/configuracionboton.png');
-    game.load.image('playButton', '../assets/Nuevos/playboton.png');
+    game.load.image('instructionsButton', '../assets/Nuevos/about.jpeg');
+
+    game.load.image('EasyButton', '../assets/Nuevos/about.jpeg');
+    game.load.image('NormalButton', '../assets/Nuevos/configuracionboton.png');
+    game.load.image('HardButton', '../assets/Nuevos/playboton.png');
 }
 
 function displayScreen() {
@@ -23,35 +33,48 @@ function displayScreen() {
 
 
     let textTitle = 'DeadLine';
+    let byus = 'Steven Sánchez \nRuben Fernandez \nAlejandro Deben Duque';
     let styleTitle = {
         font: 'The Constallation',
         fontSize: '80pt',
         fontWeight: 'bold',
         fill: '#b60404'
     };
-    game.add.text(50, game.world.height / 6, textTitle, styleTitle);
+    let styleTitle2 = {
+        font: 'The Constallation',
+        fontSize: '20pt',
+        fontWeight: 'bold',
+        fill: '#b60404'
+    };
+    let t = game.add.text(game.world.width / 2, game.world.height / 6, textTitle, styleTitle);
+    t.anchor.setTo(0.5,0.5);
 
-    btnAbout = game.add.button(game.world.width / 1.75, game.world.height / 3 + 240,
-        'aboutButton', onAboutButtonPressed);
-    btnAbout.scale.setTo(0.5);
-    btnConfig = game.add.button(game.world.width / 1.75, game.world.height / 3 + 120,
-        'configButton', onConfigButtonPressed);
-    btnPlay = game.add.button(game.world.width / 1.75, game.world.height / 3,
-        'playButton', onPlayButtonPressed);
+    let te = game.add.text(game.world.width / 4, game.world.height - 70, byus, styleTitle2);
+    te.anchor.setTo(0.5,0.5);
+
+    btninstructions = game.add.button(game.world.width / 1.75, game.world.height / 3 + 240,
+        'instructionsButton', oninstructionsButtonPressed);
+    btninstructions.scale.setTo(0.5);
+
+
+    //botones de niveles
+    btnEasy = game.add.button(game.world.width / 6, game.world.height / 3 + 240,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
+    btnEasy.scale.setTo(0.5);
+    btnNormal = game.add.button(game.world.width / 6, game.world.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
+    btnHard = game.add.button(game.world.width / 6, game.world.height / 3,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
 
 }
 
-function onAboutButtonPressed() {
-    // Your Turn 2 - Add the instruction to start the 'about' state
-    game.state.start('about');
+function oninstructionsButtonPressed() {
+    game.state.start('instructions');
 }
 
-function onConfigButtonPressed() {
-    // Your Turn 2 - Add the instruction to start the 'config' state
-    game.state.start('config');
-}
 
-function onPlayButtonPressed() {
-    // Your Turn 2 - Add the instruction to start the 'play' state
+
+
+
+function onDifficultySet(d){
+    difficulty = d;
     game.state.start('play');
 }
+
