@@ -18,6 +18,7 @@ function startGame() {
     //game.state.add('welcome', initialState);
     // Instructions Screen
     game.state.add('instructions', instructionState);
+    game.state.add('play', playState);
     game.state.add('welcome', initialState);
     // About Screen (instructions)
     //game.state.add('about', aboutState);
