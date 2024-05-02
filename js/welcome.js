@@ -16,12 +16,12 @@ const DIFFICULTY = {
 let difficulty;
 
 function loadAssets() {
-    game.load.image('fondo', '../assets/Nuevos/fondo_espadas.jpeg');
-    game.load.image('instructionsButton', '../assets/Nuevos/about.jpeg');
+    game.load.image('fondo', 'assets/Nuevos/fondo_espadas.jpeg');
+    game.load.image('instructionsButton', 'assets/Nuevos/about.jpeg');
 
-    game.load.image('EasyButton', '../assets/Nuevos/about.jpeg');
-    game.load.image('NormalButton', '../assets/Nuevos/configuracionboton.png');
-    game.load.image('HardButton', '../assets/Nuevos/playboton.png');
+    game.load.image('EasyButton', 'assets/Nuevos/about.jpeg');
+    game.load.image('NormalButton', 'assets/Nuevos/configuracionboton.png');
+    game.load.image('HardButton', 'assets/Nuevos/playboton.png');
 }
 
 function displayScreen() {
