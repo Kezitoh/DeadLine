@@ -26,6 +26,6 @@ function displayScreen() {
         fontWeight: 'bold',
         fill: '#b60404'
     };
-    game.add.text(50, game.world.height / 6, textTitle, styleTitle);
+    game.add.text(game.world.width / 2, game.world.height / 6, textTitle, styleTitle);
 
 }
