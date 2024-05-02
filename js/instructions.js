@@ -4,7 +4,7 @@ let instructionState = {
 };
 
 function loadInstructionsAssets(){
-    game.load.image('fondo', '../assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
+    game.load.image('fondo', './assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
 }
 
 function showInstructions(){

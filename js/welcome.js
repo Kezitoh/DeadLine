@@ -8,10 +8,10 @@ let btnAbout, btnConfig, btnPlay;
 let levelToPlay;
 
 function loadAssets() {
-    game.load.image('fondo', '../assets/Nuevos/fondo_espadas.jpeg');
-    game.load.image('aboutButton', '../assets/Nuevos/about.jpeg');
-    game.load.image('configButton', '../assets/Nuevos/configuracionboton.png');
-    game.load.image('playButton', '../assets/Nuevos/playboton.png');
+    game.load.image('fondo', './assets/Nuevos/fondo_espadas.jpeg');
+    game.load.image('instructionsButton', './assets/Nuevos/about.jpeg');
+    game.load.image('configButton', './assets/Nuevos/configuracionboton.png');
+    game.load.image('playButton', './assets/Nuevos/playboton.png');
 }
 
 function displayScreen() {
@@ -31,9 +31,9 @@ function displayScreen() {
     };
     game.add.text(game.world.width / 2, game.world.height / 6, textTitle, styleTitle);
 
-    btnAbout = game.add.button(game.world.width / 1.75, game.world.height / 3 + 240,
-        'aboutButton', onAboutButtonPressed);
-    btnAbout.scale.setTo(0.5);
+    btnInstructions = game.add.button(game.world.width / 1.75, game.world.height / 3 + 240,
+        'instructionsButton', onInstructionsButtonPressed);
+    btnInstructions.scale.setTo(0.5);
     btnConfig = game.add.button(game.world.width / 1.75, game.world.height / 3 + 120,
         'configButton', onConfigButtonPressed);
     btnPlay = game.add.button(game.world.width / 1.75, game.world.height / 3,
@@ -41,9 +41,9 @@ function displayScreen() {
 
 }
 
-function onAboutButtonPressed() {
+function onInstructionsButtonPressed() {
     // Your Turn 2 - Add the instruction to start the 'about' state
-    game.state.start('about');
+    game.state.start('instructions');
 }
 
 function onConfigButtonPressed() {
