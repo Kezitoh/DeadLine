@@ -5,6 +5,7 @@ let instructionState = {
 
 function loadInstructionsAssets(){
     game.load.image('fondo', './assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
+    game.load.image('btnWelcome', './assets/Nuevos/about.jpeg')
 }
 
 function showInstructions(){
@@ -30,4 +31,7 @@ function showInstructions(){
     let t = game.add.text(game.world.width / 2, game.world.height / 15, instructionsText, instructionsStyle);
     t.x -= t.width / 2;
     game.add.text(game.world.width / 2, game.world.height / 20, titleText, titleStyle);
+
+
+
 }
