@@ -10,8 +10,8 @@ let playState = {
 let hudGroup, healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty;
 let remainingTime;
 let score;
-let difficulty = "Normal"; //esto no irá aquí en el futuro, irá en pantalla de inicio
-const DIFFICULTY = {Normal : 0, Easy: 1, Hard: 2};
+//let difficulty = "Normal"; //esto no irá aquí en el futuro, irá en pantalla de inicio
+//const DIFFICULTY = {Normal : 0, Easy: 1, Hard: 2};
 function loadPlayAssets() {
     loadSprites();
     loadImages();
@@ -49,6 +49,7 @@ function setDifficulty(difficulty) {
             
             break;
     
+        
         case DIFFICULTY.Easy || 'Easy':
             break;
         case DIFFICULTY.Hard || 'Hard': 
