@@ -15,6 +15,10 @@ let playState = {
 let hudGroup, healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty;
 let remainingTime;
 let score;
+
+let player, cursors;
+let exit;
+
 //let difficulty = "Normal"; //esto no irá aquí en el futuro, irá en pantalla de inicio
 //const DIFFICULTY = {Normal : 0, Easy: 1, Hard: 2};
 
@@ -49,7 +53,11 @@ function loadImages() {
 
 
 function createLevel() {
-    exitingLevel = false;
+
+    setDifficulty(difficulty);
+    remainingTime = DEFAULT_TIME;
+    createHUD();
+
     // Set World bounds (same size as the image background in this case)
     game.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -60,9 +68,9 @@ function createLevel() {
     bg.scrollFactorY = 0.7;
 
     // Collide with this image to exit level
-    exit = game.add.sprite(game.world.width - 100, game.world.height - 64, 'exit');
-    exit.anchor.setTo(0, 1);
-    exit.body.setSize(88, 58, 20, 33);
+    //exit = game.add.sprite(game.world.width - 100, game.world.height - 64, 'exit');
+    //exit.anchor.setTo(0, 1);
+    //exit.body.setSize(88, 58, 20, 33);
 
     // Now, set time and create the HUD
     //remainingTime = secondsToGo;
@@ -73,8 +81,8 @@ function createLevel() {
     player.anchor.setTo(0.5, 0.5);
 
     //  Player physics properties. Give the little guy a slight bounce.
-    player.body.bounce.y = 0.2;
-    player.body.collideWorldBounds = true;
+    //player.body.bounce.y = 0.2;
+    //player.body.collideWorldBounds = true;
 
     // Camera follows the player inside the world
     game.camera.follow(player);
@@ -92,7 +100,7 @@ function createLevel() {
 
 function updateLevel() {
     //  Reset the players velocity (movement)
-    player.body.velocity.x = 0;
+    // player.body.velocity.x = 0;
 
     if (cursors.left.isDown) {
         //  Move to the left
@@ -106,19 +114,8 @@ function updateLevel() {
     } else if (cursors.down.isDown) {
         //  Move to the right
         player.body.velocity.y = PLAYER_VELOCITY;
-    } else {
-        //  Stand still
-        stopPlayer();
     }
 }
-
-function createLevel() {
-    setDifficulty(difficulty);
-    remainingTime = DEFAULT_TIME;
-    createHUD();
-    timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
-}
-
 function setDifficulty(difficulty) {
     switch (difficulty) {
         case DIFFICULTY.Normal || 'Normal':
