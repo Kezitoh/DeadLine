@@ -37,7 +37,7 @@ function loadImages() {
     game.load.image('heart', '../assets/UI/heart.png');
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
-    game.load.image('bgGame', '../assets/Nuevos/fondo_espadas.jpeg');
+    game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
 }
 
 function loadSounds() {
@@ -74,25 +74,17 @@ function createLevel() {
 
     // Now, set time and create the HUD
     //remainingTime = secondsToGo;
-    createHUD();
 
     // Create player. Initial position according to JSON data
-    player = game.add.sprite(game.world.width/2, game.world.height/2, 'collector');
-    player.anchor.setTo(0.5, 0.5);
+    //player = game.add.sprite(game.world.width/2, game.world.height/2, 'collector');
+    //player.anchor.setTo(0.5, 0.5);
 
     //  Player physics properties. Give the little guy a slight bounce.
-    //player.body.bounce.y = 0.2;
-    //player.body.collideWorldBounds = true;
+    
 
     // Camera follows the player inside the world
     game.camera.follow(player);
 
-    //  Our two animations, walking left and right.
-    //player.animations.add('left', [0, 1, 2, 3], 10, true);
-    //player.animations.add('right', [5, 6, 7, 8], 10, true);
-
-    //  Our controls.
-    cursors = game.input.keyboard.createCursorKeys();
 
     // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
@@ -104,6 +96,8 @@ function createLevel() {
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
 
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
+    player.body.bounce.y = 0.2;
+    player.body.collideWorldBounds = true;
 }
 
 function updateLevel() {

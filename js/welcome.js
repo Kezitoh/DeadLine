@@ -37,27 +37,38 @@ function displayScreen() {
     let styleTitle = {
         font: 'Titan One',
         fontSize: '80pt',
-        fill: '#b60404'
+        fill: '#FFFFFF'
     };
     let styleTitle2 = {
         font: 'Titan One',
         fontSize: '20pt',
         fontWeight: 'italic',
-        fill: '#b60404'
+        fill: '#FFFFFF'
     };
     let t = game.add.text(game.canvas.width / 2, game.canvas.height / 6, textTitle, styleTitle);
     t.anchor.setTo(0.5,0.5);
+    t.setShadow(5,5);
 
     let te = game.add.text(game.world.width / 7, game.world.height - 70, byus, styleTitle2);
     te.anchor.setTo(0.5,0.5);
+    te.setShadow(5,5);
 
-    btninstructions = game.add.button(game.world.width / 1.3, game.world.height / 3 + 120,'instructionsButton', oninstructionsButtonPressed);
+    btninstructions = game.add.button(game.world.width / 1.8, game.world.height / 1.4 + 120,'instructionsButton', oninstructionsButtonPressed);
 
 
     //botones de niveles
-    btnEasy = game.add.button(game.world.width / 10, game.world.height / 3 + 240,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
-    btnNormal = game.add.button(game.world.width / 10, game.world.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
-    btnHard = game.add.button(game.world.width / 10, game.world.height / 3,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
+    btnEasy = game.add.button(game.world.width / 2 - 380, game.world.height / 3 + 120,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
+    btnNormal = game.add.button(game.world.width / 2 , game.world.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
+    btnHard = game.add.button(game.world.width / 2 + 380, game.world.height / 3 + 120,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
+
+    btnEasy.anchor.setTo(0.5,0.5);
+    btnNormal.anchor.setTo(0.5,0.5);
+    btnHard.anchor.setTo(0.5,0.5);
+
+    btninstructions.scale.setTo(1.5);
+    btnEasy.scale.setTo(1.5);
+    btnNormal.scale.setTo(1.5);
+    btnHard.scale.setTo(1.5);
 
 }
 
