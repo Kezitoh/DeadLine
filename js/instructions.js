@@ -4,7 +4,7 @@ let instructionState = {
 };
 
 function loadInstructionsAssets(){
-    game.load.image('fondo', '/assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
+    game.load.image('fondo', 'assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
     game.load.image('homeBtn', 'assets/UI/cancelButton.png');
     game.load.image('forwardBtn', 'assets/UI/forwardButton.png');
     game.load.image('backBtn', 'assets/UI/backButton.png');
@@ -77,7 +77,6 @@ function showSlide2(){
     let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'backBtn', () => {backBtnPress(slideNum)});
     backBtn.scale.setTo(3);
 }
-
 
 function forwardBtnPress(slideOrigin){
     game.time.events.remove(timer);

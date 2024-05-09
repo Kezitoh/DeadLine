@@ -2,6 +2,15 @@ const MAX_HEALTH = 100;
 const DEFAULT_TIME = 60;
 const PLAYER_VELOCITY = 150;
 
+//Enemy consts
+const ENEMY_BASE_HEALTH = 10;
+const ENEMY_BASE_SPEED = 2;
+const ENEMY_GROUP_SIZE = 100;
+const ENEMY_SPAWN_TIMER = 1000;
+let enemyHealth;
+
+
+
 let playState = {
     preload: loadPlayAssets,
     create: createLevel,
@@ -25,7 +34,8 @@ function loadPlayAssets() {
 }
 
 function loadSprites() {
-    game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png')
+    game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png');
+    game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
 }
 
 function loadImages() {
@@ -62,6 +72,8 @@ function createLevel() {
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
     
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
+
+    createEnemies();
 }
 
 function setDifficulty(difficulty) {
@@ -144,6 +156,24 @@ function characterMovement() {
     }
 }
 
+function createEnemies() {
+    enemies = game.add.group();
+    enemies.enableBody = true;
+    enemies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
+    enemies.forEach();
+    game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
+    enemyHealth = ENEMY_BASE_HEALTH;
+}
+
+function spawnEnemy() {
+    let enemy = enemies.getFirstExists(false);
+    enemy.reset(10,10);
+    enemy.body.velocity.x = 1;
+    enemy.body.velocity.y = 1;
+}
+
+
+
 function updateHealthBar() {
     if (healthTween)
         healthTween.stop();
@@ -168,6 +198,14 @@ function updateTime(offset = 0) {
     }
 }
 
+function endGame() {
+    game.state.start('play');
+}
+
+
 function updateScore() {
     hudScore.setText((score+'').padStart(4,'0'))
 }
+
+
+
