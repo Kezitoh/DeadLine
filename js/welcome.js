@@ -12,7 +12,7 @@ const DIFFICULTY = {
     Easy: "Easy",
     Normal: "Normal",
     Hard: "Hard"
-}
+};
 let difficulty;
 
 function loadAssets() {
