@@ -17,7 +17,7 @@ let difficulty;
 
 function loadAssets() {
     game.load.image('fondo', 'assets/Nuevos/fondo_espadas.jpeg');
-    game.load.image('instructionsButton', '../assets/UI/instructionsButton.png');
+    game.load.image('instructionsButton', 'assets/UI/instructionsButton.png');
 
     game.load.image('EasyButton', 'assets/UI/easyButton.png');
     game.load.image('NormalButton', 'assets/UI/normalButton.png');
