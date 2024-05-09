@@ -1,5 +1,6 @@
-const WORLD_WIDTH = 1100
-const WORLD_HEIGHT = 825
+const WORLD_WIDTH = 1100;
+const WORLD_HEIGHT = 825;
+const PLAYER_VELOCITY = 150;
 
 let playState = {
     preload: loadPlayAssets,
@@ -57,4 +58,26 @@ function createLevel() {
 
     // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
+}
+
+function updateLevel() {
+    //  Reset the players velocity (movement)
+    player.body.velocity.x = 0;
+
+    if (cursors.left.isDown) {
+        //  Move to the left
+        player.body.velocity.x = -PLAYER_VELOCITY;
+    } else if (cursors.right.isDown) {
+        //  Move to the right
+        player.body.velocity.x = PLAYER_VELOCITY;
+    } else if (cursors.up.isDown) {
+        //  Move to the right
+        player.body.velocity.y = - PLAYER_VELOCITY;
+    } else if (cursors.down.isDown) {
+        //  Move to the right
+        player.body.velocity.y = PLAYER_VELOCITY;
+    } else {
+        //  Stand still
+        stopPlayer();
+    }
 }
