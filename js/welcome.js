@@ -45,7 +45,7 @@ function displayScreen() {
         fontWeight: 'italic',
         fill: '#b60404'
     };
-    let t = game.add.text(game.world.width / 2, game.world.height / 6, textTitle, styleTitle);
+    let t = game.add.text(game.canvas.width / 2, game.canvas.height / 6, textTitle, styleTitle);
     t.anchor.setTo(0.5,0.5);
 
     let te = game.add.text(game.world.width / 7, game.world.height - 70, byus, styleTitle2);
