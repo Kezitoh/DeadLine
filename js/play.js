@@ -19,7 +19,8 @@ function loadPlayAssets() {
 }
 
 function loadSprites() {
-
+    game.load.spritesheet('pc', '../assets/sprites/spritesheet_characters.png')
+    game.add.sprite();
 }
 
 function loadImages() {
@@ -41,6 +42,8 @@ function createLevel() {
     remainingTime = DEFAULT_TIME;
     createHUD();
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
+    player = game.add.sprite(game.world.width/2, game.world.height/2, soldier);
+    game.camera.follow(player);
 }
 
 function setDifficulty(difficulty) {
