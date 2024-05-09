@@ -76,7 +76,6 @@ function createLevel() {
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
     player.body.collideWorldBounds = true;
-    player.body.setCircle(100)
     
     game.add.sprite(game.world.width/4,game.world.height/4,"heart");
 }
@@ -120,6 +119,8 @@ function createHUD() {
 
 function updateLevel() {
     characterMovement();
+    //player.rotation = game.physics.arcade.angleToPointer(player);
+    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
     if(game.input.activePointer.isDown) {
         shoot();
     }
