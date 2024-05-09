@@ -46,22 +46,22 @@ function displayScreen() {
         fontWeight: 'bold',
         fill: '#b60404'
     };
-    let t = game.add.text(game.world.width / 2, game.world.height / 6, textTitle, styleTitle);
+    let t = game.add.text(game.canvas.width / 2, game.canvas.height / 6, textTitle, styleTitle);
     t.anchor.setTo(0.5,0.5);
 
-    let te = game.add.text(game.world.width / 4, game.world.height - 70, byus, styleTitle2);
+    let te = game.add.text(game.canvas.width / 4, game.canvas.height - 70, byus, styleTitle2);
     te.anchor.setTo(0.5,0.5);
 
-    btninstructions = game.add.button(game.world.width / 1.75, game.world.height / 3 + 240,
+    btninstructions = game.add.button(game.canvas.width / 1.75, game.canvas.height / 3 + 240,
         'instructionsButton', oninstructionsButtonPressed);
     btninstructions.scale.setTo(0.5);
 
 
     //botones de niveles
-    btnEasy = game.add.button(game.world.width / 6, game.world.height / 3 + 240,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
+    btnEasy = game.add.button(game.canvas.width / 6, game.canvas.height / 3 + 240,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
     btnEasy.scale.setTo(0.5);
-    btnNormal = game.add.button(game.world.width / 6, game.world.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
-    btnHard = game.add.button(game.world.width / 6, game.world.height / 3,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
+    btnNormal = game.add.button(game.canvas.width / 6, game.canvas.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
+    btnHard = game.add.button(game.canvas.width / 6, game.canvas.height / 3,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
 
 }
 

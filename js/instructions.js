@@ -25,9 +25,9 @@ function showBaseScreen(){
         align: 'center',
         fill: '#FFFFFF'
     };
-    let titleTextBox = game.add.text(game.world.width / 2, game.world.height / 20, titleText, titleStyle);
+    let titleTextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 20, titleText, titleStyle);
     titleTextBox.anchor.setTo(0.5, 0);
-    btnBack = game.add.button(game.world.width/3, game.world.height/2, 'backBtn', onBackButtonPressed);
+    btnBack = game.add.button(game.canvas.width/3, game.canvas.height/2, 'backBtn', onBackButtonPressed);
 
 
 }
@@ -40,10 +40,10 @@ function showSlide1(){
     slide1Text += 'AIM with the MOUSE and LEFT CLICK to SHOOT\n';
     slide1Text += 'SHOOT the enemies to gain points!';
     
-    let slide1TextBox = game.add.text(game.world.width / 2, game.world.height / 5, slide1Text, slideTextStyle);
+    let slide1TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide1Text, slideTextStyle);
     slide1TextBox.anchor.setTo(0.5, 0);
 
-    let forwardBtn = game.add.button(game.world.width/1.25, game.world.height/1.25, 'backBtn', forwardBtnPress);
+    let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'backBtn', forwardBtnPress);
     
 }
 
@@ -51,13 +51,13 @@ function showSlide2(){
     showBaseScreen();
 
     let slide2Text = 'A=IGBIUAEBGOIWNEGOIWHEOKFWOEIOWENENIGWIJGOWINGOWIEGOEGOWERGOWEIGJOWGIJWOEIGWOEIGHOWEGH';
-    let slide2TextBox = game.add.text(game.world.width / 2, game.world.height / 5, slide2Text, slideTextStyle)
+    let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide2Text, slideTextStyle)
 
 }
 
 
 
-game.world.removeAll();
+//game.canvas.removeAll();
 
 function onBackButtonPressed(){
     game.state.start('welcome');
