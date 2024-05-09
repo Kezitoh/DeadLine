@@ -43,12 +43,11 @@ function showSlide1(){
     showBaseScreen();
     slideNum = 1;
      timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
-    
-    
+
     let slide1Text = 'Use WASD or ARROWS to move the player character.\n';
     slide1Text += 'AIM with the MOUSE and LEFT CLICK to SHOOT\n';
     slide1Text += 'SHOOT the enemies to gain points!';
-    
+
     let slide1TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide1Text, slideTextStyle);
     slide1TextBox.anchor.setTo(0.5, 0);
     slide1TextBox.setShadow(5,5);
