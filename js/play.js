@@ -1,5 +1,4 @@
-const WORLD_WIDTH = 1100;
-const WORLD_HEIGHT = 825;
+
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 60;
@@ -38,6 +37,7 @@ function loadImages() {
     game.load.image('heart', '../assets/UI/heart.png');
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
+    game.load.image('bgGame', '../assets/Nuevos/fondo_espadas.jpeg');
 }
 
 function loadSounds() {
@@ -45,7 +45,6 @@ function loadSounds() {
 }
 
 function loadLevel(level) {
-    game.load.image('bgGame', 'assets/Nuevos/fondo_espadas.jpeg');
 }
 
 
@@ -61,7 +60,6 @@ function createLevel() {
     remainingTime = DEFAULT_TIME;
 
     // Set World bounds (same size as the image background in this case)
-    game.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
     // Background
     let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
@@ -152,6 +150,9 @@ function createHUD() {
 
 
 function characterMovement() {
+
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
 
     player.rotation = game.physics.arcade.angleToPointer(player);
     if(cursors.up.isDown || wasd.w.isDown){
