@@ -1,3 +1,4 @@
+/** @type {Phaser.Game} */
 let game;
 
 let wfConfig = {
