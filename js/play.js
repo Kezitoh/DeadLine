@@ -80,7 +80,7 @@ function createLevel() {
     //player.anchor.setTo(0.5, 0.5);
 
     //  Player physics properties. Give the little guy a slight bounce.
-    
+
 
     // Camera follows the player inside the world
     game.camera.follow(player);
@@ -106,13 +106,10 @@ function updateLevel() {
 function setDifficulty(difficulty) {
     switch (difficulty) {
         case DIFFICULTY.Normal || 'Normal':
-
             break;
-
         case DIFFICULTY.Easy || 'Easy':
             break;
-        case DIFFICULTY.Hard || 'Hard': 
-
+        case DIFFICULTY.Hard || 'Hard':
             break;
     }
 }
@@ -127,7 +124,10 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudTime);
-    hudScore = game.add.text(game.canvas.width-100, 13, '0000', {
+
+    score = 0;
+
+    hudScore = game.add.text(game.canvas.width-100, 13, score, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
@@ -139,7 +139,7 @@ function createHUD() {
     hudGroup.add(hudDifficulty);
     hudGroup.fixedToCamera = true;
     healthValue = MAX_HEALTH;
-    score = 0;
+
 }
 
 
@@ -161,14 +161,14 @@ function characterMovement() {
     if(cursors.right.isDown || wasd.d.isDown) {
         player.body.velocity.x = PLAYER_VELOCITY;
     }
-    
-    else if(cursors.down.isUp && 
-            cursors.up.isUp && 
+
+    else if(cursors.down.isUp &&
+            cursors.up.isUp &&
             cursors.left.isUp &&
-            cursors.right.isUp && 
-            wasd.w.isUp && 
-            wasd.s.isUp && 
-            wasd.a.isUp && 
+            cursors.right.isUp &&
+            wasd.w.isUp &&
+            wasd.s.isUp &&
+            wasd.a.isUp &&
             wasd.d.isUp) {
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
@@ -200,5 +200,9 @@ function updateTime(offset = 0) {
 }
 
 function updateScore() {
-    hudScore.setText((score+'').padStart(4,'0'))
+    hudScore.setText((score +'').padStart(4,'0'))
+}
+
+function endGame() {
+
 }
