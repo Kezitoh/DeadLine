@@ -1,6 +1,7 @@
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 60;
 const PLAYER_VELOCITY = 150;
+const SHOOT_COOLDOWN = 150;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 10;
@@ -17,7 +18,9 @@ let playState = {
     update: updateLevel
 };
 /** @type {Phaser.Group} */
-let hudGroup
+let hudGroup;
+/** @type {Phaser.Group} */
+let bulletGroup;
 let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty;
 let remainingTime;
 let score;
@@ -26,6 +29,7 @@ let player;
 /** @type {Phaser.CursorKeys} */
 let cursors;
 let wasd;
+let nextShoot;
 
 function loadPlayAssets() {
     loadSprites();
@@ -42,6 +46,7 @@ function loadImages() {
     game.load.image('heart', '../assets/UI/heart.png');
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
+    game.load.image('bullet', '../assets/sprites/purple_ball.png');
 }
 
 function loadSounds() {
@@ -53,11 +58,21 @@ function loadLevel(level) {
 }
 
 function createLevel() {
+    nextShoot = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     cursors = game.input.keyboard.createCursorKeys();
     wasd = game.input.keyboard.addKeys({w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D});
+    
+    bulletGroup = game.add.group();
+    bulletGroup.enableBody = true;
+    bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    bulletGroup.createMultiple(50,'bullet');
+    bulletGroup.forEach((bullet)=>{bullet.scale.set(0.5,0.5)})
+
+    bulletGroup.setAll('checkWorldBounds', true);
+    bulletGroup.setAll('outOfBoundsKill', true);
 
     setDifficulty(difficulty);
     
@@ -70,6 +85,7 @@ function createLevel() {
     player.anchor.setTo(0.5, 0.5);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
+    player.body.collideWorldBounds = true;
     
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
 
@@ -78,11 +94,8 @@ function createLevel() {
 
 function setDifficulty(difficulty) {
     switch (difficulty) {
-        case DIFFICULTY.Normal || 'Normal':
-            
+        case DIFFICULTY.Normal || 'Normal': 
             break;
-    
-        
         case DIFFICULTY.Easy || 'Easy':
             break;
         case DIFFICULTY.Hard || 'Hard': 
@@ -118,6 +131,11 @@ function createHUD() {
 
 function updateLevel() {
     characterMovement();
+    //player.rotation = game.physics.arcade.angleToPointer(player);
+    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
+    if(game.input.activePointer.isDown) {
+        shoot();
+    }
     // if(healthValue > 50) {
     //     healthValue--;
     //     updateHealthBar();
@@ -125,6 +143,15 @@ function updateLevel() {
     //     score +=2;
     //     updateScore();
     // }
+}
+
+function shoot() {
+    if(game.time.now > nextShoot && bulletGroup.countDead() > 0) {
+        nextShoot = game.time.now + SHOOT_COOLDOWN;
+        let bullet = bulletGroup.getFirstDead();
+        bullet.reset(player.x, player.y);
+        game.physics.arcade.moveToPointer(bullet, 300);
+    }
 }
 
 function characterMovement() {
