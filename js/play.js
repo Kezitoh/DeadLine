@@ -1,6 +1,6 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
-const DEFAULT_TIME = 60;
+const DEFAULT_TIME = 2;
 
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
@@ -100,19 +100,6 @@ function createLevel() {
     bg.scrollFactorX = 0.7;
     bg.scrollFactorY = 0.7;
 
-    // Collide with this image to exit level
-    //exit = game.add.sprite(game.world.width - 100, game.world.height - 64, 'exit');
-    //exit.anchor.setTo(0, 1);
-    //exit.body.setSize(88, 58, 20, 33);
-
-    // Now, set time and create the HUD
-    //remainingTime = secondsToGo;
-
-    // Create player. Initial position according to JSON data
-    //player = game.add.sprite(game.world.width/2, game.world.height/2, 'collector');
-    //player.anchor.setTo(0.5, 0.5);
-
-
     // Camera follows the player inside the world
     game.camera.follow(player);
 
@@ -127,7 +114,7 @@ function createLevel() {
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
 
     player.body.collideWorldBounds = true;
-    
+
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
 
     createEnemies();
@@ -138,7 +125,7 @@ function updateLevel() {
 }
 function setDifficulty(difficulty) {
     switch (difficulty) {
-        case DIFFICULTY.Normal || 'Normal': 
+        case DIFFICULTY.Normal || 'Normal':
             break;
         case DIFFICULTY.Easy || 'Easy':
             break;
@@ -219,17 +206,6 @@ function characterMovement() {
         player.body.velocity.x = PLAYER_VELOCITY;
     }
 
-    else if(cursors.down.isUp &&
-            cursors.up.isUp &&
-            cursors.left.isUp &&
-            cursors.right.isUp &&
-            wasd.w.isUp &&
-            wasd.s.isUp &&
-            wasd.a.isUp &&
-            wasd.d.isUp) {
-        player.body.velocity.x = 0;
-        player.body.velocity.y = 0;
-    }
 }
 
 function createEnemies() {
@@ -240,7 +216,7 @@ function createEnemies() {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
         enemyHealth = ENEMY_BASE_HEALTH;});
-    game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);   
+    game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
 }
 
 function spawnEnemy() {
@@ -295,7 +271,7 @@ function updateTime(offset = 0) {
     hudTime.setText(setRemainingTime(remainingTime));
     if(remainingTime < 0) {
         game.time.events.remove(timerClock);
-        game.time.events.add(2500, endGame, this);
+        game.time.events.add(25, endGame, this);
     }
 }
 
@@ -310,6 +286,7 @@ function updateScore() {
 
 function endGame() {
     remainingTime = 100;
+    game.state.start('screenFinal');
 }
 
 

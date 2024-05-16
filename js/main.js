@@ -15,8 +15,9 @@ WebFont.load(wfConfig);
 
 function startGame() {
     game = new Phaser.Game(1200, 800, Phaser.CANVAS, 'gameScreen');
+    //game.canvas.backgroundColor = Phaser.Color.AQUA;
 
-    //game.state.add('screenfinal', finalState);
+    game.state.add('screenFinal', finalState);
 
     game.state.add('instructions', instructionState);
 
