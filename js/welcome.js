@@ -7,12 +7,19 @@ let mainTween, downTween1, downTween2;
 let btninstructions, btnConfig, btnPlay;
 let btnEasy, btnNormal, btnHard;
 let levelToPlay;
+let img5;
 
 const DIFFICULTY = {
     Easy: "Easy",
     Normal: "Normal",
     Hard: "Hard"
 };
+
+const Salida = {
+    Play: changeScreen(),
+    Final: endGame(),
+    Inicio: onFinalButtonPressed()
+}
 let difficulty;
 
 function loadAssets() {
@@ -26,6 +33,7 @@ function loadAssets() {
 }
 
 function displayScreen() {
+
     levelToPlay = 1;
     game.input.enabled = true;
     let img = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'fondo');
@@ -72,10 +80,7 @@ function displayScreen() {
     btnNormal.scale.setTo(1.5);
     btnHard.scale.setTo(1.5);
 
-    let img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
-    img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(3);
-    img5.alpha = 0;
+    animacionEntrada();
 
 }
 
@@ -83,20 +88,38 @@ function oninstructionsButtonPressed() {
     game.state.start('instructions');
 }
 
+function animacionEntrada(){
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 1;
 
-
-
-
-function onDifficultySet(d){
-    difficulty = d;
-    mainTween = game.add.tween(hero3).to({
-        opacity: 0
-    }, 2000, Phaser.Easing.Linear.None).to({
-        opacity: 100
-    }, 500, Phaser.Easing.Linear.None);
-    mainTween.delay(3000);
-    mainTween.loop(true);
+    mainTween = game.add.tween(img5).to({
+        alpha: 0
+    },1500, Phaser.Easing.Cubic.Out);
     mainTween.start();
-    game.state.start('play');
 }
 
+function onDifficultySet(d){
+
+    difficulty = d;
+    animacionSalida(Salida.Play);
+
+}
+
+function animacionSalida(a){
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 0;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 1
+    },250, Phaser.Easing.Cubic.Out);
+    mainTween.onComplete.add(a);
+    mainTween.start();
+}
+
+function changeScreen(){
+    game.state.start('play');
+}

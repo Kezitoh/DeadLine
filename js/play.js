@@ -1,6 +1,6 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
-const DEFAULT_TIME = 2;
+const DEFAULT_TIME = 3;
 
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
@@ -62,6 +62,7 @@ function loadImages() {
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
+    game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
 }
 
 function loadSounds() {
@@ -72,16 +73,18 @@ function loadLevel(level) {
 }
 
 
+
+
 function createLevel() {
     nextShoot = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
-    
+
     let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
 
     cursors = game.input.keyboard.createCursorKeys();
     wasd = game.input.keyboard.addKeys({w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D});
-    
+
     bulletGroup = game.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
@@ -118,6 +121,7 @@ function createLevel() {
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
 
     createEnemies();
+    animacionEntrada();
 }
 
 function updateLevel() {
@@ -271,12 +275,21 @@ function updateTime(offset = 0) {
     hudTime.setText(setRemainingTime(remainingTime));
     if(remainingTime < 0) {
         game.time.events.remove(timerClock);
-        game.time.events.add(25, endGame, this);
+        game.time.events.add(25, animacionSalidaFinalMuerte, this);
     }
 }
 
-function endGame() {
-    game.state.start('play');
+function animacionSalidaFinalMuerte(a){
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 0;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 1
+    },250, Phaser.Easing.Cubic.Out);
+    mainTween.onComplete.add(endGame);
+    mainTween.start();
 }
 
 

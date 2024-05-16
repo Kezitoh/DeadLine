@@ -16,6 +16,7 @@ let btnInicio;
 function loadFinalImages() {
     game.load.image('bgGamef', '../assets/UI/Fondodejuego.png');
     game.load.image('btnInicioA', '../assets/UI/4x/btnInicioConLetras.png');
+    game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
 }
 
 function createLevelFinal() {
@@ -37,7 +38,7 @@ function createLevelFinal() {
     if(winOrLose){//aqui va si gana
         textfinal = "Victoria" ;
 
-        let scoretext3 = "Hasta toda esta vida te sobro: \n " + healthBar;
+        let scoretext3 = "Hasta toda esta vida te sobro: \n " + healthValue;
         let puntuacionTexto3 = game.add.text(game.canvas.width / 2, game.canvas.height / 3 + 240, scoretext3, stylesub);
         puntuacionTexto3.anchor.setTo(0.5,0.5);
 
@@ -47,11 +48,6 @@ function createLevelFinal() {
         textfinal = "Derrota";
         textoFinalBoton();
     }
-
-    function onFinalButtonPressed() {
-        game.state.start('welcome');
-    }
-
     function textoFinalBoton(){
         let t = game.add.text(game.canvas.width / 2, game.canvas.height / 6, textfinal, styleTitle);
         t.anchor.setTo(0.5,0.5);
@@ -65,11 +61,15 @@ function createLevelFinal() {
         let puntuacionTexto2 = game.add.text(game.canvas.width / 2, game.canvas.height / 3 + 120, scoretext2, stylesub);
         puntuacionTexto2.anchor.setTo(0.5,0.5);
 
-        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',onFinalButtonPressed);
+        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => { animacionSalida(Salida.Final); });
         btnInicio.scale.setTo(0.4);
         btnInicio.anchor.setTo(0.5,0.5);
     }
 
-
-
+    animacionEntrada();
 }
+
+function onFinalButtonPressed() {
+    game.state.start('welcome');
+}
+
