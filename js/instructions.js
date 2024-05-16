@@ -4,7 +4,7 @@ let instructionState = {
 };
 
 function loadInstructionsAssets(){
-    game.load.image('fondo', '/assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
+    game.load.image('fondo', 'assets/kenney_top_down_shooter/Tilesheet/tilesheet_complete.png');
     game.load.image('homeBtn', 'assets/UI/cancelButton.png');
     game.load.image('forwardBtn', 'assets/UI/forwardButton.png');
     game.load.image('backBtn', 'assets/UI/backButton.png');
@@ -43,21 +43,19 @@ function showSlide1(){
     showBaseScreen();
     slideNum = 1;
      timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
-    
-    
+
     let slide1Text = 'Use WASD or ARROWS to move the player character.\n';
     slide1Text += 'AIM with the MOUSE and LEFT CLICK to SHOOT\n';
     slide1Text += 'SHOOT the enemies to gain points!';
-    
+
     let slide1TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide1Text, slideTextStyle);
     slide1TextBox.anchor.setTo(0.5, 0);
     slide1TextBox.setShadow(5,5);
 
-    let forwardBtn = game.add.button(game.world.width/1.25, game.world.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
-    forwardBtn.scale.setTo(3);
+    let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
 
-    let backBtn = game.add.button(game.world.width / 12.5, game.world.height / 1.25, 'homeBtn', () => {backBtnPress(slideNum)});
-    backBtn.scale.setTo(3);
+    let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'homeBtn', () => {backBtnPress(slideNum)});
+    backBtn.scale.setTo(1.5);
 }
 
 function showSlide2(){
@@ -66,20 +64,17 @@ function showSlide2(){
     timer = game.time.events.add(SLIDE_TIME, () => {backBtnPress(slideNum)}, this);
 
     let slide2Text = 'TEXT FOR THE SLIDE 2';
-    let slide2TextBox = game.add.text(game.world.width / 2, game.world.height / 5, slide2Text, slideTextStyle);
+    let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide2Text, slideTextStyle);
     slide2TextBox.anchor.setTo(0.5,0);
     slide2TextBox.setShadow(5,5);
 
 
-    let forwardBtn = game.add.button(game.world.width/1.25, game.world.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
-    forwardBtn.scale.setTo(3);
+    let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
+    
 
-    let backBtn = game.add.button(game.world.width / 12.5, game.world.height / 1.25, 'backBtn', () => {backBtnPress(slideNum)});
-    backBtn.scale.setTo(3);
+    let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'backBtn', () => {backBtnPress(slideNum)});
+    
 }
-
-
-//game.world.removeAll();
 
 function forwardBtnPress(slideOrigin){
     game.time.events.remove(timer);
