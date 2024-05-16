@@ -1,24 +1,28 @@
-
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 60;
+
 const SHOOT_COOLDOWN = 150;
+const BULLET_SPEED = 300;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 10;
-const ENEMY_BASE_SPEED = 2;
+const ENEMY_BASE_SPEED = 50;
 const ENEMY_GROUP_SIZE = 100;
 const ENEMY_SPAWN_TIMER = 1000;
+const ENEMY_TURN_TIMER_MIN = 2000;
+const ENEMY_TURN_TIMER_MAX = 3000;
+const ENEMY_TURN_PROBABILITY = 0.9;
+const ENEMY_STOP_TIME = 1500;
 let enemyHealth;
-
-
+let enemyResetPosX;
+let enemyResetPosY;
 
 let playState = {
     preload: loadPlayAssets,
     create: createLevel,
     update: updateLevel
 };
-
 
 /** @type {Phaser.Group} */
 let hudGroup;
@@ -33,6 +37,11 @@ let player;
 let cursors;
 let wasd;
 let nextShoot;
+let cameraPosX;
+let cameraPosY;
+
+
+
 
 function loadPlayAssets() {
     loadSprites();
@@ -67,6 +76,8 @@ function createLevel() {
     nextShoot = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
+    
+    let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
 
     cursors = game.input.keyboard.createCursorKeys();
     wasd = game.input.keyboard.addKeys({w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D});
@@ -84,10 +95,7 @@ function createLevel() {
 
     remainingTime = DEFAULT_TIME;
 
-    // Set World bounds (same size as the image background in this case)
-
     // Background
-    let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
     // Smooth scrolling of the background in both X and Y axis
     bg.scrollFactorX = 0.7;
     bg.scrollFactorY = 0.7;
@@ -104,8 +112,6 @@ function createLevel() {
     //player = game.add.sprite(game.world.width/2, game.world.height/2, 'collector');
     //player.anchor.setTo(0.5, 0.5);
 
-    //  Player physics properties. Give the little guy a slight bounce.
-
 
     // Camera follows the player inside the world
     game.camera.follow(player);
@@ -119,6 +125,7 @@ function createLevel() {
     player.anchor.setTo(0.5, 0.5);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
+
     player.body.collideWorldBounds = true;
     
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
@@ -189,7 +196,7 @@ function shoot() {
         nextShoot = game.time.now + SHOOT_COOLDOWN;
         let bullet = bulletGroup.getFirstDead();
         bullet.reset(player.x, player.y);
-        game.physics.arcade.moveToPointer(bullet, 300);
+        game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
     }
 }
 
@@ -229,19 +236,44 @@ function createEnemies() {
     enemies = game.add.group();
     enemies.enableBody = true;
     enemies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
-    //enemies.forEach();
-    game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
-    enemyHealth = ENEMY_BASE_HEALTH;
+    enemies.forEach((enemy)=>{
+        enemy.anchor.setTo(0.5, 0.5);
+        enemy.body.collideWorldBounds = true;
+        enemyHealth = ENEMY_BASE_HEALTH;});
+    game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);   
 }
 
 function spawnEnemy() {
     let enemy = enemies.getFirstExists(false);
-    enemy.reset(player.x,player.y);
-    enemy.body.velocity.x = 100;
-    enemy.body.velocity.y = 100;
+    if (enemy){
+        enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
+        enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
+        enemy.rotation = Math.random() * 360;
+        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
+    }
 }
 
+function enemyMovement(enemy){
+    enemy.body.velocity = 0;
+    enemy.rotation = Math.random() * 360;
+    game.time.events.add(ENEMY_STOP_TIME, () => {
+        if (Math.random() < ENEMY_TURN_PROBABILITY){
+        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+        }
+    })
+}
 
+//function that ensures the enemies appear outside of the camera/safe zone
+function enemySpawnPositionCheck(posX, posY){
+    if(cameraPosX < posX < (cameraPosX + game.camera.width) || cameraPosY < posY < (cameraPosY + game.camera.height)){
+        posX = Math.random() * game.world.width;
+        posY = Math.random() * game.world.height;
+        enemySpawnPositionCheck(posX,posY);
+    }
+    enemyResetPosX = posX;
+    enemyResetPosY = posY;
+}
 
 function updateHealthBar() {
     if (healthTween)
@@ -277,7 +309,7 @@ function updateScore() {
 }
 
 function endGame() {
-
+    remainingTime = 100;
 }
 
 
