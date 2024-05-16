@@ -12,7 +12,7 @@ let playState = {
 let hudGroup;
 /** @type {Phaser.Group} */
 let bulletGroup;
-let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty;
+let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudInteractText;
 let remainingTime;
 let score;
 /** @type {Phaser.Sprite} */
@@ -21,6 +21,8 @@ let player;
 let cursors;
 let wasd;
 let nextShoot;
+
+let areaPositions = [];
 
 function loadPlayAssets() {
     loadSprites();
@@ -48,10 +50,23 @@ function loadLevel(level) {
 }
 
 function createLevel() {
+    generateAreaPositions(5);
     nextShoot = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
+    //reload areas
+    let graphics = game.add.graphics();
+    graphics.beginFill("0x61aaea");
+    areaPositions.forEach(element => {
+        graphics.drawCircle(element.x, element.y,100);
+    });
+    graphics.endFill();
 
+    graphics.beginFill("0xaaaaaa");
+    graphics.drawRoundedRect()//TODO: AREA BEEG
+    graphics.drawCircle(game.world.width/2, 300, 300);
+    graphics.endFill();
+    
     cursors = game.input.keyboard.createCursorKeys();
     wasd = game.input.keyboard.addKeys({w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D});
     
@@ -69,15 +84,22 @@ function createLevel() {
     remainingTime = DEFAULT_TIME;
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
     
-    createHUD();
+    
 
-    player = game.add.sprite(game.world.width/2, game.world.height/2, 'pc');
+    player = game.add.sprite(game.world.width/2, game.world.height-100, 'pc');
     player.anchor.setTo(0.5, 0.5);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
     player.body.collideWorldBounds = true;
     
     game.add.sprite(game.world.width/4,game.world.height/4,"heart");
+    createHUD();
+}
+
+function generateAreaPositions(quantity) {
+    for(let i = 0; i<quantity; i++) {
+        areaPositions.push({x:Math.random()*(game.world.width-50)+50, y: Math.random()*(game.world.height-50)+50});
+    }
 }
 
 function setDifficulty(difficulty) {
@@ -112,6 +134,13 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudDifficulty);
+
+    hudInteractText = game.add.text(game.canvas.width/2, game.canvas.height - 50 , "", {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    hudGroup.add(hudInteractText);
+
     hudGroup.fixedToCamera = true;
     healthValue = MAX_HEALTH;
     score = 0;
@@ -124,6 +153,7 @@ function updateLevel() {
     if(game.input.activePointer.isDown) {
         shoot();
     }
+    checkRechargeArea();
     // if(healthValue > 50) {
     //     healthValue--;
     //     updateHealthBar();
@@ -198,3 +228,19 @@ function updateTime(offset = 0) {
 function updateScore() {
     hudScore.setText((score+'').padStart(4,'0'))
 }
+
+function checkRechargeArea() {
+    let i = 0;
+    let found = false;
+    while(!found && i < areaPositions.length) {
+        if(Math.abs(areaPositions[i].x - player.x) < 50 && Math.abs(areaPositions[i].y - player.y) < 50) {
+            found = true;
+            hudInteractText.setText("Press [E] or [-] to recharge.");
+        }
+        i++;
+    }
+    if(!found) {
+        hudInteractText.setText("");
+    }
+}
+
