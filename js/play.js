@@ -1,3 +1,5 @@
+
+const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 60;
 const PLAYER_VELOCITY = 150;
@@ -17,6 +19,8 @@ let playState = {
     create: createLevel,
     update: updateLevel
 };
+
+
 /** @type {Phaser.Group} */
 let hudGroup;
 /** @type {Phaser.Group} */
@@ -37,6 +41,8 @@ function loadPlayAssets() {
     loadSounds();
 }
 
+
+
 function loadSprites() {
     game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png');
     game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
@@ -47,6 +53,7 @@ function loadImages() {
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
+    game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
 }
 
 function loadSounds() {
@@ -54,8 +61,8 @@ function loadSounds() {
 }
 
 function loadLevel(level) {
-
 }
+
 
 function createLevel() {
     nextShoot = 0;
@@ -75,10 +82,38 @@ function createLevel() {
     bulletGroup.setAll('outOfBoundsKill', true);
 
     setDifficulty(difficulty);
-    
+
     remainingTime = DEFAULT_TIME;
+
+    // Set World bounds (same size as the image background in this case)
+
+    // Background
+    let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
+    // Smooth scrolling of the background in both X and Y axis
+    bg.scrollFactorX = 0.7;
+    bg.scrollFactorY = 0.7;
+
+    // Collide with this image to exit level
+    //exit = game.add.sprite(game.world.width - 100, game.world.height - 64, 'exit');
+    //exit.anchor.setTo(0, 1);
+    //exit.body.setSize(88, 58, 20, 33);
+
+    // Now, set time and create the HUD
+    //remainingTime = secondsToGo;
+
+    // Create player. Initial position according to JSON data
+    //player = game.add.sprite(game.world.width/2, game.world.height/2, 'collector');
+    //player.anchor.setTo(0.5, 0.5);
+
+    //  Player physics properties. Give the little guy a slight bounce.
+
+
+    // Camera follows the player inside the world
+    game.camera.follow(player);
+
+
+    // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
-    
     createHUD();
 
     player = game.add.sprite(game.world.width/2, game.world.height/2, 'pc');
@@ -92,14 +127,16 @@ function createLevel() {
     createEnemies();
 }
 
+function updateLevel() {
+    characterMovement();
+}
 function setDifficulty(difficulty) {
     switch (difficulty) {
         case DIFFICULTY.Normal || 'Normal': 
             break;
         case DIFFICULTY.Easy || 'Easy':
             break;
-        case DIFFICULTY.Hard || 'Hard': 
-
+        case DIFFICULTY.Hard || 'Hard':
             break;
     }
 }
@@ -114,10 +151,13 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudTime);
-    hudScore = game.add.text(game.canvas.width-100, 13, '0000', {
+
+    score = 0;
+
+    hudScore = game.add.text(game.canvas.width-100, 13, score, {
         font: 'bold 20pt',
         fill: '#ffffff'
-    });   
+    });
     hudGroup.add(hudScore);
     hudDifficulty = game.add.text(hudTime.x+hudTime.width+10, 13, difficulty, {
         font: 'bold 20pt',
@@ -126,7 +166,7 @@ function createHUD() {
     hudGroup.add(hudDifficulty);
     hudGroup.fixedToCamera = true;
     healthValue = MAX_HEALTH;
-    score = 0;
+
 }
 
 function updateLevel() {
@@ -156,6 +196,9 @@ function shoot() {
 
 function characterMovement() {
 
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
+
     player.rotation = game.physics.arcade.angleToPointer(player);
     if(cursors.up.isDown || wasd.w.isDown){
         player.body.velocity.y = -PLAYER_VELOCITY;
@@ -169,14 +212,14 @@ function characterMovement() {
     if(cursors.right.isDown || wasd.d.isDown) {
         player.body.velocity.x = PLAYER_VELOCITY;
     }
-    
-    else if(cursors.down.isUp && 
-            cursors.up.isUp && 
+
+    else if(cursors.down.isUp &&
+            cursors.up.isUp &&
             cursors.left.isUp &&
-            cursors.right.isUp && 
-            wasd.w.isUp && 
-            wasd.s.isUp && 
-            wasd.a.isUp && 
+            cursors.right.isUp &&
+            wasd.w.isUp &&
+            wasd.s.isUp &&
+            wasd.a.isUp &&
             wasd.d.isUp) {
         player.body.velocity.x = 0;
         player.body.velocity.y = 0;
@@ -231,7 +274,11 @@ function endGame() {
 
 
 function updateScore() {
-    hudScore.setText((score+'').padStart(4,'0'))
+    hudScore.setText((score +'').padStart(4,'0'))
+}
+
+function endGame() {
+
 }
 
 
