@@ -53,10 +53,9 @@ function showSlide1(){
     slide1TextBox.setShadow(5,5);
 
     let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
-    forwardBtn.scale.setTo(3);
 
     let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'homeBtn', () => {backBtnPress(slideNum)});
-    backBtn.scale.setTo(3);
+    backBtn.scale.setTo(1.5);
 }
 
 function showSlide2(){
@@ -71,10 +70,10 @@ function showSlide2(){
 
 
     let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
-    forwardBtn.scale.setTo(3);
+    
 
     let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'backBtn', () => {backBtnPress(slideNum)});
-    backBtn.scale.setTo(3);
+    
 }
 
 function forwardBtnPress(slideOrigin){

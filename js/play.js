@@ -2,7 +2,6 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 60;
-const PLAYER_VELOCITY = 150;
 const SHOOT_COOLDOWN = 150;
 
 //Enemy consts
@@ -46,13 +45,13 @@ function loadPlayAssets() {
 function loadSprites() {
     game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png');
     game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
+    game.load.image('bullet', '../assets/sprites/purple_ball.png');
 }
 
 function loadImages() {
     game.load.image('heart', '../assets/UI/heart.png');
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
-    game.load.image('bullet', '../assets/sprites/purple_ball.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
 }
 
@@ -230,16 +229,16 @@ function createEnemies() {
     enemies = game.add.group();
     enemies.enableBody = true;
     enemies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
-    enemies.forEach();
+    //enemies.forEach();
     game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
     enemyHealth = ENEMY_BASE_HEALTH;
 }
 
 function spawnEnemy() {
     let enemy = enemies.getFirstExists(false);
-    enemy.reset(10,10);
-    enemy.body.velocity.x = 1;
-    enemy.body.velocity.y = 1;
+    enemy.reset(player.x,player.y);
+    enemy.body.velocity.x = 100;
+    enemy.body.velocity.y = 100;
 }
 
 
