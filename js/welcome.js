@@ -16,7 +16,7 @@ const DIFFICULTY = {
 let difficulty;
 
 function loadAssets() {
-    game.load.image('fondo', 'assets/Nuevos/fondo_espadas.jpeg');
+    game.load.image('fondo', '../assets/UI/Fondodejuego.png');
     game.load.image('instructionsButton', 'assets/UI/instructionsButton.png');
 
     game.load.image('EasyButton', 'assets/UI/easyButton.png');
@@ -27,8 +27,9 @@ function loadAssets() {
 function displayScreen() {
     levelToPlay = 1;
     game.input.enabled = true;
-    let img = game.add.image(0, 0, 'fondo');
-    img.scale.setTo(2);
+    let img = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'fondo');
+    img.anchor.setTo(0.5,0.5);
+
     console.log("va a jugar o que perro ijueputamalparido");
 
 
@@ -49,17 +50,17 @@ function displayScreen() {
     t.anchor.setTo(0.5,0.5);
     t.setShadow(5,5);
 
-    let te = game.add.text(game.world.width / 7, game.world.height - 70, byus, styleTitle2);
+    let te = game.add.text(game.canvas.width / 7, game.canvas.height - 70, byus, styleTitle2);
     te.anchor.setTo(0.5,0.5);
     te.setShadow(5,5);
 
-    btninstructions = game.add.button(game.world.width / 1.8, game.world.height / 1.4 + 120,'instructionsButton', oninstructionsButtonPressed);
+    btninstructions = game.add.button(game.canvas.width / 1.8, game.canvas.height / 1.4 + 120,'instructionsButton', oninstructionsButtonPressed);
 
 
     //botones de niveles
-    btnEasy = game.add.button(game.world.width / 2 - 380, game.world.height / 3 + 120,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
-    btnNormal = game.add.button(game.world.width / 2 , game.world.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
-    btnHard = game.add.button(game.world.width / 2 + 380, game.world.height / 3 + 120,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
+    btnEasy = game.add.button(game.canvas.width / 2 - 380, game.canvas.height / 3 + 120,'EasyButton', () => { onDifficultySet(DIFFICULTY.Easy); } );
+    btnNormal = game.add.button(game.canvas.width / 2 , game.canvas.height / 3 + 120,'NormalButton',() => { onDifficultySet(DIFFICULTY.Normal); });
+    btnHard = game.add.button(game.canvas.width / 2 + 380, game.canvas.height / 3 + 120,'HardButton',() => { onDifficultySet(DIFFICULTY.Hard); });
 
     btnEasy.anchor.setTo(0.5,0.5);
     btnNormal.anchor.setTo(0.5,0.5);
