@@ -61,7 +61,7 @@ function createLevelFinal() {
         let puntuacionTexto2 = game.add.text(game.canvas.width / 2, game.canvas.height / 3 + 120, scoretext2, stylesub);
         puntuacionTexto2.anchor.setTo(0.5,0.5);
 
-        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => { animacionSalida(Salida.Final); });
+        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => { animacionSalida(SALIDA.Final); });
         btnInicio.scale.setTo(0.4);
         btnInicio.anchor.setTo(0.5,0.5);
     }

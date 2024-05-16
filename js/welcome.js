@@ -15,7 +15,7 @@ const DIFFICULTY = {
     Hard: "Hard"
 };
 
-const Salida = {
+const SALIDA = {
     Play: changeScreen(),
     Final: endGame(),
     Inicio: onFinalButtonPressed()
@@ -103,7 +103,7 @@ function animacionEntrada(){
 function onDifficultySet(d){
 
     difficulty = d;
-    animacionSalida(Salida.Play);
+    animacionSalida(SALIDA.Play);
 
 }
 
