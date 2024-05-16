@@ -22,6 +22,7 @@ function loadAssets() {
     game.load.image('EasyButton', 'assets/UI/easyButton.png');
     game.load.image('NormalButton', 'assets/UI/normalButton.png');
     game.load.image('HardButton', 'assets/UI/hardButton.png');
+    game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
 }
 
 function displayScreen() {
@@ -33,26 +34,26 @@ function displayScreen() {
     console.log("va a jugar o que perro ijueputamalparido");
 
 
-    let textTitle = 'DeadLine';
-    let byus = 'Steven Sánchez \nRuben Fernandez \nAlejandro Deben Duque';
+    let textTitle = '\n  DeadLine  \n';
+    let byus = 'Steven Sánchez  \nRuben Fernandez  \nAlejandro Deben Duque      \n ';
     let styleTitle = {
         font: 'Titan One',
         fontSize: '80pt',
-        fill: '#FFFFFF'
+        fill: '#F9F9F9'
     };
     let styleTitle2 = {
         font: 'Titan One',
         fontSize: '20pt',
         fontWeight: 'italic',
-        fill: '#FFFFFF'
+        fill: '#F9F9F9'
     };
     let t = game.add.text(game.canvas.width / 2, game.canvas.height / 6, textTitle, styleTitle);
     t.anchor.setTo(0.5,0.5);
-    t.setShadow(5,5);
+    t.setShadow(30,30,'#212121',15);
 
-    let te = game.add.text(game.canvas.width / 7, game.canvas.height - 70, byus, styleTitle2);
+    let te = game.add.text(game.canvas.width / 7+50, game.canvas.height - 70, byus, styleTitle2);
     te.anchor.setTo(0.5,0.5);
-    te.setShadow(5,5);
+    te.setShadow(7,7,'#212121',5);
 
     btninstructions = game.add.button(game.canvas.width / 1.8, game.canvas.height / 1.4 + 120,'instructionsButton', oninstructionsButtonPressed);
 
@@ -71,6 +72,11 @@ function displayScreen() {
     btnNormal.scale.setTo(1.5);
     btnHard.scale.setTo(1.5);
 
+    let img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(3);
+    img5.alpha = 0;
+
 }
 
 function oninstructionsButtonPressed() {
@@ -83,6 +89,14 @@ function oninstructionsButtonPressed() {
 
 function onDifficultySet(d){
     difficulty = d;
+    mainTween = game.add.tween(hero3).to({
+        opacity: 0
+    }, 2000, Phaser.Easing.Linear.None).to({
+        opacity: 100
+    }, 500, Phaser.Easing.Linear.None);
+    mainTween.delay(3000);
+    mainTween.loop(true);
+    mainTween.start();
     game.state.start('play');
 }
 
