@@ -85,6 +85,8 @@ function createLevel() {
     game.add.sprite(game.world.width/2,game.world.height/2,"heart");
     player.body.bounce.y = 0.2;
     player.body.collideWorldBounds = true;
+
+    animacionEntrada();
 }
 
 function updateLevel() {
@@ -149,17 +151,6 @@ function characterMovement() {
         player.body.velocity.x = PLAYER_VELOCITY;
     }
 
-    /*else if(cursors.down.isUp &&
-            cursors.up.isUp &&
-            cursors.left.isUp &&
-            cursors.right.isUp &&
-            wasd.w.isUp &&
-            wasd.s.isUp &&
-            wasd.a.isUp &&
-            wasd.d.isUp) {
-        player.body.velocity.x = 0;
-        player.body.velocity.y = 0;
-    }*/
 }
 
 function updateHealthBar() {
@@ -182,13 +173,28 @@ function updateTime(offset = 0) {
     hudTime.setText(setRemainingTime(remainingTime));
     if(remainingTime < 0) {
         game.time.events.remove(timerClock);
-        game.time.events.add(25, endGame, this);
+        game.time.events.add(25,() => {animacionSalidaToFinal(() => {endGame();});} , this);
     }
 }
 
 function updateScore() {
     hudScore.setText((score +'').padStart(4,'0'))
 }
+
+function animacionSalidaToFinal(a){
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 0;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 1
+    }, 900, Phaser.Easing.Cubic.Out);
+    mainTween.onComplete.add(a);
+    mainTween.start();
+}
+
+
 
 function endGame() {
     // añadir if conforme a al vida para decidir si es true o false la variable winOrLose

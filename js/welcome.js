@@ -8,6 +8,8 @@ let btninstructions, btnConfig, btnPlay;
 let btnEasy, btnNormal, btnHard;
 let levelToPlay;
 
+let img5;
+
 const DIFFICULTY = {
     Easy: "Easy",
     Normal: "Normal",
@@ -72,10 +74,7 @@ function displayScreen() {
     btnNormal.scale.setTo(1.5);
     btnHard.scale.setTo(1.5);
 
-    let img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
-    img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(3);
-    img5.alpha = 0;
+    animacionEntrada();
 
 }
 
@@ -85,18 +84,41 @@ function oninstructionsButtonPressed() {
 
 
 
+let play = cambiarPlay;
 
+function animacionSalida(a){
+
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 0;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 1
+    }, 1500, Phaser.Easing.Cubic.Out);
+    mainTween.onComplete.add(a);
+    mainTween.start();
+}
+
+function animacionEntrada(){
+
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 1;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 0
+    }, 1500, Phaser.Easing.Cubic.Out);
+    mainTween.start();
+}
 
 function onDifficultySet(d){
     difficulty = d;
-    mainTween = game.add.tween(hero3).to({
-        opacity: 0
-    }, 2000, Phaser.Easing.Linear.None).to({
-        opacity: 100
-    }, 500, Phaser.Easing.Linear.None);
-    mainTween.delay(3000);
-    mainTween.loop(true);
-    mainTween.start();
+    animacionSalida(() => {cambiarPlay();});
+}
+
+function cambiarPlay(){
     game.state.start('play');
 }
 
