@@ -17,11 +17,6 @@ const DIFFICULTY = {
     Hard: "Hard"
 };
 
-const SALIDA = {
-    Play: changeScreen(),
-    Final: endGame(),
-    Inicio: onFinalButtonPressed()
-}
 let difficulty;
 
 function loadAssets() {
@@ -140,7 +135,6 @@ function animacionSalida(a){
 }
 
 function animacionEntrada(){
-
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
     img5.scale.setTo(5);
@@ -149,6 +143,7 @@ function animacionEntrada(){
     mainTween = game.add.tween(img5).to({
         alpha: 0
     }, 1500, Phaser.Easing.Cubic.Out);
+
     mainTween.start();
 }
 
