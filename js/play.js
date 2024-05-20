@@ -91,6 +91,14 @@ function createLevel() {
 
 function updateLevel() {
     characterMovement();
+
+
+    //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
+    if(healthValue == 0){
+
+        winOrLose = false;
+        animacionSalidaToFinal(() => {endGame();});
+    }
 }
 function setDifficulty(difficulty) {
     switch (difficulty) {
@@ -158,6 +166,7 @@ function updateHealthBar() {
         healthTween.stop();
     healthTween = game.add.tween(healthBar.scale).to({x: healthValue/MAX_HEALTH, y: 1}, 300, Phaser.Easing.Cubic.Out);
     healthTween.start();
+
 }
 
 function setRemainingTime(seconds) {
@@ -198,5 +207,6 @@ function animacionSalidaToFinal(a){
 
 function endGame() {
     // añadir if conforme a al vida para decidir si es true o false la variable winOrLose
+    winOrLose = false;
     game.state.start('screenFinal');
 }

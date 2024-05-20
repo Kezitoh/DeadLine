@@ -37,9 +37,11 @@ function createLevelFinal() {
     if(winOrLose){//aqui va si gana
         textfinal = "Victoria" ;
 
-        let scoretext3 = "Hasta toda esta vida te sobro: \n " + healthValue;
-        let puntuacionTexto3 = game.add.text(game.canvas.width / 2, game.canvas.height / 3 + 240, scoretext3, stylesub);
-        puntuacionTexto3.anchor.setTo(0.5,0.5);
+        let scoretext3 = "Vida restante: \n ";
+        let vidaRestantetexto = " " + healthValue;
+        let puntuacionTexto3 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 240, scoretext3, stylesub);
+
+        game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 240, vidaRestantetexto, stylesub)
 
         textoFinalBoton();
 
@@ -53,13 +55,17 @@ function createLevelFinal() {
         t.anchor.setTo(0.5,0.5);
         t.setShadow(5,5);
 
-        scoretext = "Tu puntuacion es: " + score;
-        let puntuacionTexto = game.add.text(game.canvas.width / 2, game.canvas.height / 3, scoretext, stylesub);
-        puntuacionTexto.anchor.setTo(0.5,0.5);
+        scoretext = "Tu puntuacion es: ";
+        let ptexto = " " + score;
+        let puntuacionTexto = game.add.text(game.canvas.width / 10, game.canvas.height / 3, scoretext, stylesub);
+        game.add.text(game.canvas.width / 1.5, game.canvas.height / 3, ptexto, stylesub);
 
-        scoretext2 = "Recogiste " + objetos + " objetos.";
-        let puntuacionTexto2 = game.add.text(game.canvas.width / 2, game.canvas.height / 3 + 120, scoretext2, stylesub);
-        puntuacionTexto2.anchor.setTo(0.5,0.5);
+        scoretext2 = "Objetos recogidos: ";
+        let otexto = " " + objetos;
+        let vidaRestantetexto = " " + healthValue;
+        let puntuacionTexto2 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 120, scoretext2, stylesub);
+        game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
+
 
         btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {animacionSalida(() => {onFinalButtonPressed();});} );
         btnInicio.scale.setTo(0.4);
