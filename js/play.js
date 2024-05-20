@@ -126,6 +126,14 @@ function createLevel() {
 
 function updateLevel() {
     characterMovement();
+
+
+    //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
+    if(healthValue == 0){
+
+        winOrLose = false;
+        animacionSalidaToFinal(() => {endGame();});
+    }
 }
 function setDifficulty(difficulty) {
     switch (difficulty) {
@@ -260,6 +268,7 @@ function updateHealthBar() {
         healthTween.stop();
     healthTween = game.add.tween(healthBar.scale).to({x: healthValue/MAX_HEALTH, y: 1}, 300, Phaser.Easing.Cubic.Out);
     healthTween.start();
+
 }
 
 function setRemainingTime(seconds) {
@@ -275,21 +284,8 @@ function updateTime(offset = 0) {
     hudTime.setText(setRemainingTime(remainingTime));
     if(remainingTime < 0) {
         game.time.events.remove(timerClock);
-        game.time.events.add(25, animacionSalidaFinalMuerte, this);
+        game.time.events.add(25,() => {animacionSalidaToFinal(() => {endGame();});} , this);
     }
-}
-
-function animacionSalidaFinalMuerte(a){
-    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
-    img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(5);
-    img5.alpha = 0;
-
-    mainTween = game.add.tween(img5).to({
-        alpha: 1
-    },250, Phaser.Easing.Cubic.Out);
-    mainTween.onComplete.add(endGame);
-    mainTween.start();
 }
 
 
@@ -297,8 +293,25 @@ function updateScore() {
     hudScore.setText((score +'').padStart(4,'0'))
 }
 
+function animacionSalidaToFinal(a){
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 0;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 1
+    }, 500, Phaser.Easing.Cubic.Out);
+    mainTween.onComplete.add(a);
+    mainTween.start();
+}
+
+
+
 function endGame() {
     remainingTime = 100;
+    // añadir if conforme a al vida para decidir si es true o false la variable winOrLose
+    winOrLose = false;
     game.state.start('screenFinal');
 }
 

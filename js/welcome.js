@@ -3,11 +3,13 @@ let initialState = {
     create: displayScreen
 };
 
-let mainTween, downTween1, downTween2;
+let mainTween;
 let btninstructions, btnConfig, btnPlay;
 let btnEasy, btnNormal, btnHard;
 let levelToPlay;
 let img5;
+
+let p;
 
 const DIFFICULTY = {
     Easy: "Easy",
@@ -30,6 +32,8 @@ function loadAssets() {
     game.load.image('NormalButton', 'assets/UI/normalButton.png');
     game.load.image('HardButton', 'assets/UI/hardButton.png');
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
+
+    game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png')
 }
 
 function displayScreen() {
@@ -63,7 +67,31 @@ function displayScreen() {
     te.anchor.setTo(0.5,0.5);
     te.setShadow(7,7,'#212121',5);
 
-    btninstructions = game.add.button(game.canvas.width / 1.8, game.canvas.height / 1.4 + 120,'instructionsButton', oninstructionsButtonPressed);
+    btninstructions = game.add.button(game.canvas.width / 1.3, game.canvas.height / 1.3 + 120,'instructionsButton');
+
+
+    //botones de niveles
+    btnEasy = game.add.button(game.canvas.width / 2 - 380, game.canvas.height / 3 + 120,'EasyButton');
+    btnNormal = game.add.button(game.canvas.width / 2 , game.canvas.height / 3 + 120,'NormalButton');
+    btnHard = game.add.button(game.canvas.width / 2 + 380, game.canvas.height / 3 + 120,'HardButton');
+
+    btnEasy.anchor.setTo(0.5,0.5);
+    btnNormal.anchor.setTo(0.5,0.5);
+    btnHard.anchor.setTo(0.5,0.5);
+    btninstructions.anchor.setTo(0.5,0.5);
+
+    btninstructions.scale.setTo(1.5);
+    btnEasy.scale.setTo(1.5);
+    btnNormal.scale.setTo(1.5);
+    btnHard.scale.setTo(1.5);
+
+    animacionEntrada();
+    animacionEntradaPlayer();
+
+}
+
+function botonesInicio(){
+    btninstructions = game.add.button(game.canvas.width / 1.3, game.canvas.height / 1.3 + 120,'instructionsButton', oninstructionsButtonPressed);
 
 
     //botones de niveles
@@ -74,40 +102,31 @@ function displayScreen() {
     btnEasy.anchor.setTo(0.5,0.5);
     btnNormal.anchor.setTo(0.5,0.5);
     btnHard.anchor.setTo(0.5,0.5);
+    btninstructions.anchor.setTo(0.5,0.5);
 
     btninstructions.scale.setTo(1.5);
     btnEasy.scale.setTo(1.5);
     btnNormal.scale.setTo(1.5);
     btnHard.scale.setTo(1.5);
-
-    animacionEntrada();
-
 }
 
 function oninstructionsButtonPressed() {
-    game.state.start('instructions');
-}
-
-function animacionEntrada(){
-    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
-    img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(5);
-    img5.alpha = 1;
-
-    mainTween = game.add.tween(img5).to({
-        alpha: 0
-    },1500, Phaser.Easing.Cubic.Out);
-    mainTween.start();
-}
-
-function onDifficultySet(d){
-
-    difficulty = d;
-    animacionSalida(SALIDA.Play);
+    playerTween = game.add.tween(p).to({
+        angle:0
+    }, 300, Phaser.Easing.Cubic.Out).to({
+        x: game.canvas.width / 1.3
+    }, 1000, Phaser.Easing.Cubic.Out).to({
+        angle: 90
+    }, 300, Phaser.Easing.Cubic.Out).to({
+        y:game.canvas.height / 1.3 + 120
+    }, 1000, Phaser.Easing.Cubic.Out);
+    playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('instructions');});});
+    playerTween.start();
 
 }
 
 function animacionSalida(a){
+
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
     img5.scale.setTo(5);
@@ -115,11 +134,75 @@ function animacionSalida(a){
 
     mainTween = game.add.tween(img5).to({
         alpha: 1
-    },250, Phaser.Easing.Cubic.Out);
+    }, 1500, Phaser.Easing.Cubic.Out);
     mainTween.onComplete.add(a);
     mainTween.start();
 }
 
-function changeScreen(){
-    game.state.start('play');
+function animacionEntrada(){
+
+    img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
+    img5.anchor.setTo(0.5,0.5);
+    img5.scale.setTo(5);
+    img5.alpha = 1;
+
+    mainTween = game.add.tween(img5).to({
+        alpha: 0
+    }, 1500, Phaser.Easing.Cubic.Out);
+    mainTween.start();
+}
+
+function animacionEntradaPlayer(){
+    p = game.add.sprite(-20, game.canvas.height/1.35, 'pc');
+    p.anchor.setTo(0.5,0.5);
+
+    let playerTween = game.add.tween(p).to({
+        x: game.canvas.width/2,
+        angle:0
+    }, 1500, Phaser.Easing.Cubic.Out).to({
+        angle: -90
+    }, 350, Phaser.Easing.Cubic.Out);
+    playerTween.delay(1500);
+    playerTween.onComplete.add(botonesInicio);
+
+    playerTween.start();
+}
+
+function onDifficultySet(d){
+    difficulty = d;
+    let playerTween;
+    if(difficulty == "Easy"){
+        playerTween = game.add.tween(p).to({
+            angle:-180
+        }, 300, Phaser.Easing.Cubic.Out).to({
+            x: game.canvas.width / 2 - 380
+
+        }, 1000, Phaser.Easing.Cubic.Out).to({
+            angle: -90
+        }, 300, Phaser.Easing.Cubic.Out).to({
+            y:game.canvas.height / 3 + 120
+        }, 1000, Phaser.Easing.Cubic.Out);
+        playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('play');});});
+        playerTween.start();
+    }
+    if(difficulty == "Normal"){
+        playerTween = game.add.tween(p).to({
+            y:game.canvas.height / 3 + 120
+        }, 1000, Phaser.Easing.Cubic.Out);
+        playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('play');});});
+        playerTween.start();
+    }
+    if(difficulty == "Hard"){
+        playerTween = game.add.tween(p).to({
+            angle:0
+        }, 300, Phaser.Easing.Cubic.Out).to({
+            x: game.canvas.width / 2 + 380
+        }, 1000, Phaser.Easing.Cubic.Out).to({
+            angle: -90
+        }, 300, Phaser.Easing.Cubic.Out).to({
+            y:game.canvas.height / 3 + 120
+        }, 1000, Phaser.Easing.Cubic.Out);
+        playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('play');});});
+        playerTween.start();
+    }
 }
