@@ -1,6 +1,6 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
-const DEFAULT_TIME = 3;
+const DEFAULT_TIME = 30;
 
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;

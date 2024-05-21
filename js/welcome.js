@@ -10,6 +10,7 @@ let levelToPlay;
 let img5;
 
 let p;
+let botonesGroup;
 
 const DIFFICULTY = {
     Easy: "Easy",
@@ -79,6 +80,19 @@ function displayScreen() {
     btnEasy.scale.setTo(1.5);
     btnNormal.scale.setTo(1.5);
     btnHard.scale.setTo(1.5);
+    botonesGroup = game.add.group();
+    botonesGroup.add(btninstructions);
+    botonesGroup.add(btnEasy);
+    botonesGroup.add(btnNormal);
+    botonesGroup.add(btnHard);
+
+    botonesGroup.alpha = 0;
+
+    let botonesTween = game.add.tween(botonesGroup).to({
+        alpha: 1
+    }, 1850, Phaser.Easing.Cubic.Out);
+    botonesTween.delay(1500);
+    botonesTween.start();
 
     animacionEntrada();
     animacionEntradaPlayer();
