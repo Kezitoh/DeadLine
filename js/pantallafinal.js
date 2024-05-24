@@ -67,7 +67,7 @@ function createLevelFinal() {
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
 
-        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {animacionSalida(() => {onFinalButtonPressed();});} );
+        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {animacionSalida(() => {game.state.start('welcome');});});
         btnInicio.scale.setTo(0.4);
         btnInicio.anchor.setTo(0.5,0.5);
     }
@@ -75,8 +75,4 @@ function createLevelFinal() {
     animacionEntrada();
 
     console.log("ladhfakjslf");
-}
-
-function onFinalButtonPressed() {
-    game.state.start('welcome');
 }
