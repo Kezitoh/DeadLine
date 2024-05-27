@@ -25,5 +25,5 @@ function startGame() {
 
     game.state.add('welcome', initialState);
 
-    game.state.start('welcome');
+    game.state.start('play');
 }

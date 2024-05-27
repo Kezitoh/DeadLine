@@ -138,7 +138,7 @@ function animacionSalida(a){
 
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(5);
+    img5.scale.setTo(20);
     img5.alpha = 0;
 
     mainTween = game.add.tween(img5).to({
@@ -151,7 +151,7 @@ function animacionSalida(a){
 function animacionEntrada(){
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(5);
+    img5.scale.setTo(20);
     img5.alpha = 1;
 
     mainTween = game.add.tween(img5).to({

@@ -40,7 +40,13 @@ let nextShoot;
 let cameraPosX;
 let cameraPosY;
 
+let enemy;
 
+let safeZone;
+let safeZone1;
+let safeZone2;
+let safeZone3;
+let safeZone4;
 
 
 function loadPlayAssets() {
@@ -63,6 +69,11 @@ function loadImages() {
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
+    game.load.spritesheet('safeZone','../assets/UI/Zona_segura.png');
+    game.load.spritesheet('safeZone1','../assets/UI/Zona_segura_abajo_derecha.png');
+    game.load.spritesheet('safeZone2','../assets/UI/Zona_segura_abajo_izq.png');
+    game.load.spritesheet('safeZone3','../assets/UI/Zona_segura_arriba_derecha.png');
+    game.load.spritesheet('safeZone4','../assets/UI/Zona_segura_arriba_izq.png');
 }
 
 function loadSounds() {
@@ -103,6 +114,7 @@ function createLevel() {
     bg.scrollFactorX = 0.7;
     bg.scrollFactorY = 0.7;
 
+
     // Camera follows the player inside the world
     game.camera.follow(player);
 
@@ -118,15 +130,17 @@ function createLevel() {
 
     player.body.collideWorldBounds = true;
 
-    game.add.sprite(game.world.width/2,game.world.height/2,"heart");
+    //game.add.sprite(game.world.width/2,game.world.height/2,"heart");
 
     createEnemies();
+
+    zonaSegura();
+
     animacionEntrada();
 }
 
 function updateLevel() {
-    characterMovement();
-
+    choquesZonaSegura();
 
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if(healthValue == 0){
@@ -134,7 +148,72 @@ function updateLevel() {
         winOrLose = false;
         animacionSalidaToFinal(() => {endGame();});
     }
+
+    if(game.input.activePointer.isDown) {
+        shoot();
+    }
+
+
+    characterMovement();
+
+    //player.rotation = game.physics.arcade.angleToPointer(player);
+    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
+
+    // if(healthValue > 50) {
+    //     healthValue--;
+    //     updateHealthBar();
+    // }else if(score <= 105) {
+    //     score +=2;
+    //     updateScore();
+    // 
 }
+
+function zonaSegura(){
+    safeZone = game.add.sprite(game.world.width/2, game.world.height/2, 'safeZone');
+    safeZone1 = game.add.sprite(game.world.width/2+111, game.world.height/2+111, 'safeZone1');
+    safeZone2 = game.add.sprite(game.world.width/2-112, game.world.height/2+106, 'safeZone2');
+    safeZone3 = game.add.sprite(game.world.width/2+112, game.world.height/2-101, 'safeZone3');
+    safeZone4 = game.add.sprite(game.world.width/2-107, game.world.height/2-104, 'safeZone4');
+    safeZone.anchor.setTo(0.5,0.5);
+    safeZone1.anchor.setTo(0.5,0.5);
+    safeZone2.anchor.setTo(0.5,0.5);
+    safeZone3.anchor.setTo(0.5,0.5);
+    safeZone4.anchor.setTo(0.5,0.5);
+    game.physics.arcade.enable(safeZone);
+    game.physics.arcade.enable(safeZone1);
+    game.physics.arcade.enable(safeZone2);
+    game.physics.arcade.enable(safeZone3);
+    game.physics.arcade.enable(safeZone4);
+    safeZone.body.immovable = true;
+    safeZone1.body.immovable = true;
+    safeZone2.body.immovable = true;
+    safeZone3.body.immovable = true;
+    safeZone4.body.immovable = true;
+}
+
+function choquesZonaSegura(){
+    game.physics.arcade.overlap(player, safeZone, onSafeZoneCollision, null, this);
+    //game.physics.arcade.collide(enemy, safeZone);
+
+    game.physics.arcade.collide(player, safeZone1);
+    game.physics.arcade.collide(player, safeZone2);
+    game.physics.arcade.collide(player, safeZone3);
+    game.physics.arcade.collide(player, safeZone4);
+
+    enemies.forEach(enemy =>{
+        game.physics.arcade.collide(enemy, safeZone);
+    });
+
+}
+
+function onSafeZoneCollision(player, safeZone) {
+    safeZone.body.velocity.x = 0;
+    safeZone.body.velocity.y = 0;
+    console.log("Player entered the safe zone!");
+
+}
+
+
 function setDifficulty(difficulty) {
     switch (difficulty) {
         case DIFFICULTY.Normal || 'Normal':
@@ -174,22 +253,6 @@ function createHUD() {
 
 }
 
-function updateLevel() {
-    characterMovement();
-    //player.rotation = game.physics.arcade.angleToPointer(player);
-    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
-    if(game.input.activePointer.isDown) {
-        shoot();
-    }
-    // if(healthValue > 50) {
-    //     healthValue--;
-    //     updateHealthBar();
-    // }else if(score <= 105) {
-    //     score +=2;
-    //     updateScore();
-    // }
-}
-
 function shoot() {
     if(game.time.now > nextShoot && bulletGroup.countDead() > 0) {
         nextShoot = game.time.now + SHOOT_COOLDOWN;
@@ -227,7 +290,8 @@ function createEnemies() {
     enemies.forEach((enemy)=>{
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
-        enemyHealth = ENEMY_BASE_HEALTH;});
+        enemyHealth = ENEMY_BASE_HEALTH;
+    });
     game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
 }
 
@@ -296,7 +360,7 @@ function updateScore() {
 function animacionSalidaToFinal(a){
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
-    img5.scale.setTo(5);
+    img5.scale.setTo(20);
     img5.alpha = 0;
 
     mainTween = game.add.tween(img5).to({
