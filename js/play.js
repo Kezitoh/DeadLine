@@ -29,7 +29,7 @@ let playState = {
 let hudGroup;
 /** @type {Phaser.Group} */
 let bulletGroup;
-let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins;
+let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins, hudInteractText;
 let remainingTime;
 let score;
 /** @type {Phaser.Sprite} */
@@ -55,6 +55,8 @@ let dangerSound;
 
 let coins;
 
+
+let areaPositions = [];
 
 function loadPlayAssets() {
     loadSprites();
@@ -99,6 +101,7 @@ function loadLevel(level) {
 
 function createLevel() {
     coins = 0;
+    generateAreaPositions(5);
     nextShoot = 0;
     nextHurt = 0;
     maxAmmo = 50;
@@ -108,7 +111,19 @@ function createLevel() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
+    //reload areas
+    let graphics = game.add.graphics();
+    graphics.beginFill("0x61aaea");
+    areaPositions.forEach(element => {
+        graphics.drawCircle(element.x, element.y,100);
+    });
+    graphics.endFill();
 
+    graphics.beginFill("0xaaaaaa");
+    graphics.drawRoundedRect()//TODO: AREA BEEG
+    graphics.drawCircle(game.world.width/2, 300, 300);
+    graphics.endFill();
+    
     cursors = game.input.keyboard.createCursorKeys();
     wasd = game.input.keyboard.addKeys({w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D});
 
@@ -275,6 +290,16 @@ function onSafeZoneCollision(player, safeZone) {
 
 }
 
+    
+    game.add.sprite(game.world.width/4,game.world.height/4,"heart");
+    createHUD();
+}
+
+function generateAreaPositions(quantity) {
+    for(let i = 0; i<quantity; i++) {
+        areaPositions.push({x:Math.random()*(game.world.width-50)+50, y: Math.random()*(game.world.height-50)+50});
+    }
+}
 
 function setDifficulty(difficulty) {
     switch (difficulty) {
@@ -321,9 +346,33 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudCoins);
+
+    hudInteractText = game.add.text(game.canvas.width/2, game.canvas.height - 50 , "", {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    hudGroup.add(hudInteractText);
+
     hudGroup.fixedToCamera = true;
     healthValue = MAX_HEALTH;
+    score = 0;
+}
 
+function updateLevel() {
+    characterMovement();
+    //player.rotation = game.physics.arcade.angleToPointer(player);
+    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
+    if(game.input.activePointer.isDown) {
+        shoot();
+    }
+    checkRechargeArea();
+    // if(healthValue > 50) {
+    //     healthValue--;
+    //     updateHealthBar();
+    // }else if(score <= 105) {
+    //     score +=2;
+    //     updateScore();
+    // }
 }
 
 function shoot() {
@@ -457,4 +506,20 @@ function endGame() {
 }
 
 
+
+
+function checkRechargeArea() {
+    let i = 0;
+    let found = false;
+    while(!found && i < areaPositions.length) {
+        if(Math.abs(areaPositions[i].x - player.x) < 50 && Math.abs(areaPositions[i].y - player.y) < 50) {
+            found = true;
+            hudInteractText.setText("Press [E] or [-] to recharge.");
+        }
+        i++;
+    }
+    if(!found) {
+        hudInteractText.setText("");
+    }
+}
 
