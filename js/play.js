@@ -1,12 +1,13 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 30;
+const INVULNERABILITY_TIME = 800;
 
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
 
 //Enemy consts
-const ENEMY_BASE_HEALTH = 10;
+const ENEMY_BASE_HEALTH = 20;
 const ENEMY_BASE_SPEED = 50;
 const ENEMY_GROUP_SIZE = 100;
 const ENEMY_SPAWN_TIMER = 1000;
@@ -28,7 +29,7 @@ let playState = {
 let hudGroup;
 /** @type {Phaser.Group} */
 let bulletGroup;
-let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty;
+let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins;
 let remainingTime;
 let score;
 /** @type {Phaser.Sprite} */
@@ -37,16 +38,22 @@ let player;
 let cursors;
 let wasd;
 let nextShoot;
+let nextHurt;
+let ammo;
+let maxAmmo;
 let cameraPosX;
 let cameraPosY;
-
-let enemy;
 
 let safeZone;
 let safeZone1;
 let safeZone2;
 let safeZone3;
 let safeZone4;
+
+/** @type {Phaser.Sound} */
+let dangerSound;
+
+let coins;
 
 
 function loadPlayAssets() {
@@ -67,6 +74,7 @@ function loadImages() {
     game.load.image('heart', '../assets/UI/heart.png');
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
+    game.load.image('coin', '../assets/UI/coin.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
     game.load.spritesheet('safeZone','../assets/UI/Zona_segura.png');
@@ -77,6 +85,9 @@ function loadImages() {
 }
 
 function loadSounds() {
+}
+
+function createSounds() {
 
 }
 
@@ -87,7 +98,12 @@ function loadLevel(level) {
 
 
 function createLevel() {
+    coins = 0;
     nextShoot = 0;
+    nextHurt = 0;
+    maxAmmo = 50;
+    ammo = maxAmmo;
+    enemyHealth = ENEMY_BASE_HEALTH;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -96,6 +112,13 @@ function createLevel() {
     cursors = game.input.keyboard.createCursorKeys();
     wasd = game.input.keyboard.addKeys({w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D});
 
+    coinGroup = game.add.group();
+    coinGroup.enableBody = true;
+    coinGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    coinGroup.createMultiple(20, 'coin');
+    coinGroup.forEach(coin =>{
+        coin.anchor.setTo(0.5,0.5);
+    });
     bulletGroup = game.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
@@ -141,6 +164,21 @@ function createLevel() {
 
 function updateLevel() {
     choquesZonaSegura();
+
+    enemies.forEach(enemy =>{
+        if(game.physics.arcade.distanceBetween(enemy, player) < 500) {
+            //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
+            enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
+            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation,ENEMY_BASE_SPEED);
+            game.physics.arcade.collide(enemy, player, hurtPlayer);
+            game.physics.arcade.collide(enemy, safeZone);
+            game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
+        }
+    });
+
+    coinGroup.forEachAlive(coin=>{
+        game.physics.arcade.collide(coin, player, collectCoin, null, this);
+    });
 
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if(healthValue == 0){
@@ -200,10 +238,34 @@ function choquesZonaSegura(){
     game.physics.arcade.collide(player, safeZone3);
     game.physics.arcade.collide(player, safeZone4);
 
-    enemies.forEach(enemy =>{
-        game.physics.arcade.collide(enemy, safeZone);
-    });
+}
 
+function hurtPlayer() {
+    if(game.time.now > nextHurt) {
+        nextHurt = game.time.now + INVULNERABILITY_TIME;
+        healthValue -= 15;
+        updateHealthBar();
+    }
+}
+
+function hurtEnemy(enemy, bullet) {
+    bullet.kill();
+    enemy.health -= 5;
+    score += 5;
+    if(enemy.health <= 0) {
+        let coin = coinGroup.getFirstDead();
+        coin.reset(enemy.x,enemy.y);
+        enemy.kill();
+        score += 100;
+    }
+    updateScore();
+    
+}
+
+function collectCoin(coin) {
+    coin.kill();
+    coins+=15;
+    hudCoins.setText(coins);
 }
 
 function onSafeZoneCollision(player, safeZone) {
@@ -248,17 +310,30 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudDifficulty);
+    hudAmmo = game.add.text(game.canvas.width-100, game.canvas.height-50, ammo+"/"+maxAmmo, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    hudGroup.add(hudAmmo);
+    hudGroup.create(game.canvas.width-155, 36,'coin');
+    hudCoins = game.add.text(game.canvas.width-100, 52, coins, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    hudGroup.add(hudCoins);
     hudGroup.fixedToCamera = true;
     healthValue = MAX_HEALTH;
 
 }
 
 function shoot() {
-    if(game.time.now > nextShoot && bulletGroup.countDead() > 0) {
+    if(game.time.now > nextShoot && bulletGroup.countDead() > 0 && ammo > 0) {
         nextShoot = game.time.now + SHOOT_COOLDOWN;
         let bullet = bulletGroup.getFirstDead();
         bullet.reset(player.x, player.y);
         game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
+        ammo--;
+        hudAmmo.setText(ammo+"/"+maxAmmo);
     }
 }
 
@@ -290,7 +365,8 @@ function createEnemies() {
     enemies.forEach((enemy)=>{
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
-        enemyHealth = ENEMY_BASE_HEALTH;
+        
+        game.physics.arcade.enable(enemy);
     });
     game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
 }
@@ -300,6 +376,7 @@ function spawnEnemy() {
     if (enemy){
         enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
         enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
+        enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
         enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
         game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
@@ -354,7 +431,7 @@ function updateTime(offset = 0) {
 
 
 function updateScore() {
-    hudScore.setText((score +'').padStart(4,'0'))
+    hudScore.setText((score +''))
 }
 
 function animacionSalidaToFinal(a){
