@@ -274,6 +274,10 @@ function updateLevel() {
         console.log("aa");
         areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
     }
+
+    if(healthValue <= 0){
+        animacionSalidaToFinal(() => {endGame();});
+    }
 }
 
 function zonaSegura() {
