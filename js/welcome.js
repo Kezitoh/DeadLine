@@ -4,8 +4,14 @@ let initialState = {
 };
 
 let mainTween;
-let btninstructions, btnConfig, btnPlay;
-let btnEasy, btnNormal, btnHard;
+let btninstructions;
+/** @type {Phaser.Button} */
+let btnEasy;
+/** @type {Phaser.Button} */
+let btnNormal;
+/** @type {Phaser.Button} */
+let btnHard;
+
 let levelToPlay;
 let img5;
 
@@ -19,6 +25,7 @@ const DIFFICULTY = {
 };
 
 let difficulty;
+let clickSound;
 
 function loadAssets() {
     game.load.image('fondo', '../assets/UI/Fondodejuego.png');
@@ -30,10 +37,16 @@ function loadAssets() {
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
 
     game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png')
+
+    loadSoundsWelcome();
+}
+
+function loadSoundsWelcome(){
+    game.load.audio('click', '../assets/sounds/click1.ogg');
 }
 
 function displayScreen() {
-
+    clickSound = game.add.audio('click');
     levelToPlay = 1;
     game.input.enabled = true;
     let img = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'fondo');
@@ -117,6 +130,10 @@ function botonesInicio(){
     btnEasy.scale.setTo(1.5);
     btnNormal.scale.setTo(1.5);
     btnHard.scale.setTo(1.5);
+
+    btnEasy.inputEnabled = true;
+    btnNormal.inputEnabled = true;
+    btnHard.inputEnabled = true;
 }
 
 function oninstructionsButtonPressed() {
@@ -180,7 +197,9 @@ function animacionEntradaPlayer(){
 function onDifficultySet(d){
     difficulty = d;
     let playerTween;
+    clickSound.play();
     if(difficulty == "Easy"){
+        btnEasy.inputEnabled = false;
         playerTween = game.add.tween(p).to({
             angle:-180
         }, 300, Phaser.Easing.Cubic.Out).to({
@@ -195,6 +214,7 @@ function onDifficultySet(d){
         playerTween.start();
     }
     if(difficulty == "Normal"){
+        btnNormal.inputEnabled = false;
         playerTween = game.add.tween(p).to({
             y:game.canvas.height / 3 + 120
         }, 1000, Phaser.Easing.Cubic.Out);
@@ -202,6 +222,7 @@ function onDifficultySet(d){
         playerTween.start();
     }
     if(difficulty == "Hard"){
+        btnHard.inputEnabled = false;
         playerTween = game.add.tween(p).to({
             angle:0
         }, 300, Phaser.Easing.Cubic.Out).to({

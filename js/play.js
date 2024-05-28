@@ -1,6 +1,7 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const DEFAULT_TIME = 30;
+const SZCOOLDOWN = 5000;
 
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
@@ -14,6 +15,9 @@ const ENEMY_TURN_TIMER_MIN = 2000;
 const ENEMY_TURN_TIMER_MAX = 3000;
 const ENEMY_TURN_PROBABILITY = 0.9;
 const ENEMY_STOP_TIME = 1500;
+
+const TIEMPO_DENTRO_ZONA_SEGURA = 10;
+
 let enemyHealth;
 let enemyResetPosX;
 let enemyResetPosY;
@@ -30,6 +34,7 @@ let hudGroup;
 let bulletGroup;
 let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty;
 let remainingTime;
+let remainingSZTime;
 let score;
 /** @type {Phaser.Sprite} */
 let player;
@@ -40,13 +45,30 @@ let nextShoot;
 let cameraPosX;
 let cameraPosY;
 
-let enemy;
-
 let safeZone;
 let safeZone1;
 let safeZone2;
 let safeZone3;
 let safeZone4;
+
+let safeZoneTimeIn;
+
+let timerClock;
+let timerClock2;
+
+let overlapSZ;
+
+let soundSZ;
+
+let nextEntry;
+
+let weapon1Bought;
+let weapon2Bought;
+let weapon3Bought;
+
+let velocidadJugador;
+
+
 
 
 function loadPlayAssets() {
@@ -74,20 +96,47 @@ function loadImages() {
     game.load.spritesheet('safeZone2','../assets/UI/Zona_segura_abajo_izq.png');
     game.load.spritesheet('safeZone3','../assets/UI/Zona_segura_arriba_derecha.png');
     game.load.spritesheet('safeZone4','../assets/UI/Zona_segura_arriba_izq.png');
+
+
+    game.load.spritesheet('buyWeapon1Button', '../assets/UI/heart.png');
+    game.load.spritesheet('buyWeapon2Button', '../assets/UI/heart.png');
+    game.load.spritesheet('buyWeapon3Button', '../assets/UI/heart.png');
+    game.load.spritesheet('upgradeSpeedButton', '../assets/UI/heart.png');
+    game.load.spritesheet('upgradeHealthButton', '../assets/UI/heart.png');
+    game.load.spritesheet('exitButton', '../assets/UI/heart.png');
+
+    //escopeta,pistola,machinegun
+
+    game.load.spritesheet('weapon1','../assets/UI/Zona_segura_abajo_izq.png');
+    game.load.spritesheet('weapon2','../assets/UI/Zona_segura_arriba_derecha.png');
+    game.load.spritesheet('weapon3','../assets/UI/Zona_segura_arriba_izq.png');
 }
 
 function loadSounds() {
-
+    game.load.audio('danger', '../assets/sounds/danger.wav');
 }
 
 function loadLevel(level) {
 }
 
 
+function createSounds(){
+    soundSZ = game.add.audio('danger');
+}
+
+
 
 
 function createLevel() {
+    createSounds();
+    weapon1Bought = false;
+    weapon2Bought = false;
+    weapon3Bought = false;
+
+    velocidadJugador = PLAYER_VELOCITY;
+    overlapSZ = false;
     nextShoot = 0;
+    nextEntry = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -120,8 +169,7 @@ function createLevel() {
 
 
     // Update elapsed time each second
-    timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
-    createHUD();
+    timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => {remainingTime = updateTime(hudTime,remainingTime, timerClock, setRemainingTime);}, this);
 
     player = game.add.sprite(game.world.width/2, game.world.height/2, 'pc');
     player.anchor.setTo(0.5, 0.5);
@@ -136,6 +184,12 @@ function createLevel() {
 
     zonaSegura();
 
+    createHUD();
+
+    createMenu();
+
+    hideMenu();
+
     animacionEntrada();
 }
 
@@ -149,23 +203,12 @@ function updateLevel() {
         animacionSalidaToFinal(() => {endGame();});
     }
 
-    if(game.input.activePointer.isDown) {
+    if((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone)) || (game.input.activePointer.isDown && !menuGroup.visible)) {
         shoot();
     }
 
 
     characterMovement();
-
-    //player.rotation = game.physics.arcade.angleToPointer(player);
-    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
-
-    // if(healthValue > 50) {
-    //     healthValue--;
-    //     updateHealthBar();
-    // }else if(score <= 105) {
-    //     score +=2;
-    //     updateScore();
-    // 
 }
 
 function zonaSegura(){
@@ -192,7 +235,38 @@ function zonaSegura(){
 }
 
 function choquesZonaSegura(){
-    game.physics.arcade.overlap(player, safeZone, onSafeZoneCollision, null, this);
+    //Cuando Entra a la zona segura
+
+    if(game.time.now > nextEntry && !overlapSZ && game.physics.arcade.overlap(player, safeZone)) {
+
+        overlapSZ = true;
+        onSafeZoneOverlap();
+        showMenu();
+
+    } else if (!overlapSZ){
+        game.physics.arcade.collide(player, safeZone);
+    }
+
+    if(remainingSZTime == 3){
+        soundSZ.play();
+        console.log("carapinga");
+
+    }
+
+    if(overlapSZ && !game.physics.arcade.overlap(player, safeZone)){
+        nextEntry = game.time.now + SZCOOLDOWN;
+    }
+
+    if(!game.physics.arcade.overlap(player, safeZone)){
+        overlapSZ = false;
+        game.time.events.remove(timerClock2);
+        safeZoneTimeIn.setText("");
+        soundSZ.stop();
+        hideMenu();
+    }
+
+
+
     //game.physics.arcade.collide(enemy, safeZone);
 
     game.physics.arcade.collide(player, safeZone1);
@@ -206,9 +280,23 @@ function choquesZonaSegura(){
 
 }
 
-function onSafeZoneCollision(player, safeZone) {
+function onSafeZoneOverlap() {
     safeZone.body.velocity.x = 0;
     safeZone.body.velocity.y = 0;
+
+    remainingSZTime = TIEMPO_DENTRO_ZONA_SEGURA;
+
+    timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => {remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2);}, this);
+
+
+    safeZoneTimeIn = game.add.text(game.canvas.width/2, 100, setRemainingTime2(remainingSZTime), {
+        font: 'bold 35pt',
+        fill: '#ffffff'
+    });
+
+
+    safeZoneTimeIn.fixedToCamera = true;
+
     console.log("Player entered the safe zone!");
 
 }
@@ -226,6 +314,7 @@ function setDifficulty(difficulty) {
 }
 
 function createHUD() {
+    maxHealth = MAX_HEALTH;
     hudGroup = game.add.group();
     hudGroup.create(5,5,'heart');
     hudGroup.create(50, 5, 'healthHolder');
@@ -249,7 +338,7 @@ function createHUD() {
     });
     hudGroup.add(hudDifficulty);
     hudGroup.fixedToCamera = true;
-    healthValue = MAX_HEALTH;
+    healthValue = maxHealth;
 
 }
 
@@ -269,16 +358,16 @@ function characterMovement() {
 
     player.rotation = game.physics.arcade.angleToPointer(player);
     if(cursors.up.isDown || wasd.w.isDown){
-        player.body.velocity.y = -PLAYER_VELOCITY;
+        player.body.velocity.y = -velocidadJugador;
     }
     if(cursors.down.isDown || wasd.s.isDown){
-        player.body.velocity.y = PLAYER_VELOCITY;
+        player.body.velocity.y = velocidadJugador;
     }
     if(cursors.left.isDown || wasd.a.isDown) {
-        player.body.velocity.x = -PLAYER_VELOCITY;
+        player.body.velocity.x = -velocidadJugador;
     }
     if(cursors.right.isDown || wasd.d.isDown) {
-        player.body.velocity.x = PLAYER_VELOCITY;
+        player.body.velocity.x = velocidadJugador;
     }
 
 }
@@ -330,32 +419,188 @@ function enemySpawnPositionCheck(posX, posY){
 function updateHealthBar() {
     if (healthTween)
         healthTween.stop();
-    healthTween = game.add.tween(healthBar.scale).to({x: healthValue/MAX_HEALTH, y: 1}, 300, Phaser.Easing.Cubic.Out);
+    healthTween = game.add.tween(healthBar.scale).to({x: healthValue/maxHealth, y: 1}, 300, Phaser.Easing.Cubic.Out);
     healthTween.start();
 
 }
 
 function setRemainingTime(seconds) {
-    return String(Math.trunc(seconds / 60)).padStart(2, "0") + ":" +
-    String(seconds % 60).padStart(2, "0");
+    return String(Math.trunc(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
 }
 
-function updateTime(offset = 0) {
-    if(offset != 0) {
-        remainingTime += offset;
-    }
-    remainingTime = Math.max(-1, remainingTime -1);
-    hudTime.setText(setRemainingTime(remainingTime));
-    if(remainingTime < 0) {
-        game.time.events.remove(timerClock);
+function setRemainingTime2(seconds) {
+    return String(seconds % 60);
+}
+
+
+function updateTime(variableAcutalizar, valorActualizar, temporizador,funcionActulizado) {
+
+    valorActualizar = Math.max(-1, valorActualizar -1);
+    variableAcutalizar.setText(funcionActulizado(valorActualizar));
+    if(valorActualizar < 0) {
+        game.time.events.remove(temporizador);
         game.time.events.add(25,() => {animacionSalidaToFinal(() => {endGame();});} , this);
     }
+    return valorActualizar;
 }
 
 
 function updateScore() {
     hudScore.setText((score +'').padStart(4,'0'))
 }
+
+let menuGroup;
+let coins = 1000; // Inicia con algunas monedas para pruebas
+
+function createMenu() {
+    menuGroup = game.add.group();
+
+    let buyWeapon1Button = game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');});
+    buyWeapon1Button.anchor.set(0.5);
+    menuGroup.add(buyWeapon1Button);
+
+
+    let buyWeapon2Button = game.add.button(game.canvas.width - 50, game.canvas.height/2 , 'buyWeapon2Button', () => {buyItem('weapon2');});
+    buyWeapon2Button.anchor.set(0.5);
+    menuGroup.add(buyWeapon2Button);
+
+
+    let buyWeapon3Button = game.add.button(game.canvas.width - 50, game.canvas.height/2 + 200, 'buyWeapon3Button', () => {buyItem('weapon3');});
+    buyWeapon3Button.anchor.set(0.5);
+    menuGroup.add(buyWeapon3Button);
+
+
+    let upgradeSpeedButton = game.add.button(50, game.canvas.height/2 - 200, 'upgradeSpeedButton', upgradeSpeed);
+    upgradeSpeedButton.anchor.set(0.5);
+    menuGroup.add(upgradeSpeedButton);
+
+    let upgradeHealthButton = game.add.button(50, game.canvas.height/2, 'upgradeHealthButton', upgradeHealth);
+    upgradeHealthButton.anchor.set(0.5);
+    menuGroup.add(upgradeHealthButton);
+
+    let exitButton = game.add.button(50, game.canvas.height/2 + 200, 'exitButton', hideMenu);
+    exitButton.anchor.set(0.5);
+    menuGroup.add(exitButton);
+
+    // Mostrar monedas
+    let coinsText = game.add.text(game.canvas.width/2, game.canvas.height/2 - 150, 'Coins: ' + coins, {
+        font: 'bold 25pt',
+        fill: '#ffffff'
+    });
+    coinsText.anchor.set(0.5);
+    menuGroup.add(coinsText);
+
+    menuGroup.coinsText = coinsText;
+    menuGroup.fixedToCamera = true;
+}
+
+function updateMenuButtons() {
+    //menuGroup.buyWeapon1Button = (weapon1Bought ? () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button');} : () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');})});
+    menuGroup.getAt(0).inputEnabled = !weapon1Bought;
+    menuGroup.getAt(0).alpha = (weapon1Bought ? 0.5 : 1);
+
+    menuGroup.getAt(1).inputEnabled = !weapon2Bought;
+    menuGroup.getAt(1).alpha = (weapon2Bought ? 0.5 : 1);
+
+    menuGroup.getAt(2).inputEnabled = !weapon3Bought;
+    menuGroup.getAt(2).alpha = (weapon3Bought ? 0.5 : 1);
+
+
+}
+
+function showMenu() {
+    //game.paused = true;
+    menuGroup.visible = true;
+    updateCoinsText();
+    updateMenuButtons();
+}
+
+function hideMenu() {
+    //game.paused = false;
+    menuGroup.visible = false;
+}
+
+function updateCoinsText() {
+    menuGroup.coinsText.setText('Coins: ' + coins);
+}
+
+function buyItem(item) {
+    const itemCosts = {
+        'weapon1': 300,
+        'weapon2': 500,
+        'weapon3': 700
+    };
+
+    if (coins >= itemCosts[item]) {
+        coins -= itemCosts[item];
+        switch(item) {
+            case 'weapon1':
+                if (!weapon1Bought) {
+                    weapon1Bought = true;
+                    // Lógica adicional para dar al jugador el arma 1
+                }
+                hideMenu();
+                break;
+            case 'weapon2':
+                if (!weapon2Bought) {
+                    weapon2Bought = true;
+                    // Lógica adicional para dar al jugador el arma 2
+                }
+                hideMenu();
+                break;
+            case 'weapon3':
+                if (!weapon3Bought) {
+                    weapon3Bought = true;
+                    // Lógica adicional para dar al jugador el arma 3
+                }
+                hideMenu();
+                break;
+        }
+        console.log(item + ' bought!');
+        // Aquí añadir lógica para cambiar armas al jugador
+        // Por ejemplo: equipWeapon(item);
+    } else {
+        console.log('Not enough coins for ' + item);
+    }
+    updateMenuButtons();
+    updateCoinsText();
+}
+
+let costRun;
+
+function upgradeSpeed() {
+    costRun += 70;
+    if (coins >= costRun) {
+        coins -= costRun;
+        velocidadJugador += 20;
+        console.log('Speed upgraded!');
+    } else {
+        console.log('Not enough coins to upgrade speed');
+    }
+    hideMenu();
+
+    updateCoinsText();
+}
+
+let costLife = 40;
+
+function upgradeHealth() {
+    costLife += 50;
+    if (coins >= costLife) {
+        coins -= costLife;
+        maxHealth += 10;
+        healthValue = maxHealth;
+         // Restaura la salud al máximo
+        console.log('Health upgraded!');
+        updateHealthBar();
+    } else {
+        console.log('Not enough coins to upgrade health');
+    }
+    hideMenu();
+
+    updateCoinsText();
+}
+
 
 function animacionSalidaToFinal(a){
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
