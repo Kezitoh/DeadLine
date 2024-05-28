@@ -109,7 +109,6 @@ function createLevel() {
     enemyHealth = ENEMY_BASE_HEALTH;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
-
     let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
     //reload areas
     let graphics = game.add.graphics();
@@ -161,7 +160,7 @@ function createLevel() {
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
     createHUD();
 
-    player = game.add.sprite(game.world.width/2, game.world.height/2, 'pc');
+    player = game.add.sprite(game.world.width/2, game.world.height-100, 'pc');
     player.anchor.setTo(0.5, 0.5);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
@@ -208,6 +207,7 @@ function updateLevel() {
 
 
     characterMovement();
+    checkRechargeArea();
 
     //player.rotation = game.physics.arcade.angleToPointer(player);
     //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
@@ -290,11 +290,6 @@ function onSafeZoneCollision(player, safeZone) {
 
 }
 
-    
-    game.add.sprite(game.world.width/4,game.world.height/4,"heart");
-    createHUD();
-}
-
 function generateAreaPositions(quantity) {
     for(let i = 0; i<quantity; i++) {
         areaPositions.push({x:Math.random()*(game.world.width-50)+50, y: Math.random()*(game.world.height-50)+50});
@@ -356,23 +351,6 @@ function createHUD() {
     hudGroup.fixedToCamera = true;
     healthValue = MAX_HEALTH;
     score = 0;
-}
-
-function updateLevel() {
-    characterMovement();
-    //player.rotation = game.physics.arcade.angleToPointer(player);
-    //player.body.velocity = game.physics.arcade.velocityFromRotation(player.rotation,PLAYER_VELOCITY);
-    if(game.input.activePointer.isDown) {
-        shoot();
-    }
-    checkRechargeArea();
-    // if(healthValue > 50) {
-    //     healthValue--;
-    //     updateHealthBar();
-    // }else if(score <= 105) {
-    //     score +=2;
-    //     updateScore();
-    // }
 }
 
 function shoot() {
