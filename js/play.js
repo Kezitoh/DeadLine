@@ -27,8 +27,8 @@ let playState = {
 };
 
 function render() {
-    areaGroup.forEach(area=> {
-        game.debug.bodyInfo(area,32, 32);
+    areaGroup.forEach(area => {
+        game.debug.bodyInfo(area, 32, 32);
         game.debug.body(area);
     });
 }
@@ -64,7 +64,8 @@ let safeZone4;
 let dangerSound;
 
 let coins;
-
+let bg;
+let wall;
 
 function loadPlayAssets() {
     loadSprites();
@@ -75,7 +76,7 @@ function loadPlayAssets() {
 
 
 function loadSprites() {
-    game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png');
+    game.load.spritesheet('pc', '../assets/sprites/psj.png');
     game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
     game.load.image('reloadArea', '../assets/sprites/blue_circle.png');
@@ -87,6 +88,7 @@ function loadImages() {
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('coin', '../assets/UI/coin.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
+    game.load.image('wall', "../assets/sprites/tile_273.png");
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
     game.load.spritesheet('safeZone', '../assets/UI/Zona_segura.png');
     game.load.spritesheet('safeZone1', '../assets/UI/Zona_segura_abajo_derecha.png');
@@ -109,23 +111,26 @@ function loadLevel(level) {
 
 
 function createLevel() {
-    
+
     coins = 0;
     nextShoot = 0;
     nextHurt = 0;
     maxAmmo = 50;
     ammo = maxAmmo;
     enemyHealth = ENEMY_BASE_HEALTH;
-    game.world.setBounds(0, 0, game.canvas.width * 2, game.canvas.height * 2);
+    game.world.setBounds(0, 0, game.canvas.width * 2, game.canvas.height * 4);
     game.physics.startSystem(Phaser.Physics.ARCADE);
-    let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
+    bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
+    wall = game.add.tileSprite(0, game.world.height/2, game.world.width, 64, 'wall')
+    game.physics.arcade.enable(wall);
+    wall.body.immovable = true;
     //reload areas
     areaGroup = game.add.group();
     areaGroup.enableBody = true;
     areaGroup.physicsBodyType = Phaser.Physics.ARCADE;
     areaGroup.createMultiple(5, 'reloadArea');
     areaGroup.forEachDead(area => {
-        area.body.setCircle(1, area.width/2.15, area.height/2.15);
+        area.body.setCircle(1, area.width / 2.15, area.height / 2.15);
         area.scale.setTo(4, 4);
         area.anchor.setTo(0.5, 0.5);
         area.reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
@@ -145,7 +150,10 @@ function createLevel() {
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
     bulletGroup.createMultiple(50, 'bullet');
-    bulletGroup.forEach((bullet) => { bullet.scale.set(0.5, 0.5) })
+    bulletGroup.forEach((bullet) => {
+        bullet.scale.set(0.5, 0.5);
+        bullet.body.bounce.set(1);
+    });
 
     bulletGroup.setAll('checkWorldBounds', true);
     bulletGroup.setAll('outOfBoundsKill', true);
@@ -161,15 +169,19 @@ function createLevel() {
 
 
     // Camera follows the player inside the world
-    game.camera.follow(player);
+    //game.camera.follow(player);
 
 
     // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, updateTime, this);
     createHUD();
-
-    player = game.add.sprite(game.world.width / 2, game.world.height / 2, 'pc');
+    game.camera.focusOnXY(game.world.width / 2, game.world.height - game.world.height / 7);
+    player = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'pc');
     player.anchor.setTo(0.5, 0.5);
+    player.animations.add('holdGun', [5], 0);
+    player.animations.add('shootGun', [6], 0)
+    player.animations.add('walk', [0], 0);
+    player.animations.add('shootPistol', [0], 0);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
 
@@ -188,15 +200,24 @@ function updateLevel() {
     choquesZonaSegura();
 
     enemies.forEach(enemy => {
-        if (game.physics.arcade.distanceBetween(enemy, player) < 500) {
+        enemy.chasing = false;
+        //enemy.body.speed = 0;
+        if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
+            enemy.chasing = true;
             //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
             enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
             enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
-            game.physics.arcade.collide(enemy, player, hurtPlayer);
-            game.physics.arcade.collide(enemy, safeZone);
-            game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
         }
     });
+    game.physics.arcade.collide(enemies, bulletGroup, hurtEnemy, null, this);
+    game.physics.arcade.collide(enemies, player, hurtPlayer);
+    game.physics.arcade.collide(enemies, safeZone);
+
+    if(score < 1000 ) {
+        game.physics.arcade.collide(wall, player);
+        game.physics.arcade.collide(wall, bulletGroup);
+        game.physics.arcade.collide(enemies, wall);     
+    }
 
     coinGroup.forEachAlive(coin => {
         game.physics.arcade.collide(coin, player, collectCoin, null, this);
@@ -218,8 +239,8 @@ function updateLevel() {
     areaGroup.forEachAlive(area => {
         game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
     });
-    if(areaGroup.countDead() > 0) {
-        console.log("aa");
+    if (areaGroup.countDead() > 0) {
+        //console.log("aa");
         areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
     }
 
@@ -236,11 +257,11 @@ function updateLevel() {
 }
 
 function zonaSegura() {
-    safeZone = game.add.sprite(game.world.width / 2, game.world.height / 2, 'safeZone');
-    safeZone1 = game.add.sprite(game.world.width / 2 + 111, game.world.height / 2 + 111, 'safeZone1');
-    safeZone2 = game.add.sprite(game.world.width / 2 - 112, game.world.height / 2 + 106, 'safeZone2');
-    safeZone3 = game.add.sprite(game.world.width / 2 + 112, game.world.height / 2 - 101, 'safeZone3');
-    safeZone4 = game.add.sprite(game.world.width / 2 - 107, game.world.height / 2 - 104, 'safeZone4');
+    safeZone = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'safeZone');
+    safeZone1 = game.add.sprite(game.world.width / 2 + 111, game.world.height - game.world.height / 7 + 111, 'safeZone1');
+    safeZone2 = game.add.sprite(game.world.width / 2 - 112, game.world.height - game.world.height / 7 + 106, 'safeZone2');
+    safeZone3 = game.add.sprite(game.world.width / 2 + 112, game.world.height - game.world.height / 7 - 101, 'safeZone3');
+    safeZone4 = game.add.sprite(game.world.width / 2 - 107, game.world.height - game.world.height / 7 - 104, 'safeZone4');
     safeZone.anchor.setTo(0.5, 0.5);
     safeZone1.anchor.setTo(0.5, 0.5);
     safeZone2.anchor.setTo(0.5, 0.5);
@@ -284,6 +305,8 @@ function hurtPlayer() {
 
 function hurtEnemy(enemy, bullet) {
     bullet.kill();
+    enemy.body.velocity.x = 0;
+    enemy.body.velocity.y = 0;
     enemy.health -= 5;
     score += 5;
     if (enemy.health <= 0) {
@@ -374,11 +397,25 @@ function createHUD() {
 
 function shoot() {
     if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && ammo > 0) {
+        //PISTOLA
         nextShoot = game.time.now + SHOOT_COOLDOWN;
         let bullet = bulletGroup.getFirstDead();
         bullet.reset(player.x, player.y);
         game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
         ammo--;
+
+        //ESCOPETA
+        // nextShoot = game.time.now + SHOOT_COOLDOWN * 3;
+        
+        // for (let i = 0; i < 5; i++) {
+        //     let bullet = bulletGroup.getFirstDead();
+        //     bullet.reset(player.x, player.y);
+        //     bullet.rotation = game.physics.arcade.angleToPointer(bullet);
+            
+        //     bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED);
+        // }
+        // ammo -= 4;
+
         hudAmmo.setText(ammo + "/" + maxAmmo);
     }
 }
@@ -411,17 +448,18 @@ function createEnemies() {
     enemies.forEach((enemy) => {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
-
-        game.physics.arcade.enable(enemy);
+        //game.physics.arcade.enable(enemy);
+        
     });
     game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
 }
 
 function spawnEnemy() {
-    let enemy = enemies.getFirstExists(false);
-    if (enemy) {
-        enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
-        enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
+    if(enemies.countDead() > 0) {
+        let enemy = enemies.getFirstDead();
+        let pos = enemySpawnPositionCheck(enemy);
+        enemy.reset(pos.x, pos.y);
+        if (game.physics.arcade.overlap(enemy, safeZone)) enemy.kill();
         enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
         enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
@@ -430,29 +468,36 @@ function spawnEnemy() {
 }
 
 function enemyMovement(enemy) {
-    enemy.body.velocity = 0;
-    enemy.rotation = Math.random() * 360;
+    enemy.body.velocity.x = 0;
+    enemy.body.velocity.y = 0;
+    if (!enemy.chasing) {
+        let giro = (Math.random() * 220) - 110;
+        game.add.tween(enemy).to({ angle: giro }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+    }
     game.time.events.add(ENEMY_STOP_TIME, () => {
         if (Math.random() < ENEMY_TURN_PROBABILITY) {
-            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+            enemy.body.velocity = game.physics.arcade.velocityFromAngle(enemy.angle, ENEMY_BASE_SPEED);
         }
     })
 }
 
 //function that ensures the enemies appear outside of the camera/safe zone
-function enemySpawnPositionCheck(posX, posY) {
+function enemySpawnPositionCheck(enemy) {
+    let posX = Math.random() * game.world.width;
+    let posY = Math.random() * game.world.height;
     if (cameraPosX < posX < (cameraPosX + game.camera.width) || cameraPosY < posY < (cameraPosY + game.camera.height)) {
-        posX = Math.random() * game.world.width;
-        posY = Math.random() * game.world.height;
         enemySpawnPositionCheck(posX, posY);
     }
-    if (safeZone.left < posX && posX < safeZone.right && safeZone.top < posY && posY < safeZone.bottom) {
-        posX = Math.random() * game.world.width;
-        posY = Math.random() * game.world.height;
+    if (safeZone.left + 50 < posX && posX < safeZone.right - 50 && safeZone.top + 50 < posY && posY < safeZone.bottom - 50) {
+
+        // posX = Math.random() * game.world.width;
+        // posY = Math.random() * game.world.height;
         enemySpawnPositionCheck(posX, posY);
     }
-    enemyResetPosX = posX;
-    enemyResetPosY = posY;
+
+    // enemyResetPosX = posX;
+    // enemyResetPosY = posY;
+    return { x: posX, y: posY }
 }
 
 function updateHealthBar() {
