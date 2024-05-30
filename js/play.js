@@ -519,12 +519,14 @@ function collisionsSafeZone() {
 
 
 function hurtPlayer(player, source, killsource = false) {
-    if(killsource) source.kill();
+    if(killsource && source.key === 'robotBullet') {
+      source.kill(); // Eliminar solo la bala que golpeó al jugador
+    }
     if (game.time.now > nextHurt) {
-        hitSound.play();
-        nextHurt = game.time.now + INVULNERABILITY_TIME;
-        healthValue -= enemyDamage;
-        updateHealthBar();
+      hitSound.play();
+      nextHurt = game.time.now + INVULNERABILITY_TIME;
+      healthValue -= enemyDamage;
+      updateHealthBar();
     }
 }
 
