@@ -52,9 +52,6 @@ function displayScreen() {
     let img = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'fondo');
     img.anchor.setTo(0.5,0.5);
 
-    console.log("va a jugar o que perro ijueputamalparido");
-
-
     let textTitle = '\n  DeadLine  \n';
     let byus = 'Steven Sánchez  \nRuben Fernandez  \nAlejandro Deben Duque      \n ';
     let styleTitle = {
