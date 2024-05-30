@@ -17,12 +17,12 @@ let clickSoundFinal;
 
 
 function loadFinalImages() {
-    game.load.image('bgGamef', '../assets/UI/Fondodejuego.png');
-    game.load.image('btnInicioA', '../assets/UI/4x/btnInicioConLetras.png');
-    game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
+    game.load.image('bgGamef', 'assets/UI/Fondodejuego.png');
+    game.load.image('btnInicioA', 'assets/UI/4x/btnInicioConLetras.png');
+    game.load.image('negro', 'assets/UI/ImagenNegraParaTransicion.jpg');
 
     //sonido
-    game.load.audio('click', '../assets/sounds/click1.ogg');
+    game.load.audio('click', 'assets/sounds/click1.ogg');
 }
 
 function createLevelFinal() {

@@ -4,11 +4,11 @@ let instructionState = {
 };
 
 function loadInstructionsAssets(){
-    game.load.image('fondo', '../assets/UI/Fondodejuego.png');
+    game.load.image('fondo', 'assets/UI/Fondodejuego.png');
     game.load.image('homeBtn', 'assets/UI/cancelButton.png');
     game.load.image('forwardBtn', 'assets/UI/forwardButton.png');
     game.load.image('backBtn', 'assets/UI/backButton.png');
-    game.load.image('wasdImagen', '../assets/UI/WASD.png');
+    game.load.image('wasdImagen', 'assets/UI/WASD.png');
 }
 
 const SLIDE_TIME = 15000;

@@ -157,53 +157,53 @@ function loadPlayAssets() {
 
 
 function loadSprites() {
-    game.load.spritesheet('pc', '../assets/sprites/psj.png', 55, 43);
-    game.load.spritesheet('zombie', '../assets/sprites/zomb.png', 36, 43);
-    game.load.spritesheet('robot', '../assets/sprites/robot1_gun.png');
-    game.load.image('bullet', '../assets/sprites/purple_ball.png');
-    game.load.image('robotBullet', '../assets/sprites/red_ball.png');
-    game.load.image('reloadArea', '../assets/sprites/blue_circle.png');
+    game.load.spritesheet('pc', 'assets/sprites/psj.png', 55, 43);
+    game.load.spritesheet('zombie', 'assets/sprites/zomb.png', 36, 43);
+    game.load.spritesheet('robot', 'assets/sprites/robot1_gun.png');
+    game.load.image('bullet', 'assets/sprites/purple_ball.png');
+    game.load.image('robotBullet', 'assets/sprites/red_ball.png');
+    game.load.image('reloadArea', 'assets/sprites/blue_circle.png');
 }
 
 function loadImages() {
-    game.load.image('heart', '../assets/UI/heart.png');
-    game.load.image('boots', '../assets/sprites/botasConAlas.png');
-    game.load.image('healthBar', '../assets/UI/health_bar.png');
-    game.load.image('healthHolder', '../assets/UI/health_holder.png');
-    game.load.image('coin', '../assets/UI/coin.png');
-    game.load.image('gem', '../assets/sprites/gem.png');
-    game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
-    game.load.image('bgZona2', '../assets/UI/Fondodejuego_Zona2.png');
-    game.load.image('wall', "../assets/sprites/tile_273.png");
-    game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
-    game.load.spritesheet('safeZone', '../assets/UI/Zona_segura.png');
-    game.load.spritesheet('safeZone1', '../assets/UI/Zona_segura_abajo_derecha.png');
-    game.load.spritesheet('safeZone2', '../assets/UI/Zona_segura_abajo_izq.png');
-    game.load.spritesheet('safeZone3', '../assets/UI/Zona_segura_arriba_derecha.png');
-    game.load.spritesheet('safeZone4', '../assets/UI/Zona_segura_arriba_izq.png');
+    game.load.image('heart', 'assets/UI/heart.png');
+    game.load.image('boots', 'assets/sprites/botasConAlas.png');
+    game.load.image('healthBar', 'assets/UI/health_bar.png');
+    game.load.image('healthHolder', 'assets/UI/health_holder.png');
+    game.load.image('coin', 'assets/UI/coin.png');
+    game.load.image('gem', 'assets/sprites/gem.png');
+    game.load.image('bgGame', 'assets/UI/Fondodejuego.png');
+    game.load.image('bgZona2', 'assets/UI/Fondodejuego_Zona2.png');
+    game.load.image('wall', "assets/sprites/tile_273.png");
+    game.load.image('negro', 'assets/UI/ImagenNegraParaTransicion.jpg');
+    game.load.spritesheet('safeZone', 'assets/UI/Zona_segura.png');
+    game.load.spritesheet('safeZone1', 'assets/UI/Zona_segura_abajo_derecha.png');
+    game.load.spritesheet('safeZone2', 'assets/UI/Zona_segura_abajo_izq.png');
+    game.load.spritesheet('safeZone3', 'assets/UI/Zona_segura_arriba_derecha.png');
+    game.load.spritesheet('safeZone4', 'assets/UI/Zona_segura_arriba_izq.png');
 
 
-    game.load.spritesheet('buyWeapon1Button', '../assets/UI/MenuSZ/ConBuy/BuyVerde.png');
-    game.load.spritesheet('buyWeapon2Button', '../assets/UI/MenuSZ/ConBuy/BuyNaranja.png');
-    game.load.spritesheet('buyWeapon3Button', '../assets/UI/MenuSZ/ConBuy/BuyRojo.png');
-    game.load.spritesheet('upgradeSpeedButton', '../assets/UI/MenuSZ/ConBuy/BuyBlanco.png');
-    game.load.spritesheet('upgradeHealthButton', '../assets/UI/MenuSZ/ConBuy/BuyAzul.png');
-    game.load.spritesheet('exitButton', '../assets/UI/MenuSZ/ConBuy/CloseNegro.png');
+    game.load.spritesheet('buyWeapon1Button', 'assets/UI/MenuSZ/ConBuy/BuyVerde.png');
+    game.load.spritesheet('buyWeapon2Button', 'assets/UI/MenuSZ/ConBuy/BuyNaranja.png');
+    game.load.spritesheet('buyWeapon3Button', 'assets/UI/MenuSZ/ConBuy/BuyRojo.png');
+    game.load.spritesheet('upgradeSpeedButton', 'assets/UI/MenuSZ/ConBuy/BuyBlanco.png');
+    game.load.spritesheet('upgradeHealthButton', 'assets/UI/MenuSZ/ConBuy/BuyAzul.png');
+    game.load.spritesheet('exitButton', 'assets/UI/MenuSZ/ConBuy/CloseNegro.png');
 
     //escopeta,pistola,machinegun
 
-    game.load.spritesheet('weapon0', '../assets/sprites/pistolaConSilenciador.png');
-    game.load.spritesheet('weapon1', '../assets/sprites/pistola.png');
-    game.load.spritesheet('weapon2', '../assets/sprites/escopeta.png');
-    game.load.spritesheet('weapon3', '../assets/sprites/AK.png');
+    game.load.spritesheet('weapon0', 'assets/sprites/pistolaConSilenciador.png');
+    game.load.spritesheet('weapon1', 'assets/sprites/pistola.png');
+    game.load.spritesheet('weapon2', 'assets/sprites/escopeta.png');
+    game.load.spritesheet('weapon3', 'assets/sprites/AK.png');
 }
 
 function loadSounds() {
-    game.load.audio('danger', '../assets/sounds/danger.wav');
-    game.load.audio('hitSound', '../assets/sounds/hitHurt.wav');
-    game.load.audio('coinSound', '../assets/sounds/pickupCoin.wav');
-    game.load.audio('shootSound', '../assets/sounds/laserShoot.wav');
-    game.load.audio('gemSound', '../assets/sounds/pickupGem.wav');
+    game.load.audio('danger', 'assets/sounds/danger.wav');
+    game.load.audio('hitSound', 'assets/sounds/hitHurt.wav');
+    game.load.audio('coinSound', 'assets/sounds/pickupCoin.wav');
+    game.load.audio('shootSound', 'assets/sounds/laserShoot.wav');
+    game.load.audio('gemSound', 'assets/sounds/pickupGem.wav');
 }
 
 function loadLevel(level) {

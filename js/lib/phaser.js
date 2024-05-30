@@ -865,8 +865,8 @@
 
         },{} ],7: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
-                Utils = _dereq_('../utils/Utils');
+            var vec2 = _dereq_('math/vec2'),
+                Utils = _dereq_('utils/Utils');
 
             module.exports = AABB;
 
@@ -1091,10 +1091,10 @@
 
                 return tmin;
             };
-        },{'../math/vec2': 30,'../utils/Utils': 57} ],8: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'utils/Utils': 57} ],8: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2');
-            var Body = _dereq_('../objects/Body');
+            var vec2 = _dereq_('math/vec2');
+            var Body = _dereq_('objects/Body');
 
             module.exports = Broadphase;
 
@@ -1266,14 +1266,14 @@
             Broadphase.NAIVE = 1;
             Broadphase.SAP = 2;
 
-        },{'../math/vec2': 30,'../objects/Body': 31} ],9: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'objects/Body': 31} ],9: [ function (_dereq_,module,exports)
         {
-            var Circle = _dereq_('../shapes/Circle'),
-                Plane = _dereq_('../shapes/Plane'),
-                Shape = _dereq_('../shapes/Shape'),
-                Particle = _dereq_('../shapes/Particle'),
-                Broadphase = _dereq_('../collision/Broadphase'),
-                vec2 = _dereq_('../math/vec2');
+            var Circle = _dereq_('shapes/Circle'),
+                Plane = _dereq_('shapes/Plane'),
+                Shape = _dereq_('shapes/Shape'),
+                Particle = _dereq_('shapes/Particle'),
+                Broadphase = _dereq_('collision/Broadphase'),
+                vec2 = _dereq_('math/vec2');
 
             module.exports = NaiveBroadphase;
 
@@ -1352,24 +1352,24 @@
 
                 return result;
             };
-        },{'../collision/Broadphase': 8,'../math/vec2': 30,'../shapes/Circle': 39,'../shapes/Particle': 43,'../shapes/Plane': 44,'../shapes/Shape': 45} ],10: [ function (_dereq_,module,exports)
+        },{'collision/Broadphase': 8,'math/vec2': 30,'shapes/Circle': 39,'shapes/Particle': 43,'shapes/Plane': 44,'shapes/Shape': 45} ],10: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
+            var vec2 = _dereq_('math/vec2'),
                 sub = vec2.sub,
                 add = vec2.add,
                 dot = vec2.dot,
-                Utils = _dereq_('../utils/Utils'),
-                ContactEquationPool = _dereq_('../utils/ContactEquationPool'),
-                FrictionEquationPool = _dereq_('../utils/FrictionEquationPool'),
-                TupleDictionary = _dereq_('../utils/TupleDictionary'),
-                Equation = _dereq_('../equations/Equation'),
-                ContactEquation = _dereq_('../equations/ContactEquation'),
-                FrictionEquation = _dereq_('../equations/FrictionEquation'),
-                Circle = _dereq_('../shapes/Circle'),
-                Convex = _dereq_('../shapes/Convex'),
-                Shape = _dereq_('../shapes/Shape'),
-                Body = _dereq_('../objects/Body'),
-                Box = _dereq_('../shapes/Box');
+                Utils = _dereq_('utils/Utils'),
+                ContactEquationPool = _dereq_('utils/ContactEquationPool'),
+                FrictionEquationPool = _dereq_('utils/FrictionEquationPool'),
+                TupleDictionary = _dereq_('utils/TupleDictionary'),
+                Equation = _dereq_('equations/Equation'),
+                ContactEquation = _dereq_('equations/ContactEquation'),
+                FrictionEquation = _dereq_('equations/FrictionEquation'),
+                Circle = _dereq_('shapes/Circle'),
+                Convex = _dereq_('shapes/Convex'),
+                Shape = _dereq_('shapes/Shape'),
+                Body = _dereq_('objects/Body'),
+                Box = _dereq_('shapes/Box');
 
             module.exports = Narrowphase;
 
@@ -3986,14 +3986,14 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
 
     return numContacts;
 };
-        },{'../equations/ContactEquation': 21,'../equations/Equation': 22,'../equations/FrictionEquation': 23,'../math/vec2': 30,'../objects/Body': 31,'../shapes/Box': 37,'../shapes/Circle': 39,'../shapes/Convex': 40,'../shapes/Shape': 45,'../utils/ContactEquationPool': 48,'../utils/FrictionEquationPool': 49,'../utils/TupleDictionary': 56,'../utils/Utils': 57} ],11: [ function (_dereq_,module,exports)
+        },{'equations/ContactEquation': 21,'equations/Equation': 22,'equations/FrictionEquation': 23,'math/vec2': 30,'objects/Body': 31,'shapes/Box': 37,'shapes/Circle': 39,'shapes/Convex': 40,'shapes/Shape': 45,'utils/ContactEquationPool': 48,'utils/FrictionEquationPool': 49,'utils/TupleDictionary': 56,'utils/Utils': 57} ],11: [ function (_dereq_,module,exports)
         {
             module.exports = Ray;
 
-            var vec2 = _dereq_('../math/vec2');
-            var RaycastResult = _dereq_('../collision/RaycastResult');
-            var Shape = _dereq_('../shapes/Shape');
-            var AABB = _dereq_('../collision/AABB');
+            var vec2 = _dereq_('math/vec2');
+            var RaycastResult = _dereq_('collision/RaycastResult');
+            var Shape = _dereq_('shapes/Shape');
+            var AABB = _dereq_('collision/AABB');
 
             /**
  * A line with a start and end point that is used to intersect shapes. For an example, see {{#crossLink "World/raycast:method"}}World.raycast{{/crossLink}}
@@ -4315,10 +4315,10 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
             }
 
 
-        },{'../collision/AABB': 7,'../collision/RaycastResult': 12,'../math/vec2': 30,'../shapes/Shape': 45} ],12: [ function (_dereq_,module,exports)
+        },{'collision/AABB': 7,'collision/RaycastResult': 12,'math/vec2': 30,'shapes/Shape': 45} ],12: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2');
-            var Ray = _dereq_('../collision/Ray');
+            var vec2 = _dereq_('math/vec2');
+            var Ray = _dereq_('collision/Ray');
 
             module.exports = RaycastResult;
 
@@ -4456,10 +4456,10 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 this.fraction = fraction;
                 this.faceIndex = faceIndex;
             };
-        },{'../collision/Ray': 11,'../math/vec2': 30} ],13: [ function (_dereq_,module,exports)
+        },{'collision/Ray': 11,'math/vec2': 30} ],13: [ function (_dereq_,module,exports)
         {
-            var Utils = _dereq_('../utils/Utils'),
-                Broadphase = _dereq_('../collision/Broadphase');
+            var Utils = _dereq_('utils/Utils'),
+                Broadphase = _dereq_('collision/Broadphase');
 
             module.exports = SAPBroadphase;
 
@@ -4659,11 +4659,11 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
 
                 return result;
             };
-        },{'../collision/Broadphase': 8,'../utils/Utils': 57} ],14: [ function (_dereq_,module,exports)
+        },{'collision/Broadphase': 8,'utils/Utils': 57} ],14: [ function (_dereq_,module,exports)
         {
             module.exports = Constraint;
 
-            var Utils = _dereq_('../utils/Utils');
+            var Utils = _dereq_('utils/Utils');
 
             /**
  * Base constraint class.
@@ -4806,12 +4806,12 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 }
             };
 
-        },{'../utils/Utils': 57} ],15: [ function (_dereq_,module,exports)
+        },{'utils/Utils': 57} ],15: [ function (_dereq_,module,exports)
         {
             var Constraint = _dereq_('./Constraint'),
-                Equation = _dereq_('../equations/Equation'),
-                vec2 = _dereq_('../math/vec2'),
-                Utils = _dereq_('../utils/Utils');
+                Equation = _dereq_('equations/Equation'),
+                vec2 = _dereq_('math/vec2'),
+                Utils = _dereq_('utils/Utils');
 
             module.exports = DistanceConstraint;
 
@@ -5093,12 +5093,12 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 return normal.maxForce;
             };
 
-        },{'../equations/Equation': 22,'../math/vec2': 30,'../utils/Utils': 57,'./Constraint': 14} ],16: [ function (_dereq_,module,exports)
+        },{'equations/Equation': 22,'math/vec2': 30,'utils/Utils': 57,'./Constraint': 14} ],16: [ function (_dereq_,module,exports)
         {
             var Constraint = _dereq_('./Constraint'),
-                Equation = _dereq_('../equations/Equation'),
-                AngleLockEquation = _dereq_('../equations/AngleLockEquation'),
-                vec2 = _dereq_('../math/vec2');
+                Equation = _dereq_('equations/Equation'),
+                AngleLockEquation = _dereq_('equations/AngleLockEquation'),
+                vec2 = _dereq_('math/vec2');
 
             module.exports = GearConstraint;
 
@@ -5192,11 +5192,11 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
             {
                 return this.equations[0].maxForce;
             };
-        },{'../equations/AngleLockEquation': 20,'../equations/Equation': 22,'../math/vec2': 30,'./Constraint': 14} ],17: [ function (_dereq_,module,exports)
+        },{'equations/AngleLockEquation': 20,'equations/Equation': 22,'math/vec2': 30,'./Constraint': 14} ],17: [ function (_dereq_,module,exports)
         {
             var Constraint = _dereq_('./Constraint'),
-                vec2 = _dereq_('../math/vec2'),
-                Equation = _dereq_('../equations/Equation');
+                vec2 = _dereq_('math/vec2'),
+                Equation = _dereq_('equations/Equation');
 
             module.exports = LockConstraint;
 
@@ -5384,13 +5384,13 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 rot.G[5] = vec2.crossLength(r,t);
             };
 
-        },{'../equations/Equation': 22,'../math/vec2': 30,'./Constraint': 14} ],18: [ function (_dereq_,module,exports)
+        },{'equations/Equation': 22,'math/vec2': 30,'./Constraint': 14} ],18: [ function (_dereq_,module,exports)
         {
             var Constraint = _dereq_('./Constraint'),
-                ContactEquation = _dereq_('../equations/ContactEquation'),
-                Equation = _dereq_('../equations/Equation'),
-                vec2 = _dereq_('../math/vec2'),
-                RotationalLockEquation = _dereq_('../equations/RotationalLockEquation');
+                ContactEquation = _dereq_('equations/ContactEquation'),
+                Equation = _dereq_('equations/Equation'),
+                vec2 = _dereq_('math/vec2'),
+                RotationalLockEquation = _dereq_('equations/RotationalLockEquation');
 
             module.exports = PrismaticConstraint;
 
@@ -5767,13 +5767,13 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
             };
 
 
-        },{'../equations/ContactEquation': 21,'../equations/Equation': 22,'../equations/RotationalLockEquation': 24,'../math/vec2': 30,'./Constraint': 14} ],19: [ function (_dereq_,module,exports)
+        },{'equations/ContactEquation': 21,'equations/Equation': 22,'equations/RotationalLockEquation': 24,'math/vec2': 30,'./Constraint': 14} ],19: [ function (_dereq_,module,exports)
         {
             var Constraint = _dereq_('./Constraint'),
-                Equation = _dereq_('../equations/Equation'),
-                RotationalVelocityEquation = _dereq_('../equations/RotationalVelocityEquation'),
-                RotationalLockEquation = _dereq_('../equations/RotationalLockEquation'),
-                vec2 = _dereq_('../math/vec2');
+                Equation = _dereq_('equations/Equation'),
+                RotationalVelocityEquation = _dereq_('equations/RotationalVelocityEquation'),
+                RotationalLockEquation = _dereq_('equations/RotationalLockEquation'),
+                vec2 = _dereq_('math/vec2');
 
             module.exports = RevoluteConstraint;
 
@@ -6118,10 +6118,10 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 return this.motorEquation.relativeVelocity;
             };
 
-        },{'../equations/Equation': 22,'../equations/RotationalLockEquation': 24,'../equations/RotationalVelocityEquation': 25,'../math/vec2': 30,'./Constraint': 14} ],20: [ function (_dereq_,module,exports)
+        },{'equations/Equation': 22,'equations/RotationalLockEquation': 24,'equations/RotationalVelocityEquation': 25,'math/vec2': 30,'./Constraint': 14} ],20: [ function (_dereq_,module,exports)
         {
             var Equation = _dereq_('./Equation'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = AngleLockEquation;
 
@@ -6185,10 +6185,10 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 this.minForce = -torque;
             };
 
-        },{'../math/vec2': 30,'./Equation': 22} ],21: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Equation': 22} ],21: [ function (_dereq_,module,exports)
         {
             var Equation = _dereq_('./Equation'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = ContactEquation;
 
@@ -6325,13 +6325,13 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
 
                 return vec2.dot(this.normalA, relVel);
             };
-        },{'../math/vec2': 30,'./Equation': 22} ],22: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Equation': 22} ],22: [ function (_dereq_,module,exports)
         {
             module.exports = Equation;
 
-            var vec2 = _dereq_('../math/vec2'),
-                Utils = _dereq_('../utils/Utils'),
-                Body = _dereq_('../objects/Body');
+            var vec2 = _dereq_('math/vec2'),
+                Utils = _dereq_('utils/Utils'),
+                Body = _dereq_('objects/Body');
 
             /**
  * Base class for constraint equations.
@@ -6663,11 +6663,11 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 return 1.0 / (this.computeGiMGt() + eps);
             };
 
-        },{'../math/vec2': 30,'../objects/Body': 31,'../utils/Utils': 57} ],23: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'objects/Body': 31,'utils/Utils': 57} ],23: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
+            var vec2 = _dereq_('math/vec2'),
                 Equation = _dereq_('./Equation'),
-                Utils = _dereq_('../utils/Utils');
+                Utils = _dereq_('utils/Utils');
 
             module.exports = FrictionEquation;
 
@@ -6787,10 +6787,10 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 return B;
             };
 
-        },{'../math/vec2': 30,'../utils/Utils': 57,'./Equation': 22} ],24: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'utils/Utils': 57,'./Equation': 22} ],24: [ function (_dereq_,module,exports)
         {
             var Equation = _dereq_('./Equation'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = RotationalLockEquation;
 
@@ -6833,10 +6833,10 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 return vec2.dot(worldVectorA,worldVectorB);
             };
 
-        },{'../math/vec2': 30,'./Equation': 22} ],25: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Equation': 22} ],25: [ function (_dereq_,module,exports)
         {
             var Equation = _dereq_('./Equation'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = RotationalVelocityEquation;
 
@@ -6870,7 +6870,7 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
                 return B;
             };
 
-        },{'../math/vec2': 30,'./Equation': 22} ],26: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Equation': 22} ],26: [ function (_dereq_,module,exports)
         {
         /**
  * Base class for objects that dispatches events.
@@ -6993,7 +6993,7 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
         },{} ],27: [ function (_dereq_,module,exports)
         {
             var Material = _dereq_('./Material');
-            var Equation = _dereq_('../equations/Equation');
+            var Equation = _dereq_('equations/Equation');
 
             module.exports = ContactMaterial;
 
@@ -7104,7 +7104,7 @@ Narrowphase.prototype.convexHeightfield = function (convexBody,convexShape,conve
 
             ContactMaterial.idCounter = 0;
 
-        },{'../equations/Equation': 22,'./Material': 28} ],28: [ function (_dereq_,module,exports)
+        },{'equations/Equation': 22,'./Material': 28} ],28: [ function (_dereq_,module,exports)
         {
             module.exports = Material;
 
@@ -7645,7 +7645,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
             var vec2 = module.exports = {};
 
-            var Utils = _dereq_('../utils/Utils');
+            var Utils = _dereq_('utils/Utils');
 
             /**
  * Make a cross product and only return the z component
@@ -8218,15 +8218,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return -1; // No collision
             };
 
-        },{'../utils/Utils': 57} ],31: [ function (_dereq_,module,exports)
+        },{'utils/Utils': 57} ],31: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
+            var vec2 = _dereq_('math/vec2'),
                 decomp = _dereq_('poly-decomp'),
-                Convex = _dereq_('../shapes/Convex'),
-                RaycastResult = _dereq_('../collision/RaycastResult'),
-                Ray = _dereq_('../collision/Ray'),
-                AABB = _dereq_('../collision/AABB'),
-                EventEmitter = _dereq_('../events/EventEmitter');
+                Convex = _dereq_('shapes/Convex'),
+                RaycastResult = _dereq_('collision/RaycastResult'),
+                Ray = _dereq_('collision/Ray'),
+                AABB = _dereq_('collision/AABB'),
+                EventEmitter = _dereq_('events/EventEmitter');
 
             module.exports = Body;
 
@@ -9531,11 +9531,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
             Body.SLEEPING = 2;
 
 
-        },{'../collision/AABB': 7,'../collision/Ray': 11,'../collision/RaycastResult': 12,'../events/EventEmitter': 26,'../math/vec2': 30,'../shapes/Convex': 40,'poly-decomp': 5} ],32: [ function (_dereq_,module,exports)
+        },{'collision/AABB': 7,'collision/Ray': 11,'collision/RaycastResult': 12,'events/EventEmitter': 26,'math/vec2': 30,'shapes/Convex': 40,'poly-decomp': 5} ],32: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2');
+            var vec2 = _dereq_('math/vec2');
             var Spring = _dereq_('./Spring');
-            var Utils = _dereq_('../utils/Utils');
+            var Utils = _dereq_('utils/Utils');
 
             module.exports = LinearSpring;
 
@@ -9708,9 +9708,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 bodyB.angularForce += rj_x_f;
             };
 
-        },{'../math/vec2': 30,'../utils/Utils': 57,'./Spring': 34} ],33: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'utils/Utils': 57,'./Spring': 34} ],33: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2');
+            var vec2 = _dereq_('math/vec2');
             var Spring = _dereq_('./Spring');
 
             module.exports = RotationalSpring;
@@ -9766,10 +9766,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 bodyB.angularForce += torque;
             };
 
-        },{'../math/vec2': 30,'./Spring': 34} ],34: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Spring': 34} ],34: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2');
-            var Utils = _dereq_('../utils/Utils');
+            var vec2 = _dereq_('math/vec2');
+            var Utils = _dereq_('utils/Utils');
 
             module.exports = Spring;
 
@@ -9833,13 +9833,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
             // To be implemented by subclasses
             };
 
-        },{'../math/vec2': 30,'../utils/Utils': 57} ],35: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'utils/Utils': 57} ],35: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2');
-            var Utils = _dereq_('../utils/Utils');
-            var Constraint = _dereq_('../constraints/Constraint');
-            var FrictionEquation = _dereq_('../equations/FrictionEquation');
-            var Body = _dereq_('../objects/Body');
+            var vec2 = _dereq_('math/vec2');
+            var Utils = _dereq_('utils/Utils');
+            var Constraint = _dereq_('constraints/Constraint');
+            var FrictionEquation = _dereq_('equations/FrictionEquation');
+            var Body = _dereq_('objects/Body');
 
             module.exports = TopDownVehicle;
 
@@ -10083,7 +10083,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
                 this.vehicle.chassisBody.applyForce(tmpVec, this.forwardEquation.contactPointA);
             };
-        },{'../constraints/Constraint': 14,'../equations/FrictionEquation': 23,'../math/vec2': 30,'../objects/Body': 31,'../utils/Utils': 57} ],36: [ function (_dereq_,module,exports)
+        },{'constraints/Constraint': 14,'equations/FrictionEquation': 23,'math/vec2': 30,'objects/Body': 31,'utils/Utils': 57} ],36: [ function (_dereq_,module,exports)
         {
         // Export p2 classes
             var p2 = module.exports = {
@@ -10130,7 +10130,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 Utils: _dereq_('./utils/Utils'),
                 World: _dereq_('./world/World'),
                 vec2: _dereq_('./math/vec2'),
-                version: _dereq_('../package.json').version
+                version: _dereq_('package.json').version
             };
 
             Object.defineProperty(p2, 'Rectangle', {
@@ -10140,9 +10140,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                     return this.Box;
                 }
             });
-        },{'../package.json': 6,'./collision/AABB': 7,'./collision/Broadphase': 8,'./collision/NaiveBroadphase': 9,'./collision/Narrowphase': 10,'./collision/Ray': 11,'./collision/RaycastResult': 12,'./collision/SAPBroadphase': 13,'./constraints/Constraint': 14,'./constraints/DistanceConstraint': 15,'./constraints/GearConstraint': 16,'./constraints/LockConstraint': 17,'./constraints/PrismaticConstraint': 18,'./constraints/RevoluteConstraint': 19,'./equations/AngleLockEquation': 20,'./equations/ContactEquation': 21,'./equations/Equation': 22,'./equations/FrictionEquation': 23,'./equations/RotationalVelocityEquation': 25,'./events/EventEmitter': 26,'./material/ContactMaterial': 27,'./material/Material': 28,'./math/vec2': 30,'./objects/Body': 31,'./objects/LinearSpring': 32,'./objects/RotationalSpring': 33,'./objects/Spring': 34,'./objects/TopDownVehicle': 35,'./shapes/Box': 37,'./shapes/Capsule': 38,'./shapes/Circle': 39,'./shapes/Convex': 40,'./shapes/Heightfield': 41,'./shapes/Line': 42,'./shapes/Particle': 43,'./shapes/Plane': 44,'./shapes/Shape': 45,'./solver/GSSolver': 46,'./solver/Solver': 47,'./utils/ContactEquationPool': 48,'./utils/FrictionEquationPool': 49,'./utils/Pool': 55,'./utils/Utils': 57,'./world/World': 61} ],37: [ function (_dereq_,module,exports)
+        },{'package.json': 6,'./collision/AABB': 7,'./collision/Broadphase': 8,'./collision/NaiveBroadphase': 9,'./collision/Narrowphase': 10,'./collision/Ray': 11,'./collision/RaycastResult': 12,'./collision/SAPBroadphase': 13,'./constraints/Constraint': 14,'./constraints/DistanceConstraint': 15,'./constraints/GearConstraint': 16,'./constraints/LockConstraint': 17,'./constraints/PrismaticConstraint': 18,'./constraints/RevoluteConstraint': 19,'./equations/AngleLockEquation': 20,'./equations/ContactEquation': 21,'./equations/Equation': 22,'./equations/FrictionEquation': 23,'./equations/RotationalVelocityEquation': 25,'./events/EventEmitter': 26,'./material/ContactMaterial': 27,'./material/Material': 28,'./math/vec2': 30,'./objects/Body': 31,'./objects/LinearSpring': 32,'./objects/RotationalSpring': 33,'./objects/Spring': 34,'./objects/TopDownVehicle': 35,'./shapes/Box': 37,'./shapes/Capsule': 38,'./shapes/Circle': 39,'./shapes/Convex': 40,'./shapes/Heightfield': 41,'./shapes/Line': 42,'./shapes/Particle': 43,'./shapes/Plane': 44,'./shapes/Shape': 45,'./solver/GSSolver': 46,'./solver/Solver': 47,'./utils/ContactEquationPool': 48,'./utils/FrictionEquationPool': 49,'./utils/Pool': 55,'./utils/Utils': 57,'./world/World': 61} ],37: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
+            var vec2 = _dereq_('math/vec2'),
                 Shape = _dereq_('./Shape'),
                 Convex = _dereq_('./Convex');
 
@@ -10248,10 +10248,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
             };
 
 
-        },{'../math/vec2': 30,'./Convex': 40,'./Shape': 45} ],38: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Convex': 40,'./Shape': 45} ],38: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = Capsule;
 
@@ -10485,10 +10485,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                     }
                 }
             };
-        },{'../math/vec2': 30,'./Shape': 45} ],39: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Shape': 45} ],39: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = Circle;
 
@@ -10647,11 +10647,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                     }
                 }
             };
-        },{'../math/vec2': 30,'./Shape': 45} ],40: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Shape': 45} ],40: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2'),
-                polyk = _dereq_('../math/polyk'),
+                vec2 = _dereq_('math/vec2'),
+                polyk = _dereq_('math/polyk'),
                 decomp = _dereq_('poly-decomp');
 
             module.exports = Convex;
@@ -11064,11 +11064,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 }
             };
 
-        },{'../math/polyk': 29,'../math/vec2': 30,'./Shape': 45,'poly-decomp': 5} ],41: [ function (_dereq_,module,exports)
+        },{'math/polyk': 29,'math/vec2': 30,'./Shape': 45,'poly-decomp': 5} ],41: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2'),
-                Utils = _dereq_('../utils/Utils');
+                vec2 = _dereq_('math/vec2'),
+                Utils = _dereq_('utils/Utils');
 
             module.exports = Heightfield;
 
@@ -11339,10 +11339,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                     }
                 }
             };
-        },{'../math/vec2': 30,'../utils/Utils': 57,'./Shape': 45} ],42: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'utils/Utils': 57,'./Shape': 45} ],42: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = Line;
 
@@ -11438,10 +11438,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                     ray.reportIntersection(result, fraction, normal, -1);
                 }
             };
-        },{'../math/vec2': 30,'./Shape': 45} ],43: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Shape': 45} ],43: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2');
+                vec2 = _dereq_('math/vec2');
 
             module.exports = Particle;
 
@@ -11483,11 +11483,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 vec2.copy(out.upperBound, position);
             };
 
-        },{'../math/vec2': 30,'./Shape': 45} ],44: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'./Shape': 45} ],44: [ function (_dereq_,module,exports)
         {
             var Shape = _dereq_('./Shape'),
-                vec2 = _dereq_('../math/vec2'),
-                Utils = _dereq_('../utils/Utils');
+                vec2 = _dereq_('math/vec2'),
+                Utils = _dereq_('utils/Utils');
 
             module.exports = Plane;
 
@@ -11640,11 +11640,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
                 ray.reportIntersection(result, t, normal, -1);
             };
-        },{'../math/vec2': 30,'../utils/Utils': 57,'./Shape': 45} ],45: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'utils/Utils': 57,'./Shape': 45} ],45: [ function (_dereq_,module,exports)
         {
             module.exports = Shape;
 
-            var vec2 = _dereq_('../math/vec2');
+            var vec2 = _dereq_('math/vec2');
 
             /**
  * Base class for shapes.
@@ -11885,12 +11885,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
             {
             // To be implemented in each subclass
             };
-        },{'../math/vec2': 30} ],46: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30} ],46: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
+            var vec2 = _dereq_('math/vec2'),
                 Solver = _dereq_('./Solver'),
-                Utils = _dereq_('../utils/Utils'),
-                FrictionEquation = _dereq_('../equations/FrictionEquation');
+                Utils = _dereq_('utils/Utils'),
+                FrictionEquation = _dereq_('equations/FrictionEquation');
 
             module.exports = GSSolver;
 
@@ -12165,10 +12165,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return deltalambda;
             };
 
-        },{'../equations/FrictionEquation': 23,'../math/vec2': 30,'../utils/Utils': 57,'./Solver': 47} ],47: [ function (_dereq_,module,exports)
+        },{'equations/FrictionEquation': 23,'math/vec2': 30,'utils/Utils': 57,'./Solver': 47} ],47: [ function (_dereq_,module,exports)
         {
-            var Utils = _dereq_('../utils/Utils'),
-                EventEmitter = _dereq_('../events/EventEmitter');
+            var Utils = _dereq_('utils/Utils'),
+                EventEmitter = _dereq_('events/EventEmitter');
 
             module.exports = Solver;
 
@@ -12316,9 +12316,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
             Solver.GS = 1;
             Solver.ISLAND = 2;
 
-        },{'../events/EventEmitter': 26,'../utils/Utils': 57} ],48: [ function (_dereq_,module,exports)
+        },{'events/EventEmitter': 26,'utils/Utils': 57} ],48: [ function (_dereq_,module,exports)
         {
-            var ContactEquation = _dereq_('../equations/ContactEquation');
+            var ContactEquation = _dereq_('equations/ContactEquation');
             var Pool = _dereq_('./Pool');
 
             module.exports = ContactEquationPool;
@@ -12353,9 +12353,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return this;
             };
 
-        },{'../equations/ContactEquation': 21,'./Pool': 55} ],49: [ function (_dereq_,module,exports)
+        },{'equations/ContactEquation': 21,'./Pool': 55} ],49: [ function (_dereq_,module,exports)
         {
-            var FrictionEquation = _dereq_('../equations/FrictionEquation');
+            var FrictionEquation = _dereq_('equations/FrictionEquation');
             var Pool = _dereq_('./Pool');
 
             module.exports = FrictionEquationPool;
@@ -12390,9 +12390,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return this;
             };
 
-        },{'../equations/FrictionEquation': 23,'./Pool': 55} ],50: [ function (_dereq_,module,exports)
+        },{'equations/FrictionEquation': 23,'./Pool': 55} ],50: [ function (_dereq_,module,exports)
         {
-            var IslandNode = _dereq_('../world/IslandNode');
+            var IslandNode = _dereq_('world/IslandNode');
             var Pool = _dereq_('./Pool');
 
             module.exports = IslandNodePool;
@@ -12427,9 +12427,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return this;
             };
 
-        },{'../world/IslandNode': 60,'./Pool': 55} ],51: [ function (_dereq_,module,exports)
+        },{'world/IslandNode': 60,'./Pool': 55} ],51: [ function (_dereq_,module,exports)
         {
-            var Island = _dereq_('../world/Island');
+            var Island = _dereq_('world/Island');
             var Pool = _dereq_('./Pool');
 
             module.exports = IslandPool;
@@ -12464,7 +12464,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return this;
             };
 
-        },{'../world/Island': 58,'./Pool': 55} ],52: [ function (_dereq_,module,exports)
+        },{'world/Island': 58,'./Pool': 55} ],52: [ function (_dereq_,module,exports)
         {
             var TupleDictionary = _dereq_('./TupleDictionary');
             var OverlapKeeperRecord = _dereq_('./OverlapKeeperRecord');
@@ -13064,7 +13064,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
         },{} ],58: [ function (_dereq_,module,exports)
         {
-            var Body = _dereq_('../objects/Body');
+            var Body = _dereq_('objects/Body');
 
             module.exports = Island;
 
@@ -13161,14 +13161,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return true;
             };
 
-        },{'../objects/Body': 31} ],59: [ function (_dereq_,module,exports)
+        },{'objects/Body': 31} ],59: [ function (_dereq_,module,exports)
         {
-            var vec2 = _dereq_('../math/vec2'),
+            var vec2 = _dereq_('math/vec2'),
                 Island = _dereq_('./Island'),
                 IslandNode = _dereq_('./IslandNode'),
-                IslandNodePool = _dereq_('./../utils/IslandNodePool'),
-                IslandPool = _dereq_('./../utils/IslandPool'),
-                Body = _dereq_('../objects/Body');
+                IslandNodePool = _dereq_('./utils/IslandNodePool'),
+                IslandPool = _dereq_('./utils/IslandPool'),
+                Body = _dereq_('objects/Body');
 
             module.exports = IslandManager;
 
@@ -13379,7 +13379,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return islands;
             };
 
-        },{'../math/vec2': 30,'../objects/Body': 31,'./../utils/IslandNodePool': 50,'./../utils/IslandPool': 51,'./Island': 58,'./IslandNode': 60} ],60: [ function (_dereq_,module,exports)
+        },{'math/vec2': 30,'objects/Body': 31,'./utils/IslandNodePool': 50,'./utils/IslandPool': 51,'./Island': 58,'./IslandNode': 60} ],60: [ function (_dereq_,module,exports)
         {
             module.exports = IslandNode;
 
@@ -13432,37 +13432,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
         },{} ],61: [ function (_dereq_,module,exports)
         {
-            var GSSolver = _dereq_('../solver/GSSolver'),
-                Solver = _dereq_('../solver/Solver'),
-                Ray = _dereq_('../collision/Ray'),
-                vec2 = _dereq_('../math/vec2'),
-                Circle = _dereq_('../shapes/Circle'),
-                Convex = _dereq_('../shapes/Convex'),
-                Line = _dereq_('../shapes/Line'),
-                Plane = _dereq_('../shapes/Plane'),
-                Capsule = _dereq_('../shapes/Capsule'),
-                Particle = _dereq_('../shapes/Particle'),
-                EventEmitter = _dereq_('../events/EventEmitter'),
-                Body = _dereq_('../objects/Body'),
-                Shape = _dereq_('../shapes/Shape'),
-                LinearSpring = _dereq_('../objects/LinearSpring'),
-                Material = _dereq_('../material/Material'),
-                ContactMaterial = _dereq_('../material/ContactMaterial'),
-                DistanceConstraint = _dereq_('../constraints/DistanceConstraint'),
-                Constraint = _dereq_('../constraints/Constraint'),
-                LockConstraint = _dereq_('../constraints/LockConstraint'),
-                RevoluteConstraint = _dereq_('../constraints/RevoluteConstraint'),
-                PrismaticConstraint = _dereq_('../constraints/PrismaticConstraint'),
-                GearConstraint = _dereq_('../constraints/GearConstraint'),
-                pkg = _dereq_('../../package.json'),
-                Broadphase = _dereq_('../collision/Broadphase'),
-                AABB = _dereq_('../collision/AABB'),
-                SAPBroadphase = _dereq_('../collision/SAPBroadphase'),
-                Narrowphase = _dereq_('../collision/Narrowphase'),
-                Utils = _dereq_('../utils/Utils'),
-                OverlapKeeper = _dereq_('../utils/OverlapKeeper'),
+            var GSSolver = _dereq_('solver/GSSolver'),
+                Solver = _dereq_('solver/Solver'),
+                Ray = _dereq_('collision/Ray'),
+                vec2 = _dereq_('math/vec2'),
+                Circle = _dereq_('shapes/Circle'),
+                Convex = _dereq_('shapes/Convex'),
+                Line = _dereq_('shapes/Line'),
+                Plane = _dereq_('shapes/Plane'),
+                Capsule = _dereq_('shapes/Capsule'),
+                Particle = _dereq_('shapes/Particle'),
+                EventEmitter = _dereq_('events/EventEmitter'),
+                Body = _dereq_('objects/Body'),
+                Shape = _dereq_('shapes/Shape'),
+                LinearSpring = _dereq_('objects/LinearSpring'),
+                Material = _dereq_('material/Material'),
+                ContactMaterial = _dereq_('material/ContactMaterial'),
+                DistanceConstraint = _dereq_('constraints/DistanceConstraint'),
+                Constraint = _dereq_('constraints/Constraint'),
+                LockConstraint = _dereq_('constraints/LockConstraint'),
+                RevoluteConstraint = _dereq_('constraints/RevoluteConstraint'),
+                PrismaticConstraint = _dereq_('constraints/PrismaticConstraint'),
+                GearConstraint = _dereq_('constraints/GearConstraint'),
+                pkg = _dereq_('package.json'),
+                Broadphase = _dereq_('collision/Broadphase'),
+                AABB = _dereq_('collision/AABB'),
+                SAPBroadphase = _dereq_('collision/SAPBroadphase'),
+                Narrowphase = _dereq_('collision/Narrowphase'),
+                Utils = _dereq_('utils/Utils'),
+                OverlapKeeper = _dereq_('utils/OverlapKeeper'),
                 IslandManager = _dereq_('./IslandManager'),
-                RotationalSpring = _dereq_('../objects/RotationalSpring');
+                RotationalSpring = _dereq_('objects/RotationalSpring');
 
             module.exports = World;
 
@@ -14837,7 +14837,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
                 return result.hasHit();
             };
 
-        },{'../../package.json': 6,'../collision/AABB': 7,'../collision/Broadphase': 8,'../collision/Narrowphase': 10,'../collision/Ray': 11,'../collision/SAPBroadphase': 13,'../constraints/Constraint': 14,'../constraints/DistanceConstraint': 15,'../constraints/GearConstraint': 16,'../constraints/LockConstraint': 17,'../constraints/PrismaticConstraint': 18,'../constraints/RevoluteConstraint': 19,'../events/EventEmitter': 26,'../material/ContactMaterial': 27,'../material/Material': 28,'../math/vec2': 30,'../objects/Body': 31,'../objects/LinearSpring': 32,'../objects/RotationalSpring': 33,'../shapes/Capsule': 38,'../shapes/Circle': 39,'../shapes/Convex': 40,'../shapes/Line': 42,'../shapes/Particle': 43,'../shapes/Plane': 44,'../shapes/Shape': 45,'../solver/GSSolver': 46,'../solver/Solver': 47,'../utils/OverlapKeeper': 52,'../utils/Utils': 57,'./IslandManager': 59} ]
+        },{'package.json': 6,'collision/AABB': 7,'collision/Broadphase': 8,'collision/Narrowphase': 10,'collision/Ray': 11,'collision/SAPBroadphase': 13,'constraints/Constraint': 14,'constraints/DistanceConstraint': 15,'constraints/GearConstraint': 16,'constraints/LockConstraint': 17,'constraints/PrismaticConstraint': 18,'constraints/RevoluteConstraint': 19,'events/EventEmitter': 26,'material/ContactMaterial': 27,'material/Material': 28,'math/vec2': 30,'objects/Body': 31,'objects/LinearSpring': 32,'objects/RotationalSpring': 33,'shapes/Capsule': 38,'shapes/Circle': 39,'shapes/Convex': 40,'shapes/Line': 42,'shapes/Particle': 43,'shapes/Plane': 44,'shapes/Shape': 45,'solver/GSSolver': 46,'solver/Solver': 47,'utils/OverlapKeeper': 52,'utils/Utils': 57,'./IslandManager': 59} ]
     },{},[ 36 ])
     (36);
 });

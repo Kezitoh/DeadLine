@@ -28,21 +28,21 @@ let difficulty;
 let clickSound;
 
 function loadAssets() {
-    game.load.image('fondo', '../assets/UI/Fondodejuego.png');
+    game.load.image('fondo', 'assets/UI/Fondodejuego.png');
     game.load.image('instructionsButton', 'assets/UI/instructionsButton.png');
 
     game.load.image('EasyButton', 'assets/UI/easyButton.png');
     game.load.image('NormalButton', 'assets/UI/normalButton.png');
     game.load.image('HardButton', 'assets/UI/hardButton.png');
-    game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
+    game.load.image('negro', 'assets/UI/ImagenNegraParaTransicion.jpg');
 
-    game.load.spritesheet('pc', '../assets/sprites/survivor1_stand.png')
+    game.load.spritesheet('pc', 'assets/sprites/survivor1_stand.png')
 
     loadSoundsWelcome();
 }
 
 function loadSoundsWelcome(){
-    game.load.audio('click', '../assets/sounds/click1.ogg');
+    game.load.audio('click', 'assets/sounds/click1.ogg');
 }
 
 function displayScreen() {
