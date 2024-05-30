@@ -70,7 +70,6 @@ function createLevelFinal() {
 
         scoretext2 = "Monedas Recogidas: ";
         let otexto = " " + TotalMonedas;
-        let vidaRestantetexto = " " + healthValue;
         let puntuacionTexto2 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 120, scoretext2, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
