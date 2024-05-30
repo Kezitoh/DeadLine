@@ -3,14 +3,15 @@ const MAX_HEALTH = 100;
 const SZCOOLDOWN = 5000;
 const DEFAULT_TIME = 6000;
 const INVULNERABILITY_TIME = 800;
+const COIN_GROUP_SIZE = 20;
 
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
+const BULLET_GROUP_SIZE = 50;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 20;
 const ENEMY_BASE_SPEED = 100;
-const ROBOT_BASE_SPEED = 150;
 const ENEMY_GROUP_SIZE = 100;
 const ENEMY_SPAWN_TIMER = 1000;
 const ENEMY_TURN_TIMER_MIN = 2000;
@@ -18,6 +19,8 @@ const ENEMY_TURN_TIMER_MAX = 3000;
 const ENEMY_TURN_PROBABILITY = 0.9;
 const ENEMY_STOP_TIME = 1500;
 const ENEMY_BASE_HURT = 15;
+const ROBOT_BASE_SPEED = 120;
+const ROBOT_BULLETS_GROUP_SIZE = 300;
 
 const TIEMPO_DENTRO_ZONA_SEGURA = 10;
 
@@ -140,11 +143,12 @@ function loadPlayAssets() {
 
 
 function loadSprites() {
-    //game.load.spritesheet('pc', '../assets/sprites/psj.png');
-    game.load.spritesheet('pc', '../assets/sprites/survivor1_gun.png');
-    game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
+    game.load.spritesheet('pc', '../assets/sprites/psj.png',55,43);
+    //game.load.spritesheet('pc', '../assets/sprites/survivor1_gun.png');
+    game.load.spritesheet('zombie', '../assets/sprites/zomb.png',36,43);
     game.load.spritesheet('robot', '../assets/sprites/robot1_gun.png');
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
+    game.load.image('robotBullet', '../assets/sprites/red_ball.png');
     game.load.image('reloadArea', '../assets/sprites/blue_circle.png');
 }
 
@@ -202,6 +206,7 @@ function createLevel() {
     weaponsBuy.forEach(weapon => {weapon.bought = false;})
     weaponsBuy[0].bought = true;
     weaponsBuy[0].ammo = weaponsBuy[0].maxAmmo;
+    currentWeapon = 0;
 
     weapon1Bought = false;
     weapon2Bought = false;
@@ -209,7 +214,7 @@ function createLevel() {
     overlapSZ = false;
     nextShoot = 0;
     nextEntry = 0;
-    coins = 0;
+    coins = 1000;
     nextHurt = 0;
     // maxAmmo = 50;
     // ammo = maxAmmo;
@@ -239,19 +244,28 @@ function createLevel() {
     coinGroup = game.add.group();
     coinGroup.enableBody = true;
     coinGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    coinGroup.createMultiple(20, 'coin');
+    coinGroup.createMultiple(COIN_GROUP_SIZE, 'coin');
     coinGroup.forEach(coin => {
         coin.anchor.setTo(0.5, 0.5);
     });
+
     bulletGroup = game.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    bulletGroup.createMultiple(50, 'bullet');
+    bulletGroup.createMultiple(BULLET_GROUP_SIZE, 'bullet');
     bulletGroup.forEach((bullet) => {
         bullet.scale.set(0.5, 0.5);
         bullet.body.bounce.set(1);
     });
 
+
+    robotBullets = game.add.group();
+    robotBullets.enableBody = true;
+    robotBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    robotBullets.createMultiple(ROBOT_BULLETS_GROUP_SIZE, 'robotBullet');
+    bulletGroup.forEach((bullet) => {
+        bullet.scale.set(0.5, 0.5);
+    });
     bulletGroup.setAll('checkWorldBounds', true);
     bulletGroup.setAll('outOfBoundsKill', true);
 
@@ -263,19 +277,17 @@ function createLevel() {
     bg.scrollFactorY = 0.7;
 
 
-    // Camera follows the player inside the world
-    //game.camera.follow(player);
-
-
     // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => {remainingTime = updateTime(hudTime,remainingTime, timerClock, setRemainingTime);}, this);
     game.camera.focusOnXY(game.world.width / 2, game.world.height - game.world.height / 7);
     player = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'pc');
-    player.anchor.setTo(0.5, 0.5);
-    // player.animations.add('holdGun', [5], 0);
-    // player.animations.add('shootGun', [6], 0)
-    // player.animations.add('walk', [0], 0);
-    // player.animations.add('shootPistol', [0], 0);
+    player.anchor.setTo(0.4, 0.5);
+    player.animations.add('holdGun', [5],0,false);
+    player.animations.add('shootRifle', [4], 0, false);
+    player.animations.add('shootShotgun', [3], 0, false);
+    player.animations.add('walk',[0], 0, false);
+    player.animations.add('shootPistol', [2], 0, false);
+    //player.animations.play('walk');
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
     
@@ -283,9 +295,9 @@ function createLevel() {
 
     //game.add.sprite(game.world.width/2,game.world.height/2,"heart");
 
-    createEnemies();
-
     zonaSegura();
+
+    createEnemies();
 
     createHUD();
 
@@ -346,21 +358,17 @@ function setDifficulty(difficulty) {
 }
 
 function updateLevel() {
+    if(currentWeapon < 2) {
+        player.animations.play('shootPistol');
+    }else {
+        player.animations.play('holdGun');
+    }
+    //player.animations.play('shootPistol');
     choquesZonaSegura();
 
-    //When player is close, zombies chase the player
-    zombies.forEach(enemy => {
-        enemy.chasing = false;
-        //enemy.body.speed = 0;
-        if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
-            enemy.chasing = true;
-            //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
-            enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
-            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
-        }
-        game.physics.arcade.collide(enemy, safeZone);
-        game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
-    });
+    enemyChase();
+
+
     game.physics.arcade.collide(zombies, bulletGroup, hurtEnemy, null, this);
     game.physics.arcade.collide(zombies, player, hurtPlayer);
     game.physics.arcade.collide(zombies, safeZone);
@@ -386,6 +394,17 @@ function updateLevel() {
         || (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused)
         || (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
         shoot();
+        switch(currentWeapon) {
+            case 0:
+                player.animations.play('shootPistol');
+                break;
+            case 2:
+                player.animations.play('shootShotgun');
+                break;
+            case 3:
+                player.animations.play('shootRifle');
+                break;
+        }
     }
 
 
@@ -658,6 +677,8 @@ function createEnemies() {
     zombies.enableBody = true;
     zombies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
     zombies.forEach((enemy) => {
+        enemy.animations.add('idle',[0]);
+        enemy.animations.add('chase', [1]);
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
         //game.physics.arcade.enable(enemy);
@@ -692,6 +713,7 @@ function spawnRobot() {
         let robot = robots.getFirstDead();
         robot.reset(pos.x, pos.y);
         robot.health = enemyHealth * 2;
+        robot.chasing = false;
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
         game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(robot));
@@ -702,7 +724,7 @@ function enemyMovement(enemy) {
     enemy.body.velocity.x = 0;
     enemy.body.velocity.y = 0;
     if (!enemy.chasing) {
-        let giro = (Math.random() * 220) - 110;
+        let giro = (Math.random() * 360) - 180;
         game.add.tween(enemy).to({ angle: giro }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
     }
     game.time.events.add(ENEMY_STOP_TIME, () => {
@@ -731,6 +753,46 @@ function enemySpawnPositionCheck(enemy) {
     // enemyResetPosY = posY;
     return { x: posX, y: posY }
 }
+
+function enemyChase() {
+    //When player is close, zombies chase the player
+    zombies.forEach(enemy => {
+        enemy.chasing = false;
+        enemy.animations.play('idle');
+        if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
+            enemy.chasing = true;
+            enemy.animations.play('chase');
+            //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
+            enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
+            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadZombie);
+        }
+        game.physics.arcade.collide(enemy, safeZone);
+        game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
+    });
+
+    robots.forEach(robot => {
+        //Los robots te siguen para siempre cuando te ven por primera vez
+        if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
+            if(!robot.chasing){
+                game.time.events.loop(750, ()=>robotShoot(robot));
+                robot.chasing = true;
+            }
+
+            //robot.animations.play('chase');
+            robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
+            robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, velocidadRobot);
+        }
+        game.physics.arcade.collide(robot, safeZone);
+        game.physics.arcade.collide(robot, bulletGroup, hurtEnemy, null, this);
+    })
+}
+
+function robotShoot(robot) {
+    if (game.physics.arcade.distanceBetween(robot, player) > 200){
+        
+    }
+}
+
 
 function updateHealthBar() {
     if (healthTween)
