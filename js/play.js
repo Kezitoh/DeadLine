@@ -124,6 +124,7 @@ let weaponsBuy = [
 ];
 
 let currentWeaponSprite;
+let enemyTween;
 
 
 
@@ -259,7 +260,7 @@ function createLevel() {
     player.anchor.setTo(0.5, 0.5);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
-
+    
     player.body.collideWorldBounds = true;
 
     //game.add.sprite(game.world.width/2,game.world.height/2,"heart");
@@ -618,25 +619,36 @@ function createEnemies() {
 
 function spawnEnemy() {
     let enemy = enemies.getFirstExists(false);
-    if (enemy) {
-        enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
-        enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
+    if (enemy){
+        //enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
+        //enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
+        enemy.reset(player.x, player.y);
         enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
-        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadEnemigo);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(enemy));
+        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+        enemy.enemyTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
     }
 }
 
-function enemyMovement(enemy) {
-    enemy.body.velocity.x = 0;
-    enemy.body.velocity.y = 0;
-    enemy.rotation = Math.random() * 360;
+function enemyMovement(enemy){
+    enemy.body.velocity = 0;
+    enemyTween = game.add.tween(enemy).to({angle:  (Math.random() * 360 - enemy.angle) + enemy.angle}, 400, Phaser.Easing.Linear.None, true);
     game.time.events.add(ENEMY_STOP_TIME, () => {
         if (Math.random() < ENEMY_TURN_PROBABILITY) {
             enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadEnemigo);
         }
     })
+}
+
+function enemyHit(bullet, enemy){
+    bullet.kill();
+    console.log(enemyHealth);
+    enemyHealth -= 10;
+    if(enemyHealth <= 0){
+        console.log('MUERTO');
+        //enemy.enemyTimer;
+        enemy.kill();
+    }
 }
 
 //function that ensures the enemies appear outside of the camera/safe zone
