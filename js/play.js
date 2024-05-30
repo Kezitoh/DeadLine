@@ -198,6 +198,7 @@ function createLevel() {
     weaponsBuy.forEach(weapon => {weapon.bought = false;})
     weaponsBuy[0].bought = true;
     weaponsBuy[0].ammo = weaponsBuy[0].maxAmmo;
+    currentWeapon = 0;
 
     weapon1Bought = false;
     weapon2Bought = false;
