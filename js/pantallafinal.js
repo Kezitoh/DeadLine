@@ -9,7 +9,7 @@ function loadFinalAssets() {
 }
 
 let winOrLose = false;
-let TotalMonedas = 0;
+let totalCoins = 0;
 /** @type {Phaser.Button} */
 let btnInicio;
 
@@ -68,8 +68,8 @@ function createLevelFinal() {
         let puntuacionTexto = game.add.text(game.canvas.width / 10, game.canvas.height / 3, scoretext, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3, ptexto, stylesub);
 
-        scoretext2 = "Monedas Recogidas: ";
-        let otexto = " " + TotalMonedas;
+        scoretext2 = "Objetos Recogidos: ";
+        let otexto = " " + totalCoins;
         let vidaRestantetexto = " " + healthValue;
         let puntuacionTexto2 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 120, scoretext2, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);

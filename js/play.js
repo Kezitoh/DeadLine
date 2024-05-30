@@ -4,7 +4,7 @@ const SZCOOLDOWN = 5000;
 const DEFAULT_TIME = 6000;
 const INVULNERABILITY_TIME = 800;
 const COIN_GROUP_SIZE = 20;
-
+const WIN_CONDITION = 15
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
 const BULLET_GROUP_SIZE = 50;
@@ -393,12 +393,7 @@ function updateLevel() {
     generalCollisions();
     enemyChase();
 
-    //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
-    if (healthValue == 0) {
-
-        winOrLose = false;
-        animacionSalidaToFinal(() => { endGame(); });
-    }
+    
     shoot();
     characterMovement();
     areaGroup.forEachAlive(area => {
@@ -408,9 +403,12 @@ function updateLevel() {
         //console.log("aa");
         areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
     }
-
+    
+    //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if (healthValue <= 0) {
-        animacionSalidaToFinal(() => { endGame(); });
+        animacionSalidaToFinal(() => { endGame(false); });
+    }else if(gems >= WIN_CONDITION) {
+        animacionSalidaToFinal(() => {endGame(true);});
     }
 
     if (keys.switchWeapon.justDown) {
@@ -455,19 +453,21 @@ function zonaSegura() {
 }
 
 function generalCollisions() {
-    game.physics.arcade.collide(zombieGroup, bulletGroup, hurtEnemy, null, this);
+    game.physics.arcade.collide(zombieGroup, bulletGroup, hurtZombie, null, this);
     game.physics.arcade.collide(zombieGroup, player, hurtPlayer);
     game.physics.arcade.collide(zombieGroup, safeZone);
     game.physics.arcade.collide(coinGroup, player, collectCoin, null, this);
     game.physics.arcade.collide(gemGroup, player, collectGem, null, this);
-    game.physics.arcade.collide(robotGroup, bulletGroup, hurtEnemy, null, this);
+    game.physics.arcade.collide(robotGroup, bulletGroup, hurtRobot, null, this);
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
-    game.physics.arcade.collide(robotBullets, player, hurtPlayer);
+    game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true));
     if (score < FIRST_STAGE) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
         game.physics.arcade.collide(zombieGroup, wall);
+    }else {
+        wall.kill();
     }
 }
 
@@ -486,8 +486,6 @@ function collisionsSafeZone() {
 
     if (remainingSZTime == 3) {
         soundSZ.play();
-        console.log("carapinga");
-
     }
 
     if (overlapSZ && !game.physics.arcade.overlap(player, safeZone)) {
@@ -520,7 +518,8 @@ function collisionsSafeZone() {
 
 
 
-function hurtPlayer() {
+function hurtPlayer(player, source, killsource = false) {
+    if(killsource) source.kill();
     if (game.time.now > nextHurt) {
         hitSound.play();
         nextHurt = game.time.now + INVULNERABILITY_TIME;
@@ -529,7 +528,7 @@ function hurtPlayer() {
     }
 }
 
-function hurtEnemy(enemy, bullet) {
+function hurtZombie(enemy, bullet) {
     bullet.kill();
     hitSound.play();
     //if the enemies aren't stopped when hit, the collision will send them flying
@@ -550,6 +549,26 @@ function hurtEnemy(enemy, bullet) {
 
 }
 
+
+function hurtRobot(enemy, bullet) {
+    bullet.kill();
+    hitSound.play();
+    //if the enemies aren't stopped when hit, the collision will send them flying
+    enemy.body.velocity.x = 0;
+    enemy.body.velocity.y = 0;
+    enemy.health -= weaponsBuy[currentWeapon].damage;
+    score += 5;
+    if (enemy.health <= 0) {
+        let coin = coinGroup.getFirstDead();
+        coin.reset(enemy.x - 10, enemy.y - 10);
+        enemy.kill();
+        gemGroup.getFirstDead().reset(enemy.x + 10, enemy.y + 10);
+        score += 100;
+    }
+    updateScore();
+
+}
+
 function collectCoin(player, coin) {
     coin.kill();
     coinSound.play();
@@ -562,6 +581,7 @@ function collectGem(player, gem) {
     gem.kill();
     gemSound.play();
     gems++;
+    totalCoins++;
     hudGems.setText(gems);
 
 }
@@ -745,10 +765,11 @@ function createEnemies() {
     robotBullets.enableBody = true;
     robotBullets.physicsBodyType = Phaser.Physics.ARCADE;
     robotBullets.createMultiple(ROBOT_BULLETS_GROUP_SIZE, 'robotBullet');
-    bulletGroup.forEach((bullet) => {
+    robotBullets.forEach((bullet) => {
         bullet.scale.set(0.5, 0.5);
     });
-
+    robotBullets.setAll('checkWorldBounds', true);
+    robotBullets.setAll('outOfBoundsKill', true);
     game.time.events.loop(enemySpawnRate, spawnZombie, this);
     game.time.events.loop(enemySpawnRate, spawnRobot, this);
 }
@@ -825,7 +846,7 @@ function enemyChase() {
             enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, zombieSpeed);
         }
         game.physics.arcade.collide(enemy, safeZone);
-        game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
+        game.physics.arcade.collide(enemy, bulletGroup, hurtZombie, null, this);
     });
 
     robotGroup.forEach(robot => {
@@ -841,7 +862,7 @@ function enemyChase() {
             robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         }
         game.physics.arcade.collide(robot, safeZone);
-        game.physics.arcade.collide(robot, bulletGroup, hurtEnemy, null, this);
+        game.physics.arcade.collide(robot, bulletGroup, hurtRobot, null, this);
     })
 }
 
@@ -849,7 +870,8 @@ function robotShoot(robot) {
     if (game.physics.arcade.distanceBetween(robot, player) > 200) {
         let bullet = robotBullets.getFirstDead();
         bullet.reset(robot.x, robot.y);
-        game.physics.arcade.moveToXY(player.x, player.y, BULLET_SPEED);
+        game.time.events.add(2000, ()=> {bullet.kill()})
+        game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED);
     }
 }
 
@@ -1089,7 +1111,7 @@ function buyItem(item) {
 function upgradeSpeed() {
     if (coins >= costRun) {
         coins -= costRun;
-        velocidadJugador += 25;
+        playerSpeed += 25;
         console.log('Speed upgraded!');
         costRun += 70;
     } else {
@@ -1135,10 +1157,10 @@ function animacionSalidaToFinal(a) {
 
 
 
-function endGame() {
+function endGame(victory) {
     remainingTime = 100;
     // añadir if conforme a al vida para decidir si es true o false la variable winOrLose
-    winOrLose = false;
+    winOrLose = victory;
     game.state.start('screenFinal');
 }
 
