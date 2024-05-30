@@ -329,6 +329,7 @@ function setDifficulty(difficulty) {
 function updateLevel() {
     choquesZonaSegura();
 
+    //When player is close, enemies chase the player
     enemies.forEach(enemy => {
         if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
             //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
@@ -620,13 +621,12 @@ function createEnemies() {
 function spawnEnemy() {
     let enemy = enemies.getFirstExists(false);
     if (enemy){
-        //enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
-        //enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
-        enemy.reset(player.x, player.y);
+        enemySpawnPositionCheck(Math.random() * game.world.width, Math.random() * game.world.height);
+        enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
         enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
         enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
-        enemy.enemyTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
+        enemy.enemyMoveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
     }
 }
 
@@ -646,7 +646,7 @@ function enemyHit(bullet, enemy){
     enemyHealth -= 10;
     if(enemyHealth <= 0){
         console.log('MUERTO');
-        //enemy.enemyTimer;
+        enemy.enemyMoveTimer.stop();
         enemy.kill();
     }
 }
