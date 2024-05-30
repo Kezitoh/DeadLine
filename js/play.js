@@ -191,6 +191,10 @@ function createLevel() {
     createSounds();
     setDifficulty(difficulty);
 
+    weaponsBuy.forEach(weapon => {weapon.bought = false;})
+    weaponsBuy[0].bought = true;
+    weaponsBuy[0].ammo = maxAmmo;
+
     weapon1Bought = false;
     weapon2Bought = false;
     weapon3Bought = false;
