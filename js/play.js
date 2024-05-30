@@ -139,7 +139,8 @@ function loadPlayAssets() {
 
 
 function loadSprites() {
-    game.load.spritesheet('pc', '../assets/sprites/psj.png');
+    //game.load.spritesheet('pc', '../assets/sprites/psj.png');
+    game.load.spritesheet('pc', '../assets/sprites/survivor1_gun.png');
     game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
     game.load.image('reloadArea', '../assets/sprites/blue_circle.png');
@@ -197,7 +198,7 @@ function createLevel() {
 
     weaponsBuy.forEach(weapon => {weapon.bought = false;})
     weaponsBuy[0].bought = true;
-    weaponsBuy[0].ammo = maxAmmo;
+    weaponsBuy[0].ammo = weaponsBuy[0].maxAmmo;
 
     weapon1Bought = false;
     weapon2Bought = false;
@@ -207,8 +208,8 @@ function createLevel() {
     nextEntry = 0;
     coins = 0;
     nextHurt = 0;
-    maxAmmo = 50;
-    ammo = maxAmmo;
+    // maxAmmo = 50;
+    // ammo = maxAmmo;
     TotalMonedas = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*4);
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -267,10 +268,10 @@ function createLevel() {
     game.camera.focusOnXY(game.world.width / 2, game.world.height - game.world.height / 7);
     player = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'pc');
     player.anchor.setTo(0.5, 0.5);
-    player.animations.add('holdGun', [5], 0);
-    player.animations.add('shootGun', [6], 0)
-    player.animations.add('walk', [0], 0);
-    player.animations.add('shootPistol', [0], 0);
+    // player.animations.add('holdGun', [5], 0);
+    // player.animations.add('shootGun', [6], 0)
+    // player.animations.add('walk', [0], 0);
+    // player.animations.add('shootPistol', [0], 0);
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
     
@@ -569,7 +570,7 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudDifficulty);
-    hudAmmo = game.add.text(game.canvas.width - 100, game.canvas.height - 50, ammo + "/" + maxAmmo, {
+    hudAmmo = game.add.text(game.canvas.width - 100, game.canvas.height - 50, weaponsBuy[currentWeapon].ammo + "/" + weaponsBuy[currentWeapon].maxAmmo, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
@@ -598,29 +599,30 @@ function createHUD() {
 }
 
 function shoot() {
-
     let weapon = weaponsBuy[currentWeapon];
     if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && weapon.ammo > 0) {
         nextShoot = game.time.now + weapon.cooldown;
-        let bullet = bulletGroup.getFirstDead();
-        bullet.reset(player.x, player.y);
-        game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
-        weapon.ammo--;
-        hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
-
-        //ESCOPETA
-        // nextShoot = game.time.now + SHOOT_COOLDOWN * 3;
-        
-        // for (let i = 0; i < 5; i++) {
-        //     let bullet = bulletGroup.getFirstDead();
-        //     bullet.reset(player.x, player.y);
-        //     bullet.rotation = game.physics.arcade.angleToPointer(bullet);
+        if(weaponsBuy[currentWeapon].image == 'weapon2') {
+            //ESCOPETA
+            nextShoot = game.time.now + SHOOT_COOLDOWN * 3;
             
-        //     bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED);
-        // }
-        // ammo --;
+            for (let i = 0; i < 5; i++) {
+                let bullet = bulletGroup.getFirstDead();
+                bullet.reset(player.x, player.y);
+                bullet.rotation = game.physics.arcade.angleToPointer(bullet);
+                
+                bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED);
+            }
+            weapon.ammo --;
 
-        hudAmmo.setText(ammo + "/" + maxAmmo);
+        }else {
+            let bullet = bulletGroup.getFirstDead();
+            bullet.reset(player.x, player.y);
+            game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
+            weapon.ammo--;
+        }
+        
+        hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
     }
 }
 
