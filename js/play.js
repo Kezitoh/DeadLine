@@ -1,7 +1,7 @@
 const PLAYER_VELOCITY = 150;
 const MAX_HEALTH = 100;
 const SZCOOLDOWN = 5000;
-const DEFAULT_TIME = 60;
+const DEFAULT_TIME = 6000;
 const INVULNERABILITY_TIME = 800;
 
 const SHOOT_COOLDOWN = 150;
@@ -9,7 +9,8 @@ const BULLET_SPEED = 300;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 20;
-const ENEMY_BASE_SPEED = 50;
+const ENEMY_BASE_SPEED = 100;
+const ROBOT_BASE_SPEED = 150;
 const ENEMY_GROUP_SIZE = 100;
 const ENEMY_SPAWN_TIMER = 1000;
 const ENEMY_TURN_TIMER_MIN = 2000;
@@ -109,7 +110,7 @@ let coins;
 let costRun;
 let costLife;
 
-let velocidadEnemigo;
+let velocidadZombie;
 
 
 let dañoEnemigo;
@@ -142,6 +143,7 @@ function loadSprites() {
     //game.load.spritesheet('pc', '../assets/sprites/psj.png');
     game.load.spritesheet('pc', '../assets/sprites/survivor1_gun.png');
     game.load.spritesheet('zombie', '../assets/sprites/zombie_hold.png');
+    game.load.spritesheet('robot', '../assets/sprites/robot1_gun.png');
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
     game.load.image('reloadArea', '../assets/sprites/blue_circle.png');
 }
@@ -153,6 +155,7 @@ function loadImages() {
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('coin', '../assets/UI/coin.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
+    game.load.image('bgZona2', '../assets/UI/Fondodejuego_Zona2.png');
     game.load.image('wall', "../assets/sprites/tile_273.png");
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
     game.load.spritesheet('safeZone','../assets/UI/Zona_segura.png');
@@ -213,8 +216,9 @@ function createLevel() {
     TotalMonedas = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*4);
     game.physics.startSystem(Phaser.Physics.ARCADE);
-    bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
-    wall = game.add.tileSprite(0, game.world.height/2, game.world.width, 64, 'wall')
+    bg = game.add.tileSprite(0, game.world.height/2, game.world.width, game.world.height, 'bgGame');
+    bgZona2 = game.add.tileSprite(0, 0, game.world.width, game.world.height/2, 'bgZona2');
+    wall = game.add.tileSprite(0, game.world.height/2, game.world.width, 64, 'wall');
     game.physics.arcade.enable(wall);
     wall.body.immovable = true;
     //reload areas
@@ -331,7 +335,8 @@ function setDifficulty(difficulty) {
     costLife = VALOR_COMPRA_VIDA_INICIAL*modifierCosts;
     velocidadJugador = PLAYER_VELOCITY * speedPlayerModifier;
     enemyHealth = ENEMY_BASE_HEALTH * enemyLifeModifier;
-    velocidadEnemigo = ENEMY_BASE_SPEED * speedEnemyModifier;
+    velocidadZombie = ENEMY_BASE_SPEED * speedEnemyModifier;
+    velocidadRobot = ENEMY_BASE_SPEED * speedEnemyModifier;
     maxHealth = MAX_HEALTH * lifeModifier;
     dañoEnemigo = ENEMY_BASE_HURT * enemyDamageModifier;
     frecuenciaSpawnEnemy = ENEMY_SPAWN_TIMER * frecuenciaSpawnEnemyModifier;
@@ -343,8 +348,8 @@ function setDifficulty(difficulty) {
 function updateLevel() {
     choquesZonaSegura();
 
-    //When player is close, enemies chase the player
-    enemies.forEach(enemy => {
+    //When player is close, zombies chase the player
+    zombies.forEach(enemy => {
         enemy.chasing = false;
         //enemy.body.speed = 0;
         if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
@@ -356,14 +361,14 @@ function updateLevel() {
         game.physics.arcade.collide(enemy, safeZone);
         game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
     });
-    game.physics.arcade.collide(enemies, bulletGroup, hurtEnemy, null, this);
-    game.physics.arcade.collide(enemies, player, hurtPlayer);
-    game.physics.arcade.collide(enemies, safeZone);
+    game.physics.arcade.collide(zombies, bulletGroup, hurtEnemy, null, this);
+    game.physics.arcade.collide(zombies, player, hurtPlayer);
+    game.physics.arcade.collide(zombies, safeZone);
 
     if(score < 1000 ) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
-        game.physics.arcade.collide(enemies, wall);     
+        game.physics.arcade.collide(zombies, wall);     
     }
 
     coinGroup.forEachAlive(coin => {
@@ -497,6 +502,7 @@ function hurtPlayer() {
 
 function hurtEnemy(enemy, bullet) {
     bullet.kill();
+    //if the enemies aren't stopped when hit, the collision will send them flying
     enemy.body.velocity.x = 0;
     enemy.body.velocity.y = 0;
     enemy.health -= 5;
@@ -648,28 +654,47 @@ function characterMovement() {
 }
 
 function createEnemies() {
-    enemies = game.add.group();
-    enemies.enableBody = true;
-    enemies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
-    enemies.forEach((enemy) => {
+    zombies = game.add.group();
+    zombies.enableBody = true;
+    zombies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
+    zombies.forEach((enemy) => {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
         //game.physics.arcade.enable(enemy);
         
     });
-    game.time.events.loop(frecuenciaSpawnEnemy, spawnEnemy, this);
+
+    robots = game.add.group();
+    robots.enableBody = true;
+    robots.createMultiple(ENEMY_GROUP_SIZE/2, 'robot');
+    robots.forEach((enemy) => {
+        enemy.anchor.setTo(0.5, 0.5);
+        enemy.body.collideWorldBounds = true;
+    });
+
+    game.time.events.loop(frecuenciaSpawnEnemy, spawnZombie, this);
 }
 
-function spawnEnemy() {
-    if(enemies.countDead() > 0) {
-        let enemy = enemies.getFirstDead();
+function spawnZombie() {
+    if(zombies.countDead() > 0) {
+        let enemy = zombies.getFirstDead();
         let pos = enemySpawnPositionCheck(enemy);
         enemy.reset(pos.x, pos.y);
-        if (game.physics.arcade.overlap(enemy, safeZone)) enemy.kill();
         enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
         enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
-        enemy.enemyMoveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
+    }
+}
+
+function spawnRobot() {
+    if(robots.countDead() > 0) {
+        let robot = robots.getFirstDead();
+        robot.reset(pos.x, pos.y);
+        robot.health = enemyHealth * 2;
+        robot.rotation = Math.random() * 360;
+        robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(robot));
     }
 }
 
@@ -687,16 +712,6 @@ function enemyMovement(enemy) {
     })
 }
 
-function enemyHit(bullet, enemy){
-    bullet.kill();
-    console.log(enemyHealth);
-    enemyHealth -= 10;
-    if(enemyHealth <= 0){
-        console.log('MUERTO');
-        enemy.enemyMoveTimer.stop();
-        enemy.kill();
-    }
-}
 
 //function that ensures the enemies appear outside of the camera/safe zone
 function enemySpawnPositionCheck(enemy) {
@@ -951,7 +966,7 @@ function buyItem(item) {
 function upgradeSpeed() {
     if (coins >= costRun) {
         coins -= costRun;
-        velocidadJugador += 20;
+        velocidadJugador += 25;
         console.log('Speed upgraded!');
         costRun += 70;
     } else {
