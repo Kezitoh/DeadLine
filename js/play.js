@@ -8,6 +8,7 @@ const COIN_GROUP_SIZE = 20;
 const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 300;
 const BULLET_GROUP_SIZE = 50;
+const FIRST_STAGE = 1000;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 20;
@@ -41,7 +42,7 @@ let modifierCosts;
 let lifeModifier;
 let enemyLifeModifier;
 let enemyDamageModifier;
-let frecuenciaSpawnEnemyModifier;
+let enemySpawnRateModifier;
 let speedPlayerModifier;
 let speedEnemyModifier;
 
@@ -49,7 +50,7 @@ let playState = {
     preload: loadPlayAssets,
     create: createLevel,
     update: updateLevel,
-    render: render
+    //render: render
 };
 
 function render() {
@@ -58,7 +59,12 @@ function render() {
         game.debug.body(area);
     });
 }
-
+/** @type {Phaser.Group} */
+let zombieGroup;
+/** @type {Phaser.Group} */
+let robotGroup;
+/** @type {Phaser.Group} */
+let robotBullets;
 /** @type {Phaser.Group} */
 let areaGroup;
 /** @type {Phaser.Group} */
@@ -121,17 +127,17 @@ let gems;
 let costRun;
 let costLife;
 
-let velocidadZombie;
+let zombieSpeed;
 
 
 let enemyDamage;
-let frecuenciaSpawnEnemy;
+let enemySpawnRate;
 
 let currentWeapon = 0;
 let weaponsBuy = [
-    { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500, damage: 5},//predeterminada
-    { image: 'weapon1', bought: false, ammo: 20, maxAmmo: 20, cooldown: 500, damage: 7},
-    { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1500, damage: 5},
+    { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500, damage: 5 },//predeterminada
+    { image: 'weapon1', bought: false, ammo: 20, maxAmmo: 20, cooldown: 500, damage: 7 },
+    { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1500, damage: 5 },
     { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99, damage: 3 }
 ];
 
@@ -151,8 +157,8 @@ function loadPlayAssets() {
 
 
 function loadSprites() {
-    game.load.spritesheet('pc', '../assets/sprites/psj.png',55,43);
-    game.load.spritesheet('zombie', '../assets/sprites/zomb.png',36,43);
+    game.load.spritesheet('pc', '../assets/sprites/psj.png', 55, 43);
+    game.load.spritesheet('zombie', '../assets/sprites/zomb.png', 36, 43);
     game.load.spritesheet('robot', '../assets/sprites/robot1_gun.png');
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
     game.load.image('robotBullet', '../assets/sprites/red_ball.png');
@@ -170,11 +176,11 @@ function loadImages() {
     game.load.image('bgZona2', '../assets/UI/Fondodejuego_Zona2.png');
     game.load.image('wall', "../assets/sprites/tile_273.png");
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
-    game.load.spritesheet('safeZone','../assets/UI/Zona_segura.png');
-    game.load.spritesheet('safeZone1','../assets/UI/Zona_segura_abajo_derecha.png');
-    game.load.spritesheet('safeZone2','../assets/UI/Zona_segura_abajo_izq.png');
-    game.load.spritesheet('safeZone3','../assets/UI/Zona_segura_arriba_derecha.png');
-    game.load.spritesheet('safeZone4','../assets/UI/Zona_segura_arriba_izq.png');
+    game.load.spritesheet('safeZone', '../assets/UI/Zona_segura.png');
+    game.load.spritesheet('safeZone1', '../assets/UI/Zona_segura_abajo_derecha.png');
+    game.load.spritesheet('safeZone2', '../assets/UI/Zona_segura_abajo_izq.png');
+    game.load.spritesheet('safeZone3', '../assets/UI/Zona_segura_arriba_derecha.png');
+    game.load.spritesheet('safeZone4', '../assets/UI/Zona_segura_arriba_izq.png');
 
 
     game.load.spritesheet('buyWeapon1Button', '../assets/UI/MenuSZ/ConBuy/BuyVerde.png');
@@ -186,10 +192,10 @@ function loadImages() {
 
     //escopeta,pistola,machinegun
 
-    game.load.spritesheet('weapon0','../assets/sprites/pistolaConSilenciador.png');
-    game.load.spritesheet('weapon1','../assets/sprites/pistola.png');
-    game.load.spritesheet('weapon2','../assets/sprites/escopeta.png');
-    game.load.spritesheet('weapon3','../assets/sprites/AK.png');
+    game.load.spritesheet('weapon0', '../assets/sprites/pistolaConSilenciador.png');
+    game.load.spritesheet('weapon1', '../assets/sprites/pistola.png');
+    game.load.spritesheet('weapon2', '../assets/sprites/escopeta.png');
+    game.load.spritesheet('weapon3', '../assets/sprites/AK.png');
 }
 
 function loadSounds() {
@@ -204,7 +210,7 @@ function loadLevel(level) {
 }
 
 
-function createSounds(){
+function createSounds() {
     soundSZ = game.add.audio('danger');
     hitSound = game.add.audio('hitSound');
     coinSound = game.add.audio('coinSound');
@@ -219,7 +225,7 @@ function createLevel() {
     createSounds();
     setDifficulty(difficulty);
 
-    weaponsBuy.forEach(weapon => {weapon.bought = false;})
+    weaponsBuy.forEach(weapon => { weapon.bought = false; })
     weaponsBuy[0].bought = true;
     weaponsBuy[0].ammo = weaponsBuy[0].maxAmmo;
     currentWeapon = 0;
@@ -236,11 +242,11 @@ function createLevel() {
     // maxAmmo = 50;
     // ammo = maxAmmo;
     totalCoins = 0;
-    game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*4);
+    game.world.setBounds(0, 0, game.canvas.width * 2, game.canvas.height * 4);
     game.physics.startSystem(Phaser.Physics.ARCADE);
-    bg = game.add.tileSprite(0, game.world.height/2, game.world.width, game.world.height, 'bgGame');
-    bgZona2 = game.add.tileSprite(0, 0, game.world.width, game.world.height/2, 'bgZona2');
-    wall = game.add.tileSprite(0, game.world.height/2, game.world.width, 64, 'wall');
+    bg = game.add.tileSprite(0, game.world.height / 2, game.world.width, game.world.height, 'bgGame');
+    bgZona2 = game.add.tileSprite(0, 0, game.world.width, game.world.height / 2, 'bgZona2');
+    wall = game.add.tileSprite(0, game.world.height / 2, game.world.width, 64, 'wall');
     game.physics.arcade.enable(wall);
     wall.body.immovable = true;
     //reload areas
@@ -269,10 +275,10 @@ function createLevel() {
     gemGroup = game.add.group();
     gemGroup.enableBody = true;
     gemGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    gemGroup.createMultiple(20,'gem');
+    gemGroup.createMultiple(20, 'gem');
     gemGroup.forEach(gem => {
         gem.anchor.setTo(0.5, 0.5);
-        gem.scale.setTo(2,2);
+        gem.scale.setTo(2, 2);
     });
 
     bulletGroup = game.add.group();
@@ -284,14 +290,6 @@ function createLevel() {
         bullet.body.bounce.set(1);
     });
 
-
-    robotBullets = game.add.group();
-    robotBullets.enableBody = true;
-    robotBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    robotBullets.createMultiple(ROBOT_BULLETS_GROUP_SIZE, 'robotBullet');
-    bulletGroup.forEach((bullet) => {
-        bullet.scale.set(0.5, 0.5);
-    });
     bulletGroup.setAll('checkWorldBounds', true);
     bulletGroup.setAll('outOfBoundsKill', true);
 
@@ -304,19 +302,19 @@ function createLevel() {
 
 
     // Update elapsed time each second
-    timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => {remainingTime = updateTime(hudTime,remainingTime, timerClock, setRemainingTime);}, this);
+    timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingTime = updateTime(hudTime, remainingTime, timerClock, setRemainingTime); }, this);
     game.camera.focusOnXY(game.world.width / 2, game.world.height - game.world.height / 7);
     player = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'pc');
     player.anchor.setTo(0.4, 0.5);
-    player.animations.add('holdGun', [5],0,false);
+    player.animations.add('holdGun', [5], 0, false);
     player.animations.add('shootRifle', [4], 0, false);
     player.animations.add('shootShotgun', [3], 0, false);
-    player.animations.add('walk',[0], 0, false);
+    player.animations.add('walk', [0], 0, false);
     player.animations.add('shootPistol', [2], 0, false);
     //player.animations.play('walk');
     game.physics.arcade.enable(player);
     game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN, 0.1, 0.1);
-    
+
     player.body.collideWorldBounds = true;
 
     //game.add.sprite(game.world.width/2,game.world.height/2,"heart");
@@ -345,7 +343,7 @@ function setDifficulty(difficulty) {
             lifeModifier = 1;
             enemyLifeModifier = 1;
             enemyDamageModifier = 1;
-            frecuenciaSpawnEnemyModifier = 1;
+            enemySpawnRateModifier = 1;
             speedPlayerModifier = 1;
             speedEnemyModifier = 1;
 
@@ -355,7 +353,7 @@ function setDifficulty(difficulty) {
             lifeModifier = 1.3;
             enemyLifeModifier = 0.6;
             enemyDamageModifier = 0.8;
-            frecuenciaSpawnEnemyModifier = 1.5;
+            enemySpawnRateModifier = 1.5;
             speedPlayerModifier = 1.3;
             speedEnemyModifier = 0.8;
             break;
@@ -364,50 +362,36 @@ function setDifficulty(difficulty) {
             lifeModifier = 0.85;
             enemyLifeModifier = 1.5;
             enemyDamageModifier = 1.5;
-            frecuenciaSpawnEnemyModifier = 0.5;
+            enemySpawnRateModifier = 0.5;
             speedPlayerModifier = 0.8;
             speedEnemyModifier = 1.3;
             break;
     }
-    costRun = INITIAL_SPEED_VALUE*modifierCosts;
-    costLife = INITIAL_HEALTH_VALUE*modifierCosts;
+    costRun = INITIAL_SPEED_VALUE * modifierCosts;
+    costLife = INITIAL_HEALTH_VALUE * modifierCosts;
     playerSpeed = PLAYER_VELOCITY * speedPlayerModifier;
     enemyHealth = ENEMY_BASE_HEALTH * enemyLifeModifier;
-    velocidadZombie = ENEMY_BASE_SPEED * speedEnemyModifier;
-    velocidadRobot = ENEMY_BASE_SPEED * speedEnemyModifier;
+    zombieSpeed = ENEMY_BASE_SPEED * speedEnemyModifier;
+    robotSpeed = ENEMY_BASE_SPEED * speedEnemyModifier;
     maxHealth = MAX_HEALTH * lifeModifier;
     enemyDamage = ENEMY_BASE_HURT * enemyDamageModifier;
-    frecuenciaSpawnEnemy = ENEMY_SPAWN_TIMER * frecuenciaSpawnEnemyModifier;
-    ITEMCOST.forEach(item => {itemCostArray.push(item*modifierCosts);
-        console.log(item, modifierCosts, item*modifierCosts);
+    enemySpawnRate = ENEMY_SPAWN_TIMER * enemySpawnRateModifier;
+    ITEMCOST.forEach(item => {
+        itemCostArray.push(item * modifierCosts);
+        console.log(item, modifierCosts, item * modifierCosts);
     });
 }
 
 function updateLevel() {
-    if(currentWeapon < 2) {
+    if (currentWeapon < 2) {
         player.animations.play('shootPistol');
-    }else {
+    } else {
         player.animations.play('holdGun');
     }
     //player.animations.play('shootPistol');
-    choquesZonaSegura();
-
+    collisionsSafeZone();
+    generalCollisions();
     enemyChase();
-
-
-    game.physics.arcade.collide(zombies, bulletGroup, hurtEnemy, null, this);
-    game.physics.arcade.collide(zombies, player, hurtPlayer);
-    game.physics.arcade.collide(zombies, safeZone);
-
-    if(score < 1000 ) {
-        game.physics.arcade.collide(wall, player);
-        game.physics.arcade.collide(wall, bulletGroup);
-        game.physics.arcade.collide(zombies, wall);     
-    }
-
-    game.physics.arcade.collide(player, coinGroup, collectCoin, null, this);
-
-    game.physics.arcade.collide(player, gemGroup, collectGem, null, this);
 
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if (healthValue == 0) {
@@ -415,15 +399,7 @@ function updateLevel() {
         winOrLose = false;
         animacionSalidaToFinal(() => { endGame(); });
     }
-
-    if((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone) && !game.physics.arcade.isPaused)
-        || (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused)
-        || (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
-        shoot();
-        
-    }
-
-
+    shoot();
     characterMovement();
     areaGroup.forEachAlive(area => {
         game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
@@ -433,8 +409,8 @@ function updateLevel() {
         areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
     }
 
-    if(healthValue <= 0){
-        animacionSalidaToFinal(() => {endGame();});
+    if (healthValue <= 0) {
+        animacionSalidaToFinal(() => { endGame(); });
     }
 
     if (keys.switchWeapon.justDown) {
@@ -478,30 +454,47 @@ function zonaSegura() {
     safeZone4.body.immovable = true;
 }
 
-function choquesZonaSegura(){
+function generalCollisions() {
+    game.physics.arcade.collide(zombieGroup, bulletGroup, hurtEnemy, null, this);
+    game.physics.arcade.collide(zombieGroup, player, hurtPlayer);
+    game.physics.arcade.collide(zombieGroup, safeZone);
+    game.physics.arcade.collide(coinGroup, player, collectCoin, null, this);
+    game.physics.arcade.collide(gemGroup, player, collectGem, null, this);
+    game.physics.arcade.collide(robotGroup, bulletGroup, hurtEnemy, null, this);
+    game.physics.arcade.collide(robotGroup, player, hurtPlayer);
+    game.physics.arcade.collide(robotGroup, safeZone);
+    game.physics.arcade.collide(robotBullets, player, hurtPlayer);
+    if (score < FIRST_STAGE) {
+        game.physics.arcade.collide(wall, player);
+        game.physics.arcade.collide(wall, bulletGroup);
+        game.physics.arcade.collide(zombieGroup, wall);
+    }
+}
+
+function collisionsSafeZone() {
     //Cuando Entra a la zona segura
 
-    if(game.time.now > nextEntry && !overlapSZ && game.physics.arcade.overlap(player, safeZone)) {
+    if (game.time.now > nextEntry && !overlapSZ && game.physics.arcade.overlap(player, safeZone)) {
 
         overlapSZ = true;
         onSafeZoneOverlap();
         showMenu();
 
-    } else if (!overlapSZ){
+    } else if (!overlapSZ) {
         game.physics.arcade.collide(player, safeZone);
     }
 
-    if(remainingSZTime == 3){
+    if (remainingSZTime == 3) {
         soundSZ.play();
         console.log("carapinga");
 
     }
 
-    if(overlapSZ && !game.physics.arcade.overlap(player, safeZone)){
+    if (overlapSZ && !game.physics.arcade.overlap(player, safeZone)) {
         nextEntry = game.time.now + SZCOOLDOWN;
     }
 
-    if(!game.physics.arcade.overlap(player, safeZone)){
+    if (!game.physics.arcade.overlap(player, safeZone)) {
         overlapSZ = false;
         game.time.events.remove(timerClock2);
         safeZoneTimeIn.setText("");
@@ -546,10 +539,10 @@ function hurtEnemy(enemy, bullet) {
     score += 5;
     if (enemy.health <= 0) {
         let coin = coinGroup.getFirstDead();
-        coin.reset(enemy.x-10, enemy.y-10);
+        coin.reset(enemy.x - 10, enemy.y - 10);
         enemy.kill();
-        if(Math.random()>0.5) {
-            gemGroup.getFirstDead().reset(enemy.x+10,enemy.y+10);
+        if (Math.random() > 0.5) {
+            gemGroup.getFirstDead().reset(enemy.x + 10, enemy.y + 10);
         }
         score += 100;
     }
@@ -561,7 +554,7 @@ function collectCoin(player, coin) {
     coin.kill();
     coinSound.play();
     coins += 15;
-    totalCoins ++;
+    totalCoins++;
     hudCoins.setText(coins);
 }
 
@@ -570,7 +563,7 @@ function collectGem(player, gem) {
     gemSound.play();
     gems++;
     hudGems.setText(gems);
-    
+
 }
 
 function onSafeZoneOverlap() {
@@ -579,10 +572,10 @@ function onSafeZoneOverlap() {
 
     remainingSZTime = SAFE_ZONE_COUNTDOWN;
 
-    timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => {remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2);}, this);
+    timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2); }, this);
 
 
-    safeZoneTimeIn = game.add.text(game.canvas.width/2, 100, setRemainingTime2(remainingSZTime), {
+    safeZoneTimeIn = game.add.text(game.canvas.width / 2, 100, setRemainingTime2(remainingSZTime), {
         font: 'bold 35pt',
         fill: '#ffffff'
     });
@@ -639,7 +632,7 @@ function createHUD() {
     hudGroup.add(hudCoins);
 
     let gemIcon = hudGroup.create(game.canvas.width - 135, 95, 'gem');
-    gemIcon.scale.setTo(1.5,1.5);
+    gemIcon.scale.setTo(1.5, 1.5);
     hudGems = game.add.text(game.canvas.width - 100, 92, gems, {
         font: 'bold 20pt',
         fill: '#ffffff'
@@ -663,42 +656,46 @@ function createHUD() {
 }
 
 function shoot() {
-    switch(currentWeapon) {
-        case 0:
-            player.animations.play('shootPistol');
-            break;
-        case 2:
-            player.animations.play('shootShotgun');
-            break;
-        case 3:
-            player.animations.play('shootRifle');
-            break;
-    }
-    let weapon = weaponsBuy[currentWeapon];
-    if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && weapon.ammo > 0) {
-        shootSound.play();
-        nextShoot = game.time.now + weapon.cooldown;
-        if(weapon.image == 'weapon2') {
-            //ESCOPETA
-            nextShoot = game.time.now + SHOOT_COOLDOWN * 3;
-            
-            for (let i = 0; i < 5; i++) {
+    if ((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone) && !game.physics.arcade.isPaused)
+        || (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused)
+        || (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
+        switch (currentWeapon) {
+            case 0:
+                player.animations.play('shootPistol');
+                break;
+            case 2:
+                player.animations.play('shootShotgun');
+                break;
+            case 3:
+                player.animations.play('shootRifle');
+                break;
+        }
+        let weapon = weaponsBuy[currentWeapon];
+        if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && weapon.ammo > 0) {
+            shootSound.play();
+            nextShoot = game.time.now + weapon.cooldown;
+            if (weapon.image == 'weapon2') {
+                //ESCOPETA
+                nextShoot = game.time.now + SHOOT_COOLDOWN * 3;
+
+                for (let i = 0; i < 5; i++) {
+                    let bullet = bulletGroup.getFirstDead();
+                    bullet.reset(player.x, player.y);
+                    bullet.rotation = game.physics.arcade.angleToPointer(bullet);
+
+                    bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED);
+                }
+                weapon.ammo--;
+
+            } else {
                 let bullet = bulletGroup.getFirstDead();
                 bullet.reset(player.x, player.y);
-                bullet.rotation = game.physics.arcade.angleToPointer(bullet);
-                
-                bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED);
+                game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
+                weapon.ammo--;
             }
-            weapon.ammo --;
 
-        }else {
-            let bullet = bulletGroup.getFirstDead();
-            bullet.reset(player.x, player.y);
-            game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
-            weapon.ammo--;
+            hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
         }
-        
-        hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
     }
 }
 
@@ -708,68 +705,76 @@ function characterMovement() {
     player.body.velocity.y = 0;
 
     player.rotation = game.physics.arcade.angleToPointer(player);
-    if(cursors.up.isDown || keys.w.isDown){
+    if (cursors.up.isDown || keys.w.isDown) {
         player.body.velocity.y = -playerSpeed;
     }
-    if(cursors.down.isDown || keys.s.isDown){
+    if (cursors.down.isDown || keys.s.isDown) {
         player.body.velocity.y = playerSpeed;
     }
-    if(cursors.left.isDown || keys.a.isDown) {
+    if (cursors.left.isDown || keys.a.isDown) {
         player.body.velocity.x = -playerSpeed;
     }
-    if(cursors.right.isDown || keys.d.isDown) {
+    if (cursors.right.isDown || keys.d.isDown) {
         player.body.velocity.x = playerSpeed;
     }
 
 }
 
 function createEnemies() {
-    zombies = game.add.group();
-    zombies.enableBody = true;
-    zombies.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
-    zombies.forEach((enemy) => {
-        enemy.animations.add('idle',[0]);
+    zombieGroup = game.add.group();
+    zombieGroup.enableBody = true;
+    zombieGroup.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
+    zombieGroup.forEach((enemy) => {
+        enemy.animations.add('idle', [0]);
         enemy.animations.add('chase', [1]);
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
         //game.physics.arcade.enable(enemy);
-        
+
     });
 
-    robots = game.add.group();
-    robots.enableBody = true;
-    robots.createMultiple(ENEMY_GROUP_SIZE/2, 'robot');
-    robots.forEach((enemy) => {
+    robotGroup = game.add.group();
+    robotGroup.enableBody = true;
+    robotGroup.createMultiple(ENEMY_GROUP_SIZE / 2, 'robot');
+    robotGroup.forEach((enemy) => {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
     });
 
-    game.time.events.loop(frecuenciaSpawnEnemy, spawnZombie, this);
+    robotBullets = game.add.group();
+    robotBullets.enableBody = true;
+    robotBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    robotBullets.createMultiple(ROBOT_BULLETS_GROUP_SIZE, 'robotBullet');
+    bulletGroup.forEach((bullet) => {
+        bullet.scale.set(0.5, 0.5);
+    });
+
+    game.time.events.loop(enemySpawnRate, spawnZombie, this);
+    game.time.events.loop(enemySpawnRate, spawnRobot, this);
 }
 
 function spawnZombie() {
-    if(zombies.countDead() > 0) {
-        let enemy = zombies.getFirstDead();
-        let pos = enemySpawnPositionCheck(enemy);
-        enemy.reset(pos.x, pos.y);
-        enemy.health = enemyHealth;
-        enemy.rotation = Math.random() * 360;
-        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, enemySpeed);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(enemy));
-        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(enemy));
+    if (zombieGroup.countDead() > 0) {
+        let zombie = zombieGroup.getFirstDead();
+        let pos = enemySpawnPositionCheck(zombie);
+        zombie.reset(pos.x, pos.y);
+        zombie.health = enemyHealth;
+        zombie.rotation = Math.random() * 360;
+        zombie.body.velocity = game.physics.arcade.velocityFromRotation(zombie.rotation, zombieSpeed);
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(zombie));
     }
 }
 
 function spawnRobot() {
-    if(robots.countDead() > 0) {
-        let robot = robots.getFirstDead();
+    if (robotGroup.countDead() > 0 && score >= FIRST_STAGE) {
+        let robot = robotGroup.getFirstDead();
+        let pos = enemySpawnPositionCheck(robot);
         robot.reset(pos.x, pos.y);
         robot.health = enemyHealth * 2;
         robot.chasing = false;
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), ()=>enemyMovement(robot));
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(robot));
     }
 }
 
@@ -808,8 +813,8 @@ function enemySpawnPositionCheck(enemy) {
 }
 
 function enemyChase() {
-    //When player is close, zombies chase the player
-    zombies.forEach(enemy => {
+    //When player is close, zombieGroup chase the player
+    zombieGroup.forEach(enemy => {
         enemy.chasing = false;
         enemy.animations.play('idle');
         if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
@@ -817,23 +822,23 @@ function enemyChase() {
             enemy.animations.play('chase');
             //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
             enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
-            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadZombie);
+            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, zombieSpeed);
         }
         game.physics.arcade.collide(enemy, safeZone);
         game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
     });
 
-    robots.forEach(robot => {
-        //Los robots te siguen para siempre cuando te ven por primera vez
+    robotGroup.forEach(robot => {
+        //Los robotGroup te siguen para siempre cuando te ven por primera vez
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
-            if(!robot.chasing){
-                game.time.events.loop(750, ()=>robotShoot(robot));
+            if (!robot.chasing) {
+                game.time.events.loop(750, () => robotShoot(robot));
                 robot.chasing = true;
             }
 
             //robot.animations.play('chase');
             robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
-            robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, velocidadRobot);
+            robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         }
         game.physics.arcade.collide(robot, safeZone);
         game.physics.arcade.collide(robot, bulletGroup, hurtEnemy, null, this);
@@ -841,8 +846,10 @@ function enemyChase() {
 }
 
 function robotShoot(robot) {
-    if (game.physics.arcade.distanceBetween(robot, player) > 200){
-        
+    if (game.physics.arcade.distanceBetween(robot, player) > 200) {
+        let bullet = robotBullets.getFirstDead();
+        bullet.reset(robot.x, robot.y);
+        game.physics.arcade.moveToXY(player.x, player.y, BULLET_SPEED);
     }
 }
 
@@ -850,7 +857,7 @@ function robotShoot(robot) {
 function updateHealthBar() {
     if (healthTween)
         healthTween.stop();
-    healthTween = game.add.tween(healthBar.scale).to({x: healthValue/maxHealth, y: 1}, 300, Phaser.Easing.Cubic.Out);
+    healthTween = game.add.tween(healthBar.scale).to({ x: healthValue / maxHealth, y: 1 }, 300, Phaser.Easing.Cubic.Out);
     healthTween.start();
 
 }
@@ -864,13 +871,13 @@ function setRemainingTime2(seconds) {
 }
 
 
-function updateTime(variableAcutalizar, valorActualizar, temporizador,funcionActulizado) {
+function updateTime(variableAcutalizar, valorActualizar, temporizador, funcionActulizado) {
 
-    valorActualizar = Math.max(-1, valorActualizar -1);
+    valorActualizar = Math.max(-1, valorActualizar - 1);
     variableAcutalizar.setText(funcionActulizado(valorActualizar));
-    if(valorActualizar < 0) {
+    if (valorActualizar < 0) {
         game.time.events.remove(temporizador);
-        game.time.events.add(25,() => {animacionSalidaToFinal(() => {endGame();});} , this);
+        game.time.events.add(25, () => { animacionSalidaToFinal(() => { endGame(); }); }, this);
     }
     return valorActualizar;
 }
@@ -885,41 +892,41 @@ let menuGroup;
 function createMenu() {
     menuGroup = game.add.group();
 
-    let buyWeapon1Button = game.add.button(game.canvas.width - 100, game.canvas.height/2 + 70 - 200, 'buyWeapon1Button', () => {buyItem(0);});
+    let buyWeapon1Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70 - 200, 'buyWeapon1Button', () => { buyItem(0); });
     buyWeapon1Button.anchor.set(0.5);
     buyWeapon1Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon1Button);
 
 
-    let buyWeapon2Button = game.add.button(game.canvas.width - 100, game.canvas.height/2 + 70 , 'buyWeapon2Button', () => {buyItem(1);});
+    let buyWeapon2Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70, 'buyWeapon2Button', () => { buyItem(1); });
     buyWeapon2Button.anchor.set(0.5);
     buyWeapon2Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon2Button);
 
 
-    let buyWeapon3Button = game.add.button(game.canvas.width - 100, game.canvas.height/2 + 70 + 200, 'buyWeapon3Button', () => {buyItem(2);});
+    let buyWeapon3Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70 + 200, 'buyWeapon3Button', () => { buyItem(2); });
     buyWeapon3Button.anchor.set(0.5);
     buyWeapon3Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon3Button);
 
 
-    let upgradeSpeedButton = game.add.button(100, game.canvas.height/2 + 70 - 200, 'upgradeSpeedButton', upgradeSpeed);
+    let upgradeSpeedButton = game.add.button(100, game.canvas.height / 2 + 70 - 200, 'upgradeSpeedButton', upgradeSpeed);
     upgradeSpeedButton.anchor.set(0.5);
     upgradeSpeedButton.scale.setTo(0.25);
     menuGroup.add(upgradeSpeedButton);
 
-    let upgradeHealthButton = game.add.button(100, game.canvas.height/2 + 70, 'upgradeHealthButton', upgradeHealth);
+    let upgradeHealthButton = game.add.button(100, game.canvas.height / 2 + 70, 'upgradeHealthButton', upgradeHealth);
     upgradeHealthButton.anchor.set(0.5);
     upgradeHealthButton.scale.setTo(0.25);
     menuGroup.add(upgradeHealthButton);
 
-    let exitButton = game.add.button(100, game.canvas.height/2 + 70 + 200, 'exitButton', hideMenu);
+    let exitButton = game.add.button(100, game.canvas.height / 2 + 70 + 200, 'exitButton', hideMenu);
     exitButton.anchor.set(0.5);
     exitButton.scale.setTo(0.25);
     menuGroup.add(exitButton);
 
     // Mostrar monedas
-    let coinsText = game.add.text(game.canvas.width/2, game.canvas.height/2 + 70 - 150, 'Coins: ' + coins, {
+    let coinsText = game.add.text(game.canvas.width / 2, game.canvas.height / 2 + 70 - 150, 'Coins: ' + coins, {
         font: 'bold 25pt',
         fill: '#ffffff'
     });
@@ -928,69 +935,69 @@ function createMenu() {
 
     //apartir de aqui para abajo es para el texto de lo que cuesta cada boton
 
-    let textValorWeapon1 = "Cost: " + itemCostArray[0] +" coins";
-    let costWeapon1 = game.add.text(game.canvas.width - 100, game.canvas.height/2 + 30 - 200, textValorWeapon1, {
+    let textValorWeapon1 = "Cost: " + itemCostArray[0] + " coins";
+    let costWeapon1 = game.add.text(game.canvas.width - 100, game.canvas.height / 2 + 30 - 200, textValorWeapon1, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
-    costWeapon1.anchor.setTo(0.5,0.5);
+    costWeapon1.anchor.setTo(0.5, 0.5);
     menuGroup.add(costWeapon1);
 
-    let textValorWeapon2 = "Cost: " + itemCostArray[1] +" coins";
-    let costWeapon2 = game.add.text(game.canvas.width - 100, game.canvas.height/2 + 30, textValorWeapon2, {
+    let textValorWeapon2 = "Cost: " + itemCostArray[1] + " coins";
+    let costWeapon2 = game.add.text(game.canvas.width - 100, game.canvas.height / 2 + 30, textValorWeapon2, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
-    costWeapon2.anchor.setTo(0.5,0.5);
+    costWeapon2.anchor.setTo(0.5, 0.5);
     menuGroup.add(costWeapon2);
 
-    let textValorWeapon3 = "Cost: " + itemCostArray[2]  +" coins";
-    let costWeapon3 = game.add.text(game.canvas.width - 100, game.canvas.height/2 + 30 + 200, textValorWeapon3, {
+    let textValorWeapon3 = "Cost: " + itemCostArray[2] + " coins";
+    let costWeapon3 = game.add.text(game.canvas.width - 100, game.canvas.height / 2 + 30 + 200, textValorWeapon3, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
-    costWeapon3.anchor.setTo(0.5,0.5);
+    costWeapon3.anchor.setTo(0.5, 0.5);
     menuGroup.add(costWeapon3);
 
-    let textValorUpgradeSpeed = "Cost: " + costRun +" coins";
-    costRunText = game.add.text( 100, game.canvas.height/2 + 30 - 200, textValorUpgradeSpeed, {
+    let textValorUpgradeSpeed = "Cost: " + costRun + " coins";
+    costRunText = game.add.text(100, game.canvas.height / 2 + 30 - 200, textValorUpgradeSpeed, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
-    costRunText.anchor.setTo(0.5,0.5);
+    costRunText.anchor.setTo(0.5, 0.5);
     menuGroup.add(costRunText);
 
-    let textValorUpgradeLife = "Cost: " + costLife +" coins";
-    costLifeText = game.add.text( 100, game.canvas.height/2 + 30 , textValorUpgradeLife, {
+    let textValorUpgradeLife = "Cost: " + costLife + " coins";
+    costLifeText = game.add.text(100, game.canvas.height / 2 + 30, textValorUpgradeLife, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
-    costLifeText.anchor.setTo(0.5,0.5);
+    costLifeText.anchor.setTo(0.5, 0.5);
     menuGroup.add(costLifeText);
 
     //apartir de aqui van las imagenes
 
-    let weapon1Image = game.add.sprite(game.canvas.width - 100, game.canvas.height/2 - 200 - 25, 'weapon1');
+    let weapon1Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 - 200 - 25, 'weapon1');
     weapon1Image.anchor.set(0.5);
     weapon1Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
     menuGroup.add(weapon1Image);
 
-    let weapon2Image = game.add.sprite(game.canvas.width - 100, game.canvas.height/2 - 25, 'weapon2');
+    let weapon2Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 - 25, 'weapon2');
     weapon2Image.anchor.set(0.5);
     weapon2Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
     menuGroup.add(weapon2Image);
 
-    let weapon3Image = game.add.sprite(game.canvas.width - 100, game.canvas.height/2 + 200 - 25, 'weapon3');
+    let weapon3Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 + 200 - 25, 'weapon3');
     weapon3Image.anchor.set(0.5);
     weapon3Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
     menuGroup.add(weapon3Image);
 
-    let heartImageMenu = game.add.sprite(100, game.canvas.height/2 - 25, 'heart');
+    let heartImageMenu = game.add.sprite(100, game.canvas.height / 2 - 25, 'heart');
     heartImageMenu.anchor.set(0.5);
     heartImageMenu.scale.setTo(1); // Ajusta el tamaño según sea necesario
     menuGroup.add(heartImageMenu);
 
-    let botasImagenAlas = game.add.sprite(100, game.canvas.height/2 - 25 - 200, 'boots');
+    let botasImagenAlas = game.add.sprite(100, game.canvas.height / 2 - 25 - 200, 'boots');
     botasImagenAlas.anchor.set(0.5);
     botasImagenAlas.scale.setTo(0.04); // Ajusta el tamaño según sea necesario
     menuGroup.add(botasImagenAlas);
@@ -1016,8 +1023,8 @@ function updateMenuButtons() {
 
     //para actualizar el texto de lo que cuesta la vida y lo que cuesta mejorar la velocidad
 
-    costLifeText.setText(("Cost: " + costLife +" coins"));
-    costRunText.setText(("Cost: " + costRun +" coins"));
+    costLifeText.setText(("Cost: " + costLife + " coins"));
+    costRunText.setText(("Cost: " + costRun + " coins"));
 
 
 
@@ -1043,7 +1050,7 @@ function updateCoinsText() {
 function buyItem(item) {
     if (coins >= itemCostArray[item]) {
         coins -= itemCostArray[item];
-        switch(item) {
+        switch (item) {
             case 0:
                 if (!weapon1Bought) {
                     weapon1Bought = true;
@@ -1100,7 +1107,7 @@ function upgradeHealth() {
         coins -= costLife;
         maxHealth += 30;
         healthValue = maxHealth;
-         // Restaura la salud al máximo
+        // Restaura la salud al máximo
         console.log('Health upgraded!');
         costLife += 50;
         updateHealthBar();
@@ -1113,7 +1120,7 @@ function upgradeHealth() {
 }
 
 
-function animacionSalidaToFinal(a){
+function animacionSalidaToFinal(a) {
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5, 0.5);
     img5.scale.setTo(20);
