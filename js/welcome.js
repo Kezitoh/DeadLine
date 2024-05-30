@@ -134,9 +134,15 @@ function botonesInicio(){
     btnEasy.inputEnabled = true;
     btnNormal.inputEnabled = true;
     btnHard.inputEnabled = true;
+    btninstructions.inputEnabled = true;
 }
 
 function oninstructionsButtonPressed() {
+    btninstructions.inputEnabled = false;
+    btnHard.inputEnabled = false;
+    btnNormal.inputEnabled = false;
+    btnEasy.inputEnabled = false;
+    clickSound.play();
     playerTween = game.add.tween(p).to({
         angle:0
     }, 300, Phaser.Easing.Cubic.Out).to({
@@ -200,6 +206,9 @@ function onDifficultySet(d){
     clickSound.play();
     if(difficulty == "Easy"){
         btnEasy.inputEnabled = false;
+        btnHard.inputEnabled = false;
+        btnNormal.inputEnabled = false;
+        btninstructions.inputEnabled = false;
         playerTween = game.add.tween(p).to({
             angle:-180
         }, 300, Phaser.Easing.Cubic.Out).to({
@@ -215,6 +224,9 @@ function onDifficultySet(d){
     }
     if(difficulty == "Normal"){
         btnNormal.inputEnabled = false;
+        btnEasy.inputEnabled = false;
+        btnHard.inputEnabled = false;
+        btninstructions.inputEnabled = false;
         playerTween = game.add.tween(p).to({
             y:game.canvas.height / 3 + 120
         }, 1000, Phaser.Easing.Cubic.Out);
@@ -223,6 +235,9 @@ function onDifficultySet(d){
     }
     if(difficulty == "Hard"){
         btnHard.inputEnabled = false;
+        btnNormal.inputEnabled = false;
+        btnEasy.inputEnabled = false;
+        btninstructions.inputEnabled = false;
         playerTween = game.add.tween(p).to({
             angle:0
         }, 300, Phaser.Easing.Cubic.Out).to({

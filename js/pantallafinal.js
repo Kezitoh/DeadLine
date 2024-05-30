@@ -9,17 +9,25 @@ function loadFinalAssets() {
 }
 
 let winOrLose = false;
-let objetos = 0;
+let TotalMonedas = 0;
+/** @type {Phaser.Button} */
 let btnInicio;
+
+let clickSoundFinal;
 
 
 function loadFinalImages() {
     game.load.image('bgGamef', '../assets/UI/Fondodejuego.png');
     game.load.image('btnInicioA', '../assets/UI/4x/btnInicioConLetras.png');
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
+
+    //sonido
+    game.load.audio('click', '../assets/sounds/click1.ogg');
 }
 
 function createLevelFinal() {
+    clickSoundFinal = game.add.audio('click');
+
     let styleTitle = {
         font: 'Titan One',
         fontSize: '80pt',
@@ -60,19 +68,24 @@ function createLevelFinal() {
         let puntuacionTexto = game.add.text(game.canvas.width / 10, game.canvas.height / 3, scoretext, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3, ptexto, stylesub);
 
-        scoretext2 = "Objetos recogidos: ";
-        let otexto = " " + objetos;
+        scoretext2 = "Monedas Recogidas: ";
+        let otexto = " " + TotalMonedas;
         let vidaRestantetexto = " " + healthValue;
         let puntuacionTexto2 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 120, scoretext2, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
+        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {
+            animacionSalida(() => {game.state.start('welcome');});
+            clickSoundFinal.play();
+            btnInicio.inputEnabled = false;
+        });
 
-        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {animacionSalida(() => {game.state.start('welcome');});});
+        btnInicio.inputEnabled = true;
         btnInicio.scale.setTo(0.4);
         btnInicio.anchor.setTo(0.5,0.5);
     }
 
     animacionEntrada();
 
-    console.log("ladhfakjslf");
+    console.log("CTM");
 }

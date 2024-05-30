@@ -16,12 +16,30 @@ const ENEMY_TURN_TIMER_MIN = 2000;
 const ENEMY_TURN_TIMER_MAX = 3000;
 const ENEMY_TURN_PROBABILITY = 0.9;
 const ENEMY_STOP_TIME = 1500;
+const ENEMY_BASE_HURT = 15;
 
 const TIEMPO_DENTRO_ZONA_SEGURA = 10;
+
+const VALOR_COMPRA_VIDA_INICIAL = 40;
+const VALOR_COMPRA_VELOCIDAD_INICIAL = 70;
 
 let enemyHealth;
 let enemyResetPosX;
 let enemyResetPosY;
+
+
+
+const ITEMCOST = [30, 50, 70];
+
+
+let itemCostArray;
+let modifierCosts;
+let lifeModifier;
+let enemyLifeModifier;
+let enemyDamageModifier;
+let frecuenciaSpawnEnemyModifier;
+let speedPlayerModifier;
+let speedEnemyModifier;
 
 let playState = {
     preload: loadPlayAssets,
@@ -88,6 +106,26 @@ let dangerSound;
 
 let coins;
 
+let costRun;
+let costLife;
+
+let velocidadEnemigo;
+
+
+let dañoEnemigo;
+let frecuenciaSpawnEnemy;
+
+let currentWeapon = 0;
+let weaponsBuy = [
+    { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500},//predeterminada
+    { image: 'weapon1', bought: false, ammo: 20, maxAmmo: 20, cooldown: 500 },
+    { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1000 },
+    { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99 }
+];
+
+let currentWeaponSprite;
+
+
 
 function loadPlayAssets() {
     loadSprites();
@@ -106,6 +144,7 @@ function loadSprites() {
 
 function loadImages() {
     game.load.image('heart', '../assets/UI/heart.png');
+    game.load.image('boots', '../assets/sprites/botasConAlas.png');
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('coin', '../assets/UI/coin.png');
@@ -118,18 +157,19 @@ function loadImages() {
     game.load.spritesheet('safeZone4','../assets/UI/Zona_segura_arriba_izq.png');
 
 
-    game.load.spritesheet('buyWeapon1Button', '../assets/UI/heart.png');
-    game.load.spritesheet('buyWeapon2Button', '../assets/UI/heart.png');
-    game.load.spritesheet('buyWeapon3Button', '../assets/UI/heart.png');
-    game.load.spritesheet('upgradeSpeedButton', '../assets/UI/heart.png');
-    game.load.spritesheet('upgradeHealthButton', '../assets/UI/heart.png');
-    game.load.spritesheet('exitButton', '../assets/UI/heart.png');
+    game.load.spritesheet('buyWeapon1Button', '../assets/UI/MenuSZ/ConBuy/BuyVerde.png');
+    game.load.spritesheet('buyWeapon2Button', '../assets/UI/MenuSZ/ConBuy/BuyNaranja.png');
+    game.load.spritesheet('buyWeapon3Button', '../assets/UI/MenuSZ/ConBuy/BuyRojo.png');
+    game.load.spritesheet('upgradeSpeedButton', '../assets/UI/MenuSZ/ConBuy/BuyBlanco.png');
+    game.load.spritesheet('upgradeHealthButton', '../assets/UI/MenuSZ/ConBuy/BuyAzul.png');
+    game.load.spritesheet('exitButton', '../assets/UI/MenuSZ/ConBuy/CloseNegro.png');
 
     //escopeta,pistola,machinegun
 
-    game.load.spritesheet('weapon1','../assets/UI/Zona_segura_abajo_izq.png');
-    game.load.spritesheet('weapon2','../assets/UI/Zona_segura_arriba_derecha.png');
-    game.load.spritesheet('weapon3','../assets/UI/Zona_segura_arriba_izq.png');
+    game.load.spritesheet('weapon0','../assets/sprites/pistola.png');
+    game.load.spritesheet('weapon1','../assets/sprites/pistolaConSilenciador.png');
+    game.load.spritesheet('weapon2','../assets/sprites/escopeta.png');
+    game.load.spritesheet('weapon3','../assets/sprites/AK.png');
 }
 
 function loadSounds() {
@@ -149,19 +189,20 @@ function createSounds(){
 
 function createLevel() {
     createSounds();
+    setDifficulty(difficulty);
+
     weapon1Bought = false;
     weapon2Bought = false;
     weapon3Bought = false;
-    velocidadJugador = PLAYER_VELOCITY;
     overlapSZ = false;
     nextShoot = 0;
     nextEntry = 0;
-    game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     coins = 0;
     nextHurt = 0;
     maxAmmo = 50;
     ammo = maxAmmo;
-    enemyHealth = ENEMY_BASE_HEALTH;
+    TotalMonedas = 0;
+    game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*2);
     game.physics.startSystem(Phaser.Physics.ARCADE);
     let bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
     //reload areas
@@ -194,8 +235,6 @@ function createLevel() {
 
     bulletGroup.setAll('checkWorldBounds', true);
     bulletGroup.setAll('outOfBoundsKill', true);
-
-    setDifficulty(difficulty);
 
     remainingTime = DEFAULT_TIME;
 
@@ -231,21 +270,69 @@ function createLevel() {
 
     hideMenu();
 
+    keys.switchWeapon = game.input.keyboard.addKey(Phaser.KeyCode.Q);
+
     animacionEntrada();
+}
+
+function setDifficulty(difficulty) {
+    // mas o menos vida--, mas o menos daño de los enemigos y la vida  la velocidad de los enemigos, cantidad de los enemigos precios
+    itemCostArray = [];
+    switch (difficulty) {
+        case DIFFICULTY.Normal || 'Normal':
+            modifierCosts = 1;
+            lifeModifier = 1;
+            enemyLifeModifier = 1;
+            enemyDamageModifier = 1;
+            frecuenciaSpawnEnemyModifier = 1;
+            speedPlayerModifier = 1;
+            speedEnemyModifier = 1;
+
+            break;
+        case DIFFICULTY.Easy || 'Easy':
+            modifierCosts = 0.5;
+            lifeModifier = 1.3;
+            enemyLifeModifier = 0.6;
+            enemyDamageModifier = 0.8;
+            frecuenciaSpawnEnemyModifier = 1.5;
+            speedPlayerModifier = 1.3;
+            speedEnemyModifier = 0.8;
+            break;
+        case DIFFICULTY.Hard || 'Hard':
+            modifierCosts = 1.30;
+            lifeModifier = 0.85;
+            enemyLifeModifier = 1.5;
+            enemyDamageModifier = 1.5;
+            frecuenciaSpawnEnemyModifier = 0.5;
+            speedPlayerModifier = 0.8;
+            speedEnemyModifier = 1.3;
+            break;
+    }
+    costRun = VALOR_COMPRA_VELOCIDAD_INICIAL*modifierCosts;
+    costLife = VALOR_COMPRA_VIDA_INICIAL*modifierCosts;
+    velocidadJugador = PLAYER_VELOCITY * speedPlayerModifier;
+    enemyHealth = ENEMY_BASE_HEALTH * enemyLifeModifier;
+    velocidadEnemigo = ENEMY_BASE_SPEED * speedEnemyModifier;
+    maxHealth = MAX_HEALTH * lifeModifier;
+    dañoEnemigo = ENEMY_BASE_HURT * enemyDamageModifier;
+    frecuenciaSpawnEnemy = ENEMY_SPAWN_TIMER * frecuenciaSpawnEnemyModifier;
+    ITEMCOST.forEach(item => {itemCostArray.push(item*modifierCosts);
+        console.log(item, modifierCosts, item*modifierCosts);
+    });
 }
 
 function updateLevel() {
     choquesZonaSegura();
 
     enemies.forEach(enemy => {
-        if (game.physics.arcade.distanceBetween(enemy, player) < 500) {
+        if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
             //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
             enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
-            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadEnemigo);
             game.physics.arcade.collide(enemy, player, hurtPlayer);
-            game.physics.arcade.collide(enemy, safeZone);
-            game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
         }
+        game.physics.arcade.collide(enemy, safeZone);
+        game.physics.arcade.collide(enemy, bulletGroup, hurtEnemy, null, this);
     });
 
     coinGroup.forEachAlive(coin => {
@@ -259,9 +346,9 @@ function updateLevel() {
         animacionSalidaToFinal(() => { endGame(); });
     }
 
-    if((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone)) 
-        || (game.input.activePointer.isDown && !menuGroup.visible) 
-        || (game.input.activePointer.isDown && !game.physics.arcade.isPaused)) {
+    if((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone) && !game.physics.arcade.isPaused)
+        || (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused)
+        || (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
         shoot();
     }
 
@@ -278,7 +365,24 @@ function updateLevel() {
     if(healthValue <= 0){
         animacionSalidaToFinal(() => {endGame();});
     }
+
+    if (keys.switchWeapon.justDown) {
+        switchWeapon();
+        console.log("Switched to weapon: " + currentWeapon);
+    }
+
 }
+
+function switchWeapon() {
+    do {
+        currentWeapon = (currentWeapon + 1) % weaponsBuy.length;
+    } while (!weaponsBuy[currentWeapon].bought);
+
+    currentWeaponSprite.loadTexture(weaponsBuy[currentWeapon].image);
+    hudAmmo.setText(weaponsBuy[currentWeapon].ammo + "/" + weaponsBuy[currentWeapon].maxAmmo);
+}
+
+
 
 function zonaSegura() {
     safeZone = game.add.sprite(game.world.width / 2, game.world.height / 2, 'safeZone');
@@ -350,10 +454,12 @@ function choquesZonaSegura(){
 
 }
 
+
+
 function hurtPlayer() {
     if (game.time.now > nextHurt) {
         nextHurt = game.time.now + INVULNERABILITY_TIME;
-        healthValue -= 15;
+        healthValue -= dañoEnemigo;
         updateHealthBar();
     }
 }
@@ -375,6 +481,7 @@ function hurtEnemy(enemy, bullet) {
 function collectCoin(coin) {
     coin.kill();
     coins += 15;
+    TotalMonedas ++;
     hudCoins.setText(coins);
 }
 
@@ -405,19 +512,9 @@ function onSafeZoneOverlap() {
 //     }
 // }
 
-function setDifficulty(difficulty) {
-    switch (difficulty) {
-        case DIFFICULTY.Normal || 'Normal':
-            break;
-        case DIFFICULTY.Easy || 'Easy':
-            break;
-        case DIFFICULTY.Hard || 'Hard':
-            break;
-    }
-}
+
 
 function createHUD() {
-    maxHealth = MAX_HEALTH;
     hudGroup = game.add.group();
     hudGroup.create(5, 5, 'heart');
     hudGroup.create(50, 5, 'healthHolder');
@@ -458,19 +555,26 @@ function createHUD() {
     });
     hudGroup.add(hudInteractText);
 
+    currentWeaponSprite = hudGroup.create(game.canvas.width - 155, game.canvas.height - 100, 'weapon0');
+    currentWeaponSprite.anchor.setTo(0.5, 0.5);
+    currentWeaponSprite.scale.setTo(0.25);
+
+
     hudGroup.fixedToCamera = true;
     healthValue = maxHealth;
     score = 0;
 }
 
 function shoot() {
-    if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && ammo > 0) {
-        nextShoot = game.time.now + SHOOT_COOLDOWN;
+
+    let weapon = weaponsBuy[currentWeapon];
+    if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && weapon.ammo > 0) {
+        nextShoot = game.time.now + weapon.cooldown;
         let bullet = bulletGroup.getFirstDead();
         bullet.reset(player.x, player.y);
         game.physics.arcade.moveToPointer(bullet, BULLET_SPEED);
-        ammo--;
-        hudAmmo.setText(ammo + "/" + maxAmmo);
+        weapon.ammo--;
+        hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
     }
 }
 
@@ -505,7 +609,7 @@ function createEnemies() {
 
         game.physics.arcade.enable(enemy);
     });
-    game.time.events.loop(ENEMY_SPAWN_TIMER, spawnEnemy, this);
+    game.time.events.loop(frecuenciaSpawnEnemy, spawnEnemy, this);
 }
 
 function spawnEnemy() {
@@ -515,17 +619,18 @@ function spawnEnemy() {
         enemy.reset(Math.random() * game.world.width, Math.random() * game.world.height);
         enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
-        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadEnemigo);
         game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(enemy));
     }
 }
 
 function enemyMovement(enemy) {
-    enemy.body.velocity = 0;
+    enemy.body.velocity.x = 0;
+    enemy.body.velocity.y = 0;
     enemy.rotation = Math.random() * 360;
     game.time.events.add(ENEMY_STOP_TIME, () => {
         if (Math.random() < ENEMY_TURN_PROBABILITY) {
-            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, ENEMY_BASE_SPEED);
+            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadEnemigo);
         }
     })
 }
@@ -584,44 +689,122 @@ let menuGroup;
 function createMenu() {
     menuGroup = game.add.group();
 
-    let buyWeapon1Button = game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');});
+    let buyWeapon1Button = game.add.button(game.canvas.width - 100, game.canvas.height/2 + 70 - 200, 'buyWeapon1Button', () => {buyItem(0);});
     buyWeapon1Button.anchor.set(0.5);
+    buyWeapon1Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon1Button);
 
 
-    let buyWeapon2Button = game.add.button(game.canvas.width - 50, game.canvas.height/2 , 'buyWeapon2Button', () => {buyItem('weapon2');});
+    let buyWeapon2Button = game.add.button(game.canvas.width - 100, game.canvas.height/2 + 70 , 'buyWeapon2Button', () => {buyItem(1);});
     buyWeapon2Button.anchor.set(0.5);
+    buyWeapon2Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon2Button);
 
 
-    let buyWeapon3Button = game.add.button(game.canvas.width - 50, game.canvas.height/2 + 200, 'buyWeapon3Button', () => {buyItem('weapon3');});
+    let buyWeapon3Button = game.add.button(game.canvas.width - 100, game.canvas.height/2 + 70 + 200, 'buyWeapon3Button', () => {buyItem(2);});
     buyWeapon3Button.anchor.set(0.5);
+    buyWeapon3Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon3Button);
 
 
-    let upgradeSpeedButton = game.add.button(50, game.canvas.height/2 - 200, 'upgradeSpeedButton', upgradeSpeed);
+    let upgradeSpeedButton = game.add.button(100, game.canvas.height/2 + 70 - 200, 'upgradeSpeedButton', upgradeSpeed);
     upgradeSpeedButton.anchor.set(0.5);
+    upgradeSpeedButton.scale.setTo(0.25);
     menuGroup.add(upgradeSpeedButton);
 
-    let upgradeHealthButton = game.add.button(50, game.canvas.height/2, 'upgradeHealthButton', upgradeHealth);
+    let upgradeHealthButton = game.add.button(100, game.canvas.height/2 + 70, 'upgradeHealthButton', upgradeHealth);
     upgradeHealthButton.anchor.set(0.5);
+    upgradeHealthButton.scale.setTo(0.25);
     menuGroup.add(upgradeHealthButton);
 
-    let exitButton = game.add.button(50, game.canvas.height/2 + 200, 'exitButton', hideMenu);
+    let exitButton = game.add.button(100, game.canvas.height/2 + 70 + 200, 'exitButton', hideMenu);
     exitButton.anchor.set(0.5);
+    exitButton.scale.setTo(0.25);
     menuGroup.add(exitButton);
 
     // Mostrar monedas
-    let coinsText = game.add.text(game.canvas.width/2, game.canvas.height/2 - 150, 'Coins: ' + coins, {
+    let coinsText = game.add.text(game.canvas.width/2, game.canvas.height/2 + 70 - 150, 'Coins: ' + coins, {
         font: 'bold 25pt',
         fill: '#ffffff'
     });
     coinsText.anchor.set(0.5);
     menuGroup.add(coinsText);
 
+    //apartir de aqui para abajo es para el texto de lo que cuesta cada boton
+
+    let textValorWeapon1 = "Cost: " + itemCostArray[0] +" coins";
+    let costWeapon1 = game.add.text(game.canvas.width - 100, game.canvas.height/2 + 30 - 200, textValorWeapon1, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    costWeapon1.anchor.setTo(0.5,0.5);
+    menuGroup.add(costWeapon1);
+
+    let textValorWeapon2 = "Cost: " + itemCostArray[1] +" coins";
+    let costWeapon2 = game.add.text(game.canvas.width - 100, game.canvas.height/2 + 30, textValorWeapon2, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    costWeapon2.anchor.setTo(0.5,0.5);
+    menuGroup.add(costWeapon2);
+
+    let textValorWeapon3 = "Cost: " + itemCostArray[2]  +" coins";
+    let costWeapon3 = game.add.text(game.canvas.width - 100, game.canvas.height/2 + 30 + 200, textValorWeapon3, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    costWeapon3.anchor.setTo(0.5,0.5);
+    menuGroup.add(costWeapon3);
+
+    let textValorUpgradeSpeed = "Cost: " + costRun +" coins";
+    costRunText = game.add.text( 100, game.canvas.height/2 + 30 - 200, textValorUpgradeSpeed, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    costRunText.anchor.setTo(0.5,0.5);
+    menuGroup.add(costRunText);
+
+    let textValorUpgradeLife = "Cost: " + costLife +" coins";
+    costLifeText = game.add.text( 100, game.canvas.height/2 + 30 , textValorUpgradeLife, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    costLifeText.anchor.setTo(0.5,0.5);
+    menuGroup.add(costLifeText);
+
+    //apartir de aqui van las imagenes
+
+    let weapon1Image = game.add.sprite(game.canvas.width - 100, game.canvas.height/2 - 200 - 25, 'weapon1');
+    weapon1Image.anchor.set(0.5);
+    weapon1Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
+    menuGroup.add(weapon1Image);
+
+    let weapon2Image = game.add.sprite(game.canvas.width - 100, game.canvas.height/2 - 25, 'weapon2');
+    weapon2Image.anchor.set(0.5);
+    weapon2Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
+    menuGroup.add(weapon2Image);
+
+    let weapon3Image = game.add.sprite(game.canvas.width - 100, game.canvas.height/2 + 200 - 25, 'weapon3');
+    weapon3Image.anchor.set(0.5);
+    weapon3Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
+    menuGroup.add(weapon3Image);
+
+    let heartImageMenu = game.add.sprite(100, game.canvas.height/2 - 25, 'heart');
+    heartImageMenu.anchor.set(0.5);
+    heartImageMenu.scale.setTo(1); // Ajusta el tamaño según sea necesario
+    menuGroup.add(heartImageMenu);
+
+    let botasImagenAlas = game.add.sprite(100, game.canvas.height/2 - 25 - 200, 'boots');
+    botasImagenAlas.anchor.set(0.5);
+    botasImagenAlas.scale.setTo(0.04); // Ajusta el tamaño según sea necesario
+    menuGroup.add(botasImagenAlas);
+
     menuGroup.coinsText = coinsText;
     menuGroup.fixedToCamera = true;
 }
+
+let costLifeText;
+let costRunText;
 
 function updateMenuButtons() {
     //menuGroup.buyWeapon1Button = (weapon1Bought ? () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button');} : () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');})});
@@ -633,6 +816,13 @@ function updateMenuButtons() {
 
     menuGroup.getAt(2).inputEnabled = !weapon3Bought;
     menuGroup.getAt(2).alpha = (weapon3Bought ? 0.5 : 1);
+
+
+    //para actualizar el texto de lo que cuesta la vida y lo que cuesta mejorar la velocidad
+
+    costLifeText.setText(("Cost: " + costLife +" coins"));
+    costRunText.setText(("Cost: " + costRun +" coins"));
+
 
 
 }
@@ -654,33 +844,28 @@ function updateCoinsText() {
 }
 
 function buyItem(item) {
-    const itemCosts = {
-        'weapon1': 300,
-        'weapon2': 500,
-        'weapon3': 700
-    };
-
-    if (coins >= itemCosts[item]) {
-        coins -= itemCosts[item];
+    if (coins >= itemCostArray[item]) {
+        coins -= itemCostArray[item];
         switch(item) {
-            case 'weapon1':
+            case 0:
                 if (!weapon1Bought) {
                     weapon1Bought = true;
-                    // Lógica adicional para dar al jugador el arma 1
+                    weaponsBuy[1].bought = true;
                 }
                 hideMenu();
                 break;
-            case 'weapon2':
+            case 1:
                 if (!weapon2Bought) {
                     weapon2Bought = true;
-                    // Lógica adicional para dar al jugador el arma 2
+                    weaponsBuy[2].bought = true;
+
                 }
                 hideMenu();
                 break;
-            case 'weapon3':
+            case 2:
                 if (!weapon3Bought) {
                     weapon3Bought = true;
-                    // Lógica adicional para dar al jugador el arma 3
+                    weaponsBuy[3].bought = true;
                 }
                 hideMenu();
                 break;
@@ -695,14 +880,14 @@ function buyItem(item) {
     updateCoinsText();
 }
 
-let costRun;
+
 
 function upgradeSpeed() {
-    costRun += 70;
     if (coins >= costRun) {
         coins -= costRun;
         velocidadJugador += 20;
         console.log('Speed upgraded!');
+        costRun += 70;
     } else {
         console.log('Not enough coins to upgrade speed');
     }
@@ -711,16 +896,16 @@ function upgradeSpeed() {
     updateCoinsText();
 }
 
-let costLife = 40;
+
 
 function upgradeHealth() {
-    costLife += 50;
     if (coins >= costLife) {
         coins -= costLife;
-        maxHealth += 10;
+        maxHealth += 30;
         healthValue = maxHealth;
          // Restaura la salud al máximo
         console.log('Health upgraded!');
+        costLife += 50;
         updateHealthBar();
     } else {
         console.log('Not enough coins to upgrade health');
@@ -757,16 +942,23 @@ function endGame() {
 
 
 function checkRechargeArea(area) {
+
+    let weapon = weaponsBuy[currentWeapon];
     hudInteractText.setText("Press [E] or [-] to recharge.");
     game.physics.arcade.isPaused = true;
     timerClock.timer.pause();
     if (keys.e.isDown || keys.minus.isDown) {
-        ammo = maxAmmo;
-        hudAmmo.setText(ammo + "/" + maxAmmo);
+        weaponsBuy.forEach(weapon => {
+            weapon.ammo = weapon.maxAmmo;
+        });
+
+        hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
         area.kill();
         game.physics.arcade.isPaused = false;
         timerClock.timer.resume();
         hudInteractText.setText("");
     }
+
+
 }
 
