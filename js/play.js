@@ -18,10 +18,10 @@ const ENEMY_TURN_PROBABILITY = 0.9;
 const ENEMY_STOP_TIME = 1500;
 const ENEMY_BASE_HURT = 15;
 
-const TIEMPO_DENTRO_ZONA_SEGURA = 10;
+const SAFE_ZONE_COUNTDOWN = 10;
 
-const VALOR_COMPRA_VIDA_INICIAL = 40;
-const VALOR_COMPRA_VELOCIDAD_INICIAL = 70;
+const INITIAL_HEALTH_VALUE = 40;
+const INITIAL_SPEED_VALUE = 70;
 
 let enemyHealth;
 let enemyResetPosX;
@@ -61,7 +61,9 @@ let areaGroup;
 let hudGroup;
 /** @type {Phaser.Group} */
 let bulletGroup;
-let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins, hudInteractText;
+/** @type {Phaser.Group} */
+let gemGroup;
+let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins, hudInteractText, hudGems;
 let remainingTime;
 let remainingSZTime;
 let score;
@@ -98,29 +100,35 @@ let weapon1Bought;
 let weapon2Bought;
 let weapon3Bought;
 
-let velocidadJugador;
+let playerSpeed;
 
 
 /** @type {Phaser.Sound} */
 let dangerSound;
+let hitSound;
+let coinSound;
+let shootSound;
+let gemSound;
+
 
 let coins;
+let gems;
 
 let costRun;
 let costLife;
 
-let velocidadEnemigo;
+let enemySpeed;
 
 
-let dañoEnemigo;
+let enemyDamage;
 let frecuenciaSpawnEnemy;
 
 let currentWeapon = 0;
 let weaponsBuy = [
-    { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500},//predeterminada
-    { image: 'weapon1', bought: false, ammo: 20, maxAmmo: 20, cooldown: 500 },
-    { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1000 },
-    { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99 }
+    { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500, damage: 5},//predeterminada
+    { image: 'weapon1', bought: false, ammo: 20, maxAmmo: 20, cooldown: 500, damage: 7},
+    { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1500, damage: 5},
+    { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99, damage: 3 }
 ];
 
 let currentWeaponSprite;
@@ -139,7 +147,6 @@ function loadPlayAssets() {
 
 function loadSprites() {
     game.load.spritesheet('pc', '../assets/sprites/psj.png',55,43);
-    //game.load.spritesheet('pc', '../assets/sprites/survivor1_gun.png');
     game.load.spritesheet('zombie', '../assets/sprites/zomb.png',36,43);
     game.load.image('bullet', '../assets/sprites/purple_ball.png');
     game.load.image('reloadArea', '../assets/sprites/blue_circle.png');
@@ -151,6 +158,7 @@ function loadImages() {
     game.load.image('healthBar', '../assets/UI/health_bar.png');
     game.load.image('healthHolder', '../assets/UI/health_holder.png');
     game.load.image('coin', '../assets/UI/coin.png');
+    game.load.image('gem', '../assets/sprites/gem.png');
     game.load.image('bgGame', '../assets/UI/Fondodejuego.png');
     game.load.image('wall', "../assets/sprites/tile_273.png");
     game.load.image('negro', '../assets/UI/ImagenNegraParaTransicion.jpg');
@@ -170,14 +178,18 @@ function loadImages() {
 
     //escopeta,pistola,machinegun
 
-    game.load.spritesheet('weapon0','../assets/sprites/pistola.png');
-    game.load.spritesheet('weapon1','../assets/sprites/pistolaConSilenciador.png');
+    game.load.spritesheet('weapon0','../assets/sprites/pistolaConSilenciador.png');
+    game.load.spritesheet('weapon1','../assets/sprites/pistola.png');
     game.load.spritesheet('weapon2','../assets/sprites/escopeta.png');
     game.load.spritesheet('weapon3','../assets/sprites/AK.png');
 }
 
 function loadSounds() {
     game.load.audio('danger', '../assets/sounds/danger.wav');
+    game.load.audio('hitSound', '../assets/sounds/hitHurt.wav');
+    game.load.audio('coinSound', '../assets/sounds/pickupCoin.wav');
+    game.load.audio('shootSound', '../assets/sounds/laserShoot.wav');
+    game.load.audio('gemSound', '../assets/sounds/pickupGem.wav');
 }
 
 function loadLevel(level) {
@@ -186,6 +198,10 @@ function loadLevel(level) {
 
 function createSounds(){
     soundSZ = game.add.audio('danger');
+    hitSound = game.add.audio('hitSound');
+    coinSound = game.add.audio('coinSound');
+    shootSound = game.add.audio('shootSound');
+    gemSound = game.add.audio('gemSound');
 }
 
 
@@ -206,11 +222,12 @@ function createLevel() {
     overlapSZ = false;
     nextShoot = 0;
     nextEntry = 0;
-    coins = 1000;
+    coins = 0;
+    gems = 0;
     nextHurt = 0;
     // maxAmmo = 50;
     // ammo = maxAmmo;
-    TotalMonedas = 0;
+    totalCoins = 0;
     game.world.setBounds(0, 0, game.canvas.width*2, game.canvas.height*4);
     game.physics.startSystem(Phaser.Physics.ARCADE);
     bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bgGame');
@@ -230,7 +247,7 @@ function createLevel() {
     });
     //generateAreaPositions(areaGroup.length-1);
     cursors = game.input.keyboard.createCursorKeys();
-    keys = game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D, e: Phaser.KeyCode.E, minus: Phaser.KeyCode.MINUS });
+    keys = game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D, e: Phaser.KeyCode.E, underscore: Phaser.KeyCode.UNDERSCORE });
 
     coinGroup = game.add.group();
     coinGroup.enableBody = true;
@@ -239,6 +256,16 @@ function createLevel() {
     coinGroup.forEach(coin => {
         coin.anchor.setTo(0.5, 0.5);
     });
+
+    gemGroup = game.add.group();
+    gemGroup.enableBody = true;
+    gemGroup.physicsBodyType = Phaser.Physics.ARCADE;
+    gemGroup.createMultiple(20,'gem');
+    gemGroup.forEach(gem => {
+        gem.anchor.setTo(0.5, 0.5);
+        gem.scale.setTo(2,2);
+    });
+
     bulletGroup = game.add.group();
     bulletGroup.enableBody = true;
     bulletGroup.physicsBodyType = Phaser.Physics.ARCADE;
@@ -329,13 +356,13 @@ function setDifficulty(difficulty) {
             speedEnemyModifier = 1.3;
             break;
     }
-    costRun = VALOR_COMPRA_VELOCIDAD_INICIAL*modifierCosts;
-    costLife = VALOR_COMPRA_VIDA_INICIAL*modifierCosts;
-    velocidadJugador = PLAYER_VELOCITY * speedPlayerModifier;
+    costRun = INITIAL_SPEED_VALUE*modifierCosts;
+    costLife = INITIAL_HEALTH_VALUE*modifierCosts;
+    playerSpeed = PLAYER_VELOCITY * speedPlayerModifier;
     enemyHealth = ENEMY_BASE_HEALTH * enemyLifeModifier;
-    velocidadEnemigo = ENEMY_BASE_SPEED * speedEnemyModifier;
+    enemySpeed = ENEMY_BASE_SPEED * speedEnemyModifier;
     maxHealth = MAX_HEALTH * lifeModifier;
-    dañoEnemigo = ENEMY_BASE_HURT * enemyDamageModifier;
+    enemyDamage = ENEMY_BASE_HURT * enemyDamageModifier;
     frecuenciaSpawnEnemy = ENEMY_SPAWN_TIMER * frecuenciaSpawnEnemyModifier;
     ITEMCOST.forEach(item => {itemCostArray.push(item*modifierCosts);
         console.log(item, modifierCosts, item*modifierCosts);
@@ -375,9 +402,9 @@ function updateLevel() {
         game.physics.arcade.collide(enemies, wall);     
     }
 
-    coinGroup.forEachAlive(coin => {
-        game.physics.arcade.collide(coin, player, collectCoin, null, this);
-    });
+    game.physics.arcade.collide(player, coinGroup, collectCoin, null, this);
+
+    game.physics.arcade.collide(player, gemGroup, collectGem, null, this);
 
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if (healthValue == 0) {
@@ -390,17 +417,7 @@ function updateLevel() {
         || (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused)
         || (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
         shoot();
-        switch(currentWeapon) {
-            case 0:
-                player.animations.play('shootPistol');
-                break;
-            case 2:
-                player.animations.play('shootShotgun');
-                break;
-            case 3:
-                player.animations.play('shootRifle');
-                break;
-        }
+        
     }
 
 
@@ -509,40 +526,54 @@ function choquesZonaSegura(){
 
 function hurtPlayer() {
     if (game.time.now > nextHurt) {
+        hitSound.play();
         nextHurt = game.time.now + INVULNERABILITY_TIME;
-        healthValue -= dañoEnemigo;
+        healthValue -= enemyDamage;
         updateHealthBar();
     }
 }
 
 function hurtEnemy(enemy, bullet) {
     bullet.kill();
+    hitSound.play();
     enemy.body.velocity.x = 0;
     enemy.body.velocity.y = 0;
-    enemy.health -= 5;
+    enemy.health -= weaponsBuy[currentWeapon].damage;
     score += 5;
     if (enemy.health <= 0) {
         let coin = coinGroup.getFirstDead();
-        coin.reset(enemy.x, enemy.y);
+        coin.reset(enemy.x-10, enemy.y-10);
         enemy.kill();
+        if(Math.random()>0.5) {
+            gemGroup.getFirstDead().reset(enemy.x+10,enemy.y+10);
+        }
         score += 100;
     }
     updateScore();
 
 }
 
-function collectCoin(coin) {
+function collectCoin(player, coin) {
     coin.kill();
+    coinSound.play();
     coins += 15;
-    TotalMonedas ++;
+    totalCoins ++;
     hudCoins.setText(coins);
+}
+
+function collectGem(player, gem) {
+    gem.kill();
+    gemSound.play();
+    gems++;
+    hudGems.setText(gems);
+    
 }
 
 function onSafeZoneOverlap() {
     safeZone.body.velocity.x = 0;
     safeZone.body.velocity.y = 0;
 
-    remainingSZTime = TIEMPO_DENTRO_ZONA_SEGURA;
+    remainingSZTime = SAFE_ZONE_COUNTDOWN;
 
     timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => {remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2);}, this);
 
@@ -595,12 +626,21 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudAmmo);
+
     hudGroup.create(game.canvas.width - 155, 36, 'coin');
     hudCoins = game.add.text(game.canvas.width - 100, 52, coins, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
     hudGroup.add(hudCoins);
+
+    let gemIcon = hudGroup.create(game.canvas.width - 135, 95, 'gem');
+    gemIcon.scale.setTo(1.5,1.5);
+    hudGems = game.add.text(game.canvas.width - 100, 92, gems, {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    hudGroup.add(hudGems);
 
     hudInteractText = game.add.text(game.canvas.width / 2, game.canvas.height - 50, "", {
         font: 'bold 20pt',
@@ -619,10 +659,22 @@ function createHUD() {
 }
 
 function shoot() {
+    switch(currentWeapon) {
+        case 0:
+            player.animations.play('shootPistol');
+            break;
+        case 2:
+            player.animations.play('shootShotgun');
+            break;
+        case 3:
+            player.animations.play('shootRifle');
+            break;
+    }
     let weapon = weaponsBuy[currentWeapon];
     if (game.time.now > nextShoot && bulletGroup.countDead() > 0 && weapon.ammo > 0) {
+        shootSound.play();
         nextShoot = game.time.now + weapon.cooldown;
-        if(weaponsBuy[currentWeapon].image == 'weapon2') {
+        if(weapon.image == 'weapon2') {
             //ESCOPETA
             nextShoot = game.time.now + SHOOT_COOLDOWN * 3;
             
@@ -653,16 +705,16 @@ function characterMovement() {
 
     player.rotation = game.physics.arcade.angleToPointer(player);
     if(cursors.up.isDown || keys.w.isDown){
-        player.body.velocity.y = -velocidadJugador;
+        player.body.velocity.y = -playerSpeed;
     }
     if(cursors.down.isDown || keys.s.isDown){
-        player.body.velocity.y = velocidadJugador;
+        player.body.velocity.y = playerSpeed;
     }
     if(cursors.left.isDown || keys.a.isDown) {
-        player.body.velocity.x = -velocidadJugador;
+        player.body.velocity.x = -playerSpeed;
     }
     if(cursors.right.isDown || keys.d.isDown) {
-        player.body.velocity.x = velocidadJugador;
+        player.body.velocity.x = playerSpeed;
     }
 
 }
@@ -690,7 +742,7 @@ function spawnEnemy() {
         if (game.physics.arcade.overlap(enemy, safeZone)) enemy.kill();
         enemy.health = enemyHealth;
         enemy.rotation = Math.random() * 360;
-        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, velocidadEnemigo);
+        enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, enemySpeed);
         game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(enemy));
     }
 }
@@ -918,6 +970,7 @@ function hideMenu() {
 
 function updateCoinsText() {
     menuGroup.coinsText.setText('Coins: ' + coins);
+    hudCoins.setText(coins);
 }
 
 function buyItem(item) {
@@ -962,7 +1015,7 @@ function buyItem(item) {
 function upgradeSpeed() {
     if (coins >= costRun) {
         coins -= costRun;
-        velocidadJugador += 20;
+        playerSpeed += 20;
         console.log('Speed upgraded!');
         costRun += 70;
     } else {
@@ -1024,7 +1077,7 @@ function checkRechargeArea(area) {
     hudInteractText.setText("Press [E] or [-] to recharge.");
     game.physics.arcade.isPaused = true;
     timerClock.timer.pause();
-    if (keys.e.isDown || keys.minus.isDown) {
+    if (keys.e.isDown || keys.underscore.isDown) {
         weaponsBuy.forEach(weapon => {
             weapon.ammo = weapon.maxAmmo;
         });
