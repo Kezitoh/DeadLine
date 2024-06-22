@@ -74,7 +74,7 @@ function createLevelFinal() {
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
         btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {
-            animacionSalida(() => {game.state.start('welcome');});
+            exitAnimation(() => {game.state.start('welcome');});
             clickSoundFinal.play();
             btnInicio.inputEnabled = false;
         });
@@ -84,7 +84,7 @@ function createLevelFinal() {
         btnInicio.anchor.setTo(0.5,0.5);
     }
 
-    animacionEntrada();
+    enterAnimation();
 
     console.log("CTM");
 }

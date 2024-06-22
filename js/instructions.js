@@ -65,7 +65,7 @@ function showSlide1(){
     let wasdImage = game.add.sprite(game.canvas.width / 2, game.canvas.height/2 , 'wasdImagen');
     wasdImage.anchor.set(0.5);
     wasdImage.scale.setTo(0.5);
-    animacionEntrada();
+    enterAnimation();
 }
 
 function showSlide2(){
@@ -126,7 +126,7 @@ function forwardBtnPress(slideOrigin){
             showSlide3();
             break;
         case 3:
-            animacionSalida(() => {game.state.start('welcome');});
+            exitAnimation(() => {game.state.start('welcome');});
             break;
     }
 }
@@ -135,7 +135,7 @@ function backBtnPress(slideOrigin){
     game.time.events.remove(timer);
     switch(slideOrigin){
         case 1:
-            animacionSalida(() => {game.state.start('welcome');});
+            exitAnimation(() => {game.state.start('welcome');});
             break;
         case 2:
             showSlide1();

@@ -104,8 +104,8 @@ function displayScreen() {
     botonesTween.delay(1500);
     botonesTween.start();
 
-    animacionEntrada();
-    animacionEntradaPlayer();
+    enterAnimation();
+    enterAnimationPlayer();
 
 }
 
@@ -149,12 +149,12 @@ function oninstructionsButtonPressed() {
     }, 300, Phaser.Easing.Cubic.Out).to({
         y:game.canvas.height / 1.3 + 120
     }, 1000, Phaser.Easing.Cubic.Out);
-    playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('instructions');});});
+    playerTween.onComplete.add(() => {exitAnimation(() => {game.state.start('instructions');});});
     playerTween.start();
 
 }
 
-function animacionSalida(a){
+function exitAnimation(a){
 
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
@@ -168,7 +168,7 @@ function animacionSalida(a){
     mainTween.start();
 }
 
-function animacionEntrada(){
+function enterAnimation(){
     img5 = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'negro');
     img5.anchor.setTo(0.5,0.5);
     img5.scale.setTo(20);
@@ -181,7 +181,7 @@ function animacionEntrada(){
     mainTween.start();
 }
 
-function animacionEntradaPlayer(){
+function enterAnimationPlayer(){
     p = game.add.sprite(-20, game.canvas.height/1.35, 'pc');
     p.anchor.setTo(0.5,0.5);
 
@@ -216,7 +216,7 @@ function onDifficultySet(d){
         }, 300, Phaser.Easing.Cubic.Out).to({
             y:game.canvas.height / 3 + 120
         }, 1000, Phaser.Easing.Cubic.Out);
-        playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('play');});});
+        playerTween.onComplete.add(() => {exitAnimation(() => {game.state.start('play');});});
         playerTween.start();
     }
     if(difficulty == "Normal"){
@@ -227,7 +227,7 @@ function onDifficultySet(d){
         playerTween = game.add.tween(p).to({
             y:game.canvas.height / 3 + 120
         }, 1000, Phaser.Easing.Cubic.Out);
-        playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('play');});});
+        playerTween.onComplete.add(() => {exitAnimation(() => {game.state.start('play');});});
         playerTween.start();
     }
     if(difficulty == "Hard"){
@@ -244,7 +244,7 @@ function onDifficultySet(d){
         }, 300, Phaser.Easing.Cubic.Out).to({
             y:game.canvas.height / 3 + 120
         }, 1000, Phaser.Easing.Cubic.Out);
-        playerTween.onComplete.add(() => {animacionSalida(() => {game.state.start('play');});});
+        playerTween.onComplete.add(() => {exitAnimation(() => {game.state.start('play');});});
         playerTween.start();
     }
 }
