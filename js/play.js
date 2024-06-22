@@ -282,7 +282,7 @@ function setControls() {
     keys= {
         movement:game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D }),
         reload:game.input.keyboard.addKeys({e: Phaser.KeyCode.E, underscore: Phaser.KeyCode.UNDERSCORE}),
-        switchWeapon:game.input.keyboard.addKey(Phaser.KeyCode.Q)
+        switchWeapon:game.input.keyboard.addKeys({q: Phaser.KeyCode.Q, ctrl: Phaser.KeyCode.CONTROL})
     };
     cursors = game.input.keyboard.createCursorKeys();
 }
