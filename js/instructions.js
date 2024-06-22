@@ -9,6 +9,10 @@ function loadInstructionsAssets(){
     game.load.image('forwardBtn', 'assets/UI/forwardButton.png');
     game.load.image('backBtn', 'assets/UI/backButton.png');
     game.load.image('wasdImagen', 'assets/UI/WASD.png');
+    game.load.image('silencedPistolImage', '/assets/sprites/pistolaConSilenciador.png');
+    game.load.image('pistolImage', '/assets/sprites/pistola.png');
+    game.load.image('shotgunImage', '/assets/sprites/escopeta.png');
+    game.load.image('assaultRifleImage', '/assets/sprites/AK.png');
 }
 
 const SLIDE_TIME = 15000;
@@ -45,9 +49,9 @@ function showSlide1(){
     slideNum = 1;
      timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
 
-    let slide1Text = 'Use WASD or ARROWS to move the player character.\n';
+    let slide1Text = 'Use WASD or ARROWS to move the player character\n';
     slide1Text += 'AIM with the MOUSE and LEFT CLICK to SHOOT\n';
-    slide1Text += 'SHOOT the enemies to gain points!\n \n \n \n \n \n \n In a simple way, to win you need the gems that the robots drop';
+    slide1Text += 'SHOOT the enemies to gain points!';
 
     let slide1TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide1Text, slideTextStyle);
     slide1TextBox.anchor.setTo(0.5, 0);
@@ -58,9 +62,9 @@ function showSlide1(){
     let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'homeBtn', () => {backBtnPress(slideNum)});
     backBtn.scale.setTo(1.5);
 
-    let wasdImage = game.add.sprite(game.canvas.width / 6, game.canvas.height/2 , 'wasdImagen');
+    let wasdImage = game.add.sprite(game.canvas.width / 2, game.canvas.height/2 , 'wasdImagen');
     wasdImage.anchor.set(0.5);
-    wasdImage.scale.setTo(0.25);
+    wasdImage.scale.setTo(0.5);
     animacionEntrada();
 }
 
@@ -69,10 +73,28 @@ function showSlide2(){
     slideNum = 2;
     timer = game.time.events.add(SLIDE_TIME, () => {backBtnPress(slideNum)}, this);
 
-    let slide2Text = "You can buy weapons in the safe zone \nbut don't stay too comfortable there, \nsedentary lifestyle is Lethal ;3 \nYou can equip the weapons you buy by pressing the Q key \nand with the same key change it for another one.\n \n To win is simple. The only thing you have to do is kill everyone. \nDON'T worry about them, they no longer have life, \nwe make sure of them :)";
+    let slide2Text = "Enemies drop coins and gems" + 
+                     "\nCoins can be used to buy weapons and upgrades in the Safe Zone!" + 
+                     "\nYou can swap between weapons with the Q/Control keys" + 
+                     "\nEach weapon has different damage, ammo and fire rates" +
+                     "\nWhen you gather enough gems, you will win the game!" + 
+                     "\nand with the same key change it for another one.\n" + 
+                     "\n To win is simple. The only thing you have to do is kill everyone." + 
+                     "\nDON'T worry about them, they no longer have life," + 
+                     "\nwe make sure of them :)";
     let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide2Text, slideTextStyle);
     slide2TextBox.anchor.setTo(0.5,0);
     slide2TextBox.setShadow(5,5);
+
+    let silencedPistolImage = game.add.sprite(game.canvas.width / 5, game.canvas.height/2, 'silencedPistolImage');
+    silencedPistolImage.scale.setTo(0.5);
+    let pistolImage = game.add.sprite(game.canvas.width / 5 + 200, game.canvas.height/2, 'PistolImage');
+    pistolImage.scale.setTo(0.5);
+    let shotgunImage = game.add.sprite(game.canvas.width / 5 + 200*2, game.canvas.height/2, 'shotgunImage');
+    shotgunImage.scale.setTo(0.5);
+    let assaultRifleImage = game.add.sprite(game.canvas.width / 5 + 200*3, game.canvas.height/2, 'assaultRifeImage');
+    assaultRifleImage.scale.setTo(0.5);
+
 
 
     let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});

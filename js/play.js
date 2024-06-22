@@ -329,7 +329,7 @@ function createLevel() {
 
     hideMenu();
 
-    keys.switchWeapon = game.input.keyboard.addKey(Phaser.KeyCode.Q);
+    keys.switchWeapon = game.input.keyboard.addKeys({q: Phaser.KeyCode.Q, ctrl: Phaser.KeyCode.CONTROL});
 
     animacionEntrada();
 }
@@ -411,7 +411,7 @@ function updateLevel() {
         animacionSalidaToFinal(() => {endGame(true);});
     }
 
-    if (keys.switchWeapon.justDown) {
+    if (keys.switchWeapon.q.justDown || keys.switchWeapon.ctrl.justDown) {
         switchWeapon();
         console.log("Switched to weapon: " + currentWeapon);
     }
