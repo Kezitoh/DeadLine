@@ -9,10 +9,10 @@ function loadInstructionsAssets(){
     game.load.image('forwardBtn', 'assets/UI/forwardButton.png');
     game.load.image('backBtn', 'assets/UI/backButton.png');
     game.load.image('wasdImagen', 'assets/UI/WASD.png');
-    game.load.image('silencedPistolImage', '/assets/sprites/pistolaConSilenciador.png');
-    game.load.image('pistolImage', '/assets/sprites/pistola.png');
-    game.load.image('shotgunImage', '/assets/sprites/escopeta.png');
-    game.load.image('assaultRifleImage', '/assets/sprites/AK.png');
+    game.load.image('silencedPistolImage', 'assets/sprites/pistolaConSilenciador.png');
+    game.load.image('pistolImage', 'assets/sprites/pistola.png');
+    game.load.image('shotgunImage', 'assets/sprites/escopeta.png');
+    game.load.image('assaultRifleImage', 'assets/sprites/AK.png');
 }
 
 const SLIDE_TIME = 15000;
@@ -49,8 +49,8 @@ function showSlide1(){
     slideNum = 1;
      timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
 
-    let slide1Text = 'Use WASD or ARROWS to move the player character\n';
-    slide1Text += 'AIM with the MOUSE and LEFT CLICK to SHOOT\n';
+    let slide1Text = 'Use WASD or ARROWS to move the player character.\n';
+    slide1Text += 'AIM with the MOUSE and LEFT CLICK to SHOOT.\n';
     slide1Text += 'SHOOT the enemies to gain points!';
 
     let slide1TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide1Text, slideTextStyle);
@@ -71,17 +71,13 @@ function showSlide1(){
 function showSlide2(){
     showBaseScreen();
     slideNum = 2;
-    timer = game.time.events.add(SLIDE_TIME, () => {backBtnPress(slideNum)}, this);
+    timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
 
-    let slide2Text = "Enemies drop coins and gems" + 
+    let slide2Text = "Enemies drop coins and gems." + 
                      "\nCoins can be used to buy weapons and upgrades in the Safe Zone!" + 
-                     "\nYou can swap between weapons with the Q/Control keys" + 
-                     "\nEach weapon has different damage, ammo and fire rates" +
-                     "\nWhen you gather enough gems, you will win the game!" + 
-                     "\nand with the same key change it for another one.\n" + 
-                     "\n To win is simple. The only thing you have to do is kill everyone." + 
-                     "\nDON'T worry about them, they no longer have life," + 
-                     "\nwe make sure of them :)";
+                     "\nYou can swap between weapons with the Q/Control keys." + 
+                     "\nEach weapon has different damage, ammo and fire rates.";
+
     let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide2Text, slideTextStyle);
     slide2TextBox.anchor.setTo(0.5,0);
     slide2TextBox.setShadow(5,5);
@@ -98,10 +94,26 @@ function showSlide2(){
 
 
     let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
-    
-
     let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'backBtn', () => {backBtnPress(slideNum)});
     
+}
+
+function showSlide3() {
+    showBaseScreen();
+    slideNum = 3;
+    timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
+
+    let slide3Text = "When you have enough points, \nthe barrier dividing the game world will dissapear." +
+                     "\nOnce it is gone, the robots will start spawning" +
+                     "\nDefeat robots to have a guaranteed gem drop!" +
+                     "\n\n You will win the game when you get enough gems!";
+
+    let slide3TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide3Text, slideTextStyle);
+    slide3TextBox.anchor.setTo(0.5,0);
+    slide3TextBox.setShadow(5,5);
+
+    let forwardBtn = game.add.button(game.canvas.width/1.25, game.canvas.height/1.25, 'forwardBtn', () => {forwardBtnPress(slideNum)});
+    let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'backBtn', () => {backBtnPress(slideNum)});
 }
 
 function forwardBtnPress(slideOrigin){
@@ -111,6 +123,9 @@ function forwardBtnPress(slideOrigin){
             showSlide2();
             break;
         case 2:
+            showSlide3();
+            break;
+        case 3:
             animacionSalida(() => {game.state.start('welcome');});
             break;
     }
@@ -124,6 +139,9 @@ function backBtnPress(slideOrigin){
             break;
         case 2:
             showSlide1();
+            break;
+        case 3:
+            showSlide2();
             break;
     }
 }
