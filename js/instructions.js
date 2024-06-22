@@ -16,6 +16,7 @@ function loadInstructionsAssets(){
 }
 
 const SLIDE_TIME = 15000;
+const WEAPON_IMAGE_OFFSET = 200;
 
 let slideTextStyle = {
     font: 'Titan One',
@@ -84,11 +85,11 @@ function showSlide2(){
 
     let silencedPistolImage = game.add.sprite(game.canvas.width / 5, game.canvas.height/2, 'silencedPistolImage');
     silencedPistolImage.scale.setTo(0.5);
-    let pistolImage = game.add.sprite(game.canvas.width / 5 + 200, game.canvas.height/2, 'PistolImage');
+    let pistolImage = game.add.sprite(game.canvas.width / 5 + WEAPON_IMAGE_OFFSET, game.canvas.height/2, 'PistolImage');
     pistolImage.scale.setTo(0.5);
-    let shotgunImage = game.add.sprite(game.canvas.width / 5 + 200*2, game.canvas.height/2, 'shotgunImage');
+    let shotgunImage = game.add.sprite(game.canvas.width / 5 + WEAPON_IMAGE_OFFSET*2, game.canvas.height/2, 'shotgunImage');
     shotgunImage.scale.setTo(0.5);
-    let assaultRifleImage = game.add.sprite(game.canvas.width / 5 + 200*3, game.canvas.height/2, 'assaultRifeImage');
+    let assaultRifleImage = game.add.sprite(game.canvas.width / 5 + WEAPON_IMAGE_OFFSET*3, game.canvas.height/2, 'assaultRifeImage');
     assaultRifleImage.scale.setTo(0.5);
 
 

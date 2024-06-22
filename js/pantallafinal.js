@@ -85,6 +85,3 @@ function createLevelFinal() {
     }
 
     animacionEntrada();
-
-    console.log("CTM");
-}
