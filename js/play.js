@@ -49,12 +49,13 @@ let playState = {
 };
 
 //Helper render function for collision areas
-function render() {
-    areaGroup.forEach(area => {
-        game.debug.bodyInfo(area, 32, 32);
-        game.debug.body(area);
-    });
-}
+// function render() {
+//     areaGroup.forEach(area => {
+//         game.debug.bodyInfo(area, 32, 32);
+//         game.debug.body(area);
+//     });
+//     game.debug.body(safeZone);
+// }
 
 //Group variables
 /** @type {Phaser.Group} */
@@ -485,6 +486,7 @@ function zonaSegura() {
     safeZone.anchor.setTo(0.5);
     game.physics.arcade.enable(safeZone);
     safeZone.body.immovable = true;
+    safeZone.body.setSize((safeZone.width-70)/safeZone.scale.x,(safeZone.height-70)/safeZone.scale.y, 35, 35);
     let i = 0;
     levelData.safeZone.pillars.forEach(pillar => {
         let safeZonePillar = game.add.sprite(pillar.x, pillar.y, 'safeZone' + i++);
@@ -554,6 +556,8 @@ function collisionsSafeZone() {
         game.physics.arcade.collide(bullet, safeZonePillars[2]);
         game.physics.arcade.collide(bullet, safeZonePillars[3]);
     });
+    game.physics.arcade.collide(zombieGroup, safeZonePillars);
+    game.physics.arcade.collide(robotGroup, safeZonePillars);
     game.physics.arcade.collide(player, safeZonePillars[0]);
     game.physics.arcade.collide(player, safeZonePillars[1]);
     game.physics.arcade.collide(player, safeZonePillars[2]);
@@ -836,7 +840,7 @@ function spawnZombie() {
         zombie.health = enemyHealth;
         zombie.rotation = Math.random() * 360;
         zombie.body.velocity = game.physics.arcade.velocityFromRotation(zombie.rotation, zombieSpeed);
-        zombie.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(zombie) }, this);
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(zombie) }, this);
     }
 }
 
@@ -849,8 +853,7 @@ function spawnRobot() {
         robot.chasing = false;
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
-        robot.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(robot) }, this);
-        robot.shootTimer = game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => { robotShoot(robot) });
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(robot) }, this);
         // game.time.events.events.forEach(event => {
         //     if(event.callbackContext){
         //         if(event.callbackContext.key == "robot")
@@ -912,21 +915,13 @@ function enemyChase() {
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
             if (!robot.chasing) {
                 robot.chasing = true;
+                game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => { robotShoot(robot) });
             }
-
-            // console.log(robotBullets.countDead(), robotBullets.countLiving());
-            // if(game.time.now > robot.nextRobotShoot){
-            //     robot.nextRobotShoot = game.time.now + ROBOT_SHOOT_COOLDOWN;
-            //robotShoot(robot);
-            // }
-
+            robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
+            robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         }
-        // if(game.time.now > nextRobotShoot) {
-        //     nextRobotShoot = game.time.now + ROBOT_SHOOT_COOLDOWN;
-        // }
+    
 
-        robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
-        robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         game.physics.arcade.collide(robot, safeZone);
         game.physics.arcade.collide(robot, bulletGroup, hurtRobot, null, this);
     })
