@@ -239,8 +239,8 @@ function createLevel() {
     setDifficulty(difficulty);
     setWeapons();
     setWorld();
-    setAreas();
     zonaSegura();
+    setAreas();
     game.camera.focusOnXY(initPosX, initPosY);
     setPlayer();
     // maxAmmo = 50;
@@ -308,7 +308,8 @@ function setAreas() {
         area.body.setCircle(1, area.width / 2.15, area.height / 2.15);
         area.scale.setTo(4, 4);
         area.anchor.setTo(0.5, 0.5);
-        area.reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height / 2.25) + 50)) + (game.world.height / 2.25) + 50);
+        let pos = rechargeAreaRespawnCheck();
+        area.reset(pos.x, pos.y);
     });
 }
 
@@ -443,10 +444,11 @@ function updateLevel() {
 }
 
 function rechargeAreaRespawn() {
+    let pos = rechargeAreaRespawnCheck();
     if (areaGroup.countDead() > 0) {
 
         if (score < firstStage) {
-            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height / 2.25) + 50)) + (game.world.height / 2.25) + 50);
+            areaGroup.getFirstDead().reset(pos.x, pos.y);
         }
         else {
             areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height / 1.75) - 50) + 50);
@@ -454,6 +456,15 @@ function rechargeAreaRespawn() {
     }
 }
 
+function rechargeAreaRespawnCheck() {
+    let posX = Math.random() * (game.world.width - 50) + 50;
+    let posY = Math.random() * (game.world.height - ((game.world.height / 2.25) + 50)) + (game.world.height / 2.25) + 50;
+    if(safeZone.left - SAFE_ZONE_OFFSET < posX && posX < safeZone.right + SAFE_ZONE_OFFSET && safeZone.top - SAFE_ZONE_OFFSET < posY && posY < safeZone.bottom + SAFE_ZONE_OFFSET){
+        return enemySpawnPositionCheck(posX, posY);
+    } else {
+        return { x: posX, y: posY }
+    }
+}
 
 function checkGameEnd() {
     if (healthValue <= 0) {
@@ -475,7 +486,6 @@ function switchWeapon() {
 }
 
 
-
 function zonaSegura() {
     safeZonePillars = [];
     overlapSafeZone = false;
@@ -493,6 +503,7 @@ function zonaSegura() {
         safeZonePillars.push(safeZonePillar);
     });
 }
+
 
 function generalCollisions() {
     game.physics.arcade.collide(zombieGroup, bulletGroup, hurtZombie, null, this);
