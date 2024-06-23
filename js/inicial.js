@@ -58,7 +58,12 @@ function trushInitial() {
         botonesTween.start();
     });
 
-    game.canvas.addEventListener('pointerdown', () => { botonesTween.start();});
+    let eventInitial = () => {
+        game.canvas.removeEventListener('pointerdown', eventInitial); //hostia puta joder tio no me lo puedo creer
+        botonesTween.start();
+     }
+
+    game.canvas.addEventListener('pointerdown',  eventInitial);
 
     te.events.onInputOver.add(() => {
         te.fill = '#00FF13'; // Cambia el color a rojo cuando el ratón está encima, fui obligado

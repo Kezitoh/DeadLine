@@ -624,8 +624,8 @@ function hurtZombie(zombie, bullet) {
         remainingTime += EXTRA_TIME_PER_KILL;
         updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
-        coin.reset(enemy.x - 10, enemy.y - 10);
-        enemy.kill();
+        coin.reset(zombie.x - 10, zombie.y - 10);
+        zombie.kill();
         deadSoundEnemy.play();
         if (Math.random() > 0.5) {
             gemGroup.getFirstDead().reset(zombie.x + 10, zombie.y + 10);
