@@ -29,7 +29,6 @@ const ENEMY_BASE_HURT = 15;
 const ROBOT_BASE_SPEED = 120;
 const ROBOT_BULLETS_GROUP_SIZE = 1000;
 const EXTRA_TIME_PER_KILL = 3;
-const PLAYER_SAFE_RADIUS = 200;
 
 //Safe zone consts
 const SAFE_ZONE_OFFSET = 150;
