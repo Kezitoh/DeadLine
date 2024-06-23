@@ -653,6 +653,7 @@ function hurtRobot(robot, bullet) {
         let coin = coinGroup.getFirstDead();
         coin.reset(robot.x - 10, robot.y - 10);
         robot.kill();
+        deadSoundEnemy.play();
         gemGroup.getFirstDead().reset(robot.x + 10, robot.y + 10);
         score += 100;
 
