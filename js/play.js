@@ -117,7 +117,7 @@ let currentWeapon = 0;
 //Safe zone variables
 /** @type {Phaser.Sprite} */
 let safeZone;
-let safeZonePillars = [];
+let safeZonePillars;
 let overlapSafeZone;
 let nextEntryIntoSafeZone;
 let costRun;
@@ -239,8 +239,8 @@ function createLevel() {
     setDifficulty(difficulty);
     setWeapons();
     setWorld();
-    zonaSegura();
     setAreas();
+    zonaSegura();
     game.camera.focusOnXY(initPosX, initPosY);
     setPlayer();
     // maxAmmo = 50;
@@ -358,7 +358,6 @@ function setWeapons() {
 }
 
 function setDifficulty(difficulty) {
-    // mas o menos vida--, mas o menos daño de los enemigos y la vida  la velocidad de los enemigos, cantidad de los enemigos precios
     itemCostArray = [];
 
     switch (difficulty) {
@@ -423,7 +422,6 @@ function updateLevel() {
     } else {
         player.animations.play('holdGun');
     }
-    //player.animations.play('shootPistol');
     collisionsSafeZone();
     generalCollisions();
     enemyChase();
@@ -479,6 +477,7 @@ function switchWeapon() {
 
 
 function zonaSegura() {
+    safeZonePillars = [];
     overlapSafeZone = false;
     nextEntryIntoSafeZone = 0;
     safeZone = game.add.sprite(levelData.safeZone.position.x, levelData.safeZone.position.y, 'safeZone');
@@ -493,7 +492,6 @@ function zonaSegura() {
         safeZonePillar.body.immovable = true;
         safeZonePillars.push(safeZonePillar);
     });
-
 }
 
 function generalCollisions() {
@@ -507,6 +505,7 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, safeZone);
     robotBullets.forEachAlive(bullet => {
         game.physics.arcade.collide(bullet, player, () => { hurtPlayer(player, bullet, true) });
+        game.physics.arcade.collide(bullet, safeZone, () => {bullet.kill()});
     })
     if (score <= firstStage) {
         game.physics.arcade.collide(wall, player);
@@ -518,7 +517,6 @@ function generalCollisions() {
 }
 
 function collisionsSafeZone() {
-    //Cuando Entra a la zona segura
     if (game.time.now > nextEntryIntoSafeZone && !overlapSafeZone && game.physics.arcade.overlap(player, safeZone)) {
 
         overlapSafeZone = true;
@@ -547,7 +545,6 @@ function collisionsSafeZone() {
 
 
 
-    //game.physics.arcade.collide(enemy, safeZone);
     bulletGroup.forEachAlive(bullet => {
         game.physics.arcade.collide(bullet, safeZonePillars[0]);
         game.physics.arcade.collide(bullet, safeZonePillars[1]);
@@ -655,14 +652,6 @@ function onSafeZoneOverlap() {
 
     safeZoneTimeIn.fixedToCamera = true;
 }
-
-// function generateAreaPositions(quantity) {
-//     for(let i = 0; i<quantity; i++) {
-//         //let point = game.add.(Math.random()*(game.world.width-50)+50, Math.random()*(game.world.height-50)+50);
-//         areaGroup.();
-//     }
-// }
-
 
 
 function createHUD() {
@@ -801,7 +790,6 @@ function createEnemies() {
         enemy.animations.add('chase', [1]);
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
-        //game.physics.arcade.enable(enemy);
 
     });
 
@@ -811,7 +799,7 @@ function createEnemies() {
     robotGroup.forEach((enemy) => {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
-        //enemy.nextRobotShoot = 0;
+
     });
 
     robotBullets = game.add.group();
@@ -851,12 +839,7 @@ function spawnRobot() {
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
         robot.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(robot) }, this);
         robot.shootTimer = game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => { robotShoot(robot) });
-        // game.time.events.events.forEach(event => {
-        //     if(event.callbackContext){
-        //         if(event.callbackContext.key == "robot")
-        //             console.log(event);   
-        //     }
-        // });
+
     }
 }
 
@@ -875,7 +858,6 @@ function enemyMovement(enemy) {
 }
 
 
-//function that ensures the enemies appear outside of the camera/safe zone
 function enemySpawnPositionCheck() {
     let posX = Math.random() * game.world.width;
     let posY = Math.random() * game.world.height;
@@ -887,12 +869,9 @@ function enemySpawnPositionCheck() {
         return { x: posX, y: posY }
     }
 
-    // enemyResetPosX = posX;
-    // enemyResetPosY = posY;
 }
 
 function enemyChase() {
-    //When player is close, zombieGroup chase the player
     zombieGroup.forEachAlive(zombie => {
         zombie.chasing = false;
         zombie.animations.play('idle');
@@ -908,25 +887,19 @@ function enemyChase() {
     });
 
     robotGroup.forEachAlive(robot => {
-        //Los robotGroup te siguen para siempre cuando te ven por primera vez
+        //Robots follow the player forever after seeing them once
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
             if (!robot.chasing) {
                 robot.chasing = true;
+                game.time.events.remove(robot.moveTimer);
             }
 
-            // console.log(robotBullets.countDead(), robotBullets.countLiving());
-            // if(game.time.now > robot.nextRobotShoot){
-            //     robot.nextRobotShoot = game.time.now + ROBOT_SHOOT_COOLDOWN;
-            //robotShoot(robot);
-            // }
 
+            robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
+            robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         }
-        // if(game.time.now > nextRobotShoot) {
-        //     nextRobotShoot = game.time.now + ROBOT_SHOOT_COOLDOWN;
-        // }
 
-        robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
-        robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
+
         game.physics.arcade.collide(robot, safeZone);
         game.physics.arcade.collide(robot, bulletGroup, hurtRobot, null, this);
     })
@@ -937,8 +910,6 @@ function robotShoot(robot) {
         let bullet = robotBullets.getFirstDead();
         bullet.reset(robot.x, robot.y);
         game.time.events.add(2000, () => bullet.kill());
-        // console.log(bullet.x, bullet.y);
-        // console.log(bullet.x + bullet.y == robot.x + robot.y);
         game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED / 2);
     }
 }
@@ -1015,7 +986,7 @@ function createMenu() {
     exitButton.scale.setTo(0.25);
     menuGroup.add(exitButton);
 
-    // Mostrar monedas
+
     let coinsText = game.add.text(game.canvas.width / 2, game.canvas.height / 2 + 70 - 150, 'Coins: ' + coins, {
         font: 'bold 25pt',
         fill: '#ffffff'
@@ -1069,27 +1040,27 @@ function createMenu() {
 
     let weapon1Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 - 200 - 25, 'weapon1');
     weapon1Image.anchor.set(0.5);
-    weapon1Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
+    weapon1Image.scale.setTo(0.25); 
     menuGroup.add(weapon1Image);
 
     let weapon2Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 - 25, 'weapon2');
     weapon2Image.anchor.set(0.5);
-    weapon2Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
+    weapon2Image.scale.setTo(0.25); 
     menuGroup.add(weapon2Image);
 
     let weapon3Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 + 200 - 25, 'weapon3');
     weapon3Image.anchor.set(0.5);
-    weapon3Image.scale.setTo(0.25); // Ajusta el tamaño según sea necesario
+    weapon3Image.scale.setTo(0.25); 
     menuGroup.add(weapon3Image);
 
     let heartImageMenu = game.add.sprite(100, game.canvas.height / 2 - 25, 'heart');
     heartImageMenu.anchor.set(0.5);
-    heartImageMenu.scale.setTo(1); // Ajusta el tamaño según sea necesario
+    heartImageMenu.scale.setTo(1); 
     menuGroup.add(heartImageMenu);
 
     let botasImagenAlas = game.add.sprite(100, game.canvas.height / 2 - 25 - 200, 'boots');
     botasImagenAlas.anchor.set(0.5);
-    botasImagenAlas.scale.setTo(0.04); // Ajusta el tamaño según sea necesario
+    botasImagenAlas.scale.setTo(0.04); 
     menuGroup.add(botasImagenAlas);
 
     menuGroup.coinsText = coinsText;
@@ -1100,7 +1071,6 @@ let costLifeText;
 let costRunText;
 
 function updateMenuButtons() {
-    //menuGroup.buyWeapon1Button = (weaponsBuy[1].bought ? () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button');} : () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');})});
     menuGroup.getAt(0).inputEnabled = !weaponsBuy[1].bought;
     menuGroup.getAt(0).alpha = (weaponsBuy[1].bought ? 0.5 : 1);
 
@@ -1110,14 +1080,8 @@ function updateMenuButtons() {
     menuGroup.getAt(2).inputEnabled = !weaponsBuy[3].bought;
     menuGroup.getAt(2).alpha = (weaponsBuy[3].bought ? 0.5 : 1);
 
-
-    //para actualizar el texto de lo que cuesta la vida y lo que cuesta mejorar la velocidad
-
     costLifeText.setText(("Cost: " + costLife + " coins"));
     costRunText.setText(("Cost: " + costRun + " coins"));
-
-
-
 }
 
 function showMenu() {
@@ -1220,7 +1184,6 @@ function endGame(victory) {
     game.time.events.remove(spawnRobotTimer);
     game.time.events.remove(spawnZombieTimer);
     remainingTime = 100;
-    // añadir if conforme a al vida para decidir si es true o false la variable winOrLose
     winOrLose = victory;
     game.state.start('screenFinal');
 }
