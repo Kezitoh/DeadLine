@@ -238,9 +238,8 @@ function createLevel() {
     setDifficulty(difficulty);
     setWeapons();
     setWorld();
-    zonaSegura();
-    console.log(initPosX, initPosY);
     setAreas();
+    zonaSegura();
     game.camera.focusOnXY(initPosX, initPosY);
     setPlayer();
     // maxAmmo = 50;
@@ -424,17 +423,36 @@ function updateLevel() {
     } else {
         player.animations.play('holdGun');
     }
-    //player.animations.play('shootPistol');
+
     collisionsSafeZone();
     generalCollisions();
     enemyChase();
 
     
+    if (keys.switchWeapon.shift.justDown || keys.switchWeapon.ctrl.justDown) {
+        switchWeapon();
+    }
     shoot();
     characterMovement();
-    areaGroup.forEachAlive(area => {
-        game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
-    });
+
+    rechargeZoneRespawn();
+
+
+    checkGameEnd();
+
+
+
+}
+
+function checkGameEnd() {
+    if (healthValue <= 0) {
+        exitAnimationToFinal(() => { endGame(false); });
+    }else if(gems >= winCondition) {
+        exitAnimationToFinal(() => {endGame(true);});
+    }
+}
+
+function rechargeZoneRespawn() {
     if (areaGroup.countDead() > 0) {
         
         if (score < firstStage){
@@ -444,19 +462,6 @@ function updateLevel() {
             areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height/1.75) - 50) + 50);
         }
     }
-    
-
-    //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
-    if (healthValue <= 0) {
-        exitAnimationToFinal(() => { endGame(false); });
-    }else if(gems >= winCondition) {
-        exitAnimationToFinal(() => {endGame(true);});
-    }
-
-    if (keys.switchWeapon.shift.justDown || keys.switchWeapon.ctrl.justDown) {
-        switchWeapon();
-    }
-
 }
 
 function switchWeapon() {
@@ -467,7 +472,6 @@ function switchWeapon() {
     currentWeaponSprite.loadTexture(weaponsBuy[currentWeapon].image);
     hudAmmo.setText(weaponsBuy[currentWeapon].ammo + "/" + weaponsBuy[currentWeapon].maxAmmo);
 }
-
 
 
 function zonaSegura() {
@@ -498,6 +502,10 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
     game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true, true));
+    areaGroup.forEachAlive(area => {
+        game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
+    });
+    game.physics.arcade.collide(robotBullets, safeZone);
     if (score < firstStage) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
@@ -1144,7 +1152,7 @@ function upgradeSpeed() {
     if (coins >= costRun) {
         coins -= costRun;
         playerSpeed += PLAYER_SPEED_UPGRADE_VALUE;
-        costRun = Math.floor(costRun * 1.5);
+        costRun = Math.floor(costRun * 2);
     } else {
     }
     hideMenu();
@@ -1160,7 +1168,7 @@ function upgradeHealth() {
         maxHealth += PLAYER_HEALTH_UPGRADE_VALUE;
         healthValue = maxHealth;
         // Restaura la salud al máximo
-        costLife = Math.floor(costLife * 1.5);
+        costLife = Math.floor(costLife * 2);
         updateHealthBar();
     } else {
     }
