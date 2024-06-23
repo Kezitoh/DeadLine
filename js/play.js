@@ -4,17 +4,19 @@ const MAX_HEALTH = 100;
 const SAFEZONECOOLDOWN = 5000;
 const DEFAULT_TIME = 60;
 const INVULNERABILITY_TIME = 800;
-const COIN_GROUP_SIZE = 20;
-const WIN_CONDITION = 15
+const COIN_GROUP_SIZE = 2000;
+const GEM_GROUP_SIZE = 2000;
+const WIN_CONDITION = 45;
 const SHOOT_COOLDOWN = 150;
-const BULLET_SPEED = 300;
+const BULLET_SPEED = 600;
 const BULLET_GROUP_SIZE = 50;
-const FIRST_STAGE = 1000;
+const FIRST_STAGE = 2500;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 15;
 const ENEMY_BASE_SPEED = 100;
-const ENEMY_GROUP_SIZE = 100;
+const ZOMBIE_GROUP_SIZE = 100;
+const ROBOT_GROUP_SIZE = 30;
 const ENEMY_SPAWN_TIMER = 100;
 const ENEMY_TURN_TIMER_MIN = 2000;
 const ENEMY_TURN_TIMER_MAX = 3000;
@@ -23,15 +25,15 @@ const ENEMY_STOP_TIME = 1500;
 const ENEMY_BASE_HURT = 15;
 const ROBOT_BASE_SPEED = 120;
 const ROBOT_BULLETS_GROUP_SIZE = 300;
-const EXTRA_TIME_PER_KILL = 5;
+const EXTRA_TIME_PER_KILL = 3;
 const PLAYER_SAFE_RADIUS = 200;
 
 //Safe zone consts
 const SAFE_ZONE_OFFSET = 50;
 const SAFE_ZONE_COUNTDOWN = 10;
-const INITIAL_HEALTH_VALUE = 40;
-const INITIAL_SPEED_VALUE = 70;
-const ITEMCOST = [30, 50, 70];
+const INITIAL_HEALTH_COST = 40;
+const INITIAL_SPEED_COST = 50;
+const ITEMCOST = [30, 100, 200];
 
 let initPosX;
 let initPosY;
@@ -88,9 +90,9 @@ let ammo;
 let maxAmmo;
 let weaponsBuy = [
     { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500, damage: 5 },//predeterminada
-    { image: 'weapon1', bought: false, ammo: 20, maxAmmo: 20, cooldown: 500, damage: 7 },
+    { image: 'weapon1', bought: false, ammo: 30, maxAmmo: 30, cooldown: 500, damage: 12 },
     { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1500, damage: 5 },
-    { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99, damage: 3 }
+    { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99, damage: 5 }
 ];
 let currentWeaponSprite;
 
@@ -146,11 +148,15 @@ let enemySpawnRateModifier;
 let speedPlayerModifier;
 let speedEnemyModifier;
 let timeModifier;
+let winConditionModifier;
+let firstStageModifier;
 
 //General variables
 let bg;
 let wall;
 let levelData;
+let winCondition;
+let firstStage;
 
 function loadPlayAssets() {
     loadSprites();
@@ -263,7 +269,7 @@ function setGroups() {
     gemGroup = game.add.group();
     gemGroup.enableBody = true;
     gemGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    gemGroup.createMultiple(20, 'gem');
+    gemGroup.createMultiple(GEM_GROUP_SIZE, 'gem');
     gemGroup.forEach(gem => {
         gem.anchor.setTo(0.5, 0.5);
         gem.scale.setTo(2, 2);
@@ -321,7 +327,7 @@ function setWorld() {
 }
 
 function setPlayer() {
-    totalCoins = 0;
+    totalItems = 0;
     nextHurt = 0;
     coins = 0;
     gems = 0;
@@ -364,6 +370,8 @@ function setDifficulty(difficulty) {
             //speedPlayerModifier = 1;
             speedEnemyModifier = 1;
             timeModifier = 1;
+            winConditionModifier = 1;
+            firstStageModifier = 1;
             break;
         case DIFFICULTY.Easy || 'Easy':
             costModifier = 0.5;
@@ -374,6 +382,8 @@ function setDifficulty(difficulty) {
             //speedPlayerModifier = 1.3;
             speedEnemyModifier = 0.8;
             timeModifier = 1.2;
+            winConditionModifier = 0.35;
+            firstStageModifier = 0.1;
             break;
         case DIFFICULTY.Hard || 'Hard':
             costModifier = 1.30;
@@ -384,12 +394,14 @@ function setDifficulty(difficulty) {
             //speedPlayerModifier = 0.8;
             speedEnemyModifier = 1.3;
             timeModifier = 0.5;
+            winConditionModifier = 2;
+            firstStageModifier = 0.75;
             break;
     }
     speedPlayerModifier = 1;
     remainingTime = DEFAULT_TIME * timeModifier;
-    costRun = INITIAL_SPEED_VALUE * costModifier;
-    costLife = INITIAL_HEALTH_VALUE * costModifier;
+    costRun = INITIAL_SPEED_COST * costModifier;
+    costLife = INITIAL_HEALTH_COST * costModifier;
     playerSpeed = PLAYER_VELOCITY * speedPlayerModifier;
     enemyHealth = ENEMY_BASE_HEALTH * enemyLifeModifier;
     zombieSpeed = ENEMY_BASE_SPEED * speedEnemyModifier;
@@ -397,6 +409,8 @@ function setDifficulty(difficulty) {
     maxHealth = MAX_HEALTH * lifeModifier;
     enemyDamage = ENEMY_BASE_HURT * enemyDamageModifier;
     enemySpawnRate = ENEMY_SPAWN_TIMER * enemySpawnRateModifier;
+    winCondition = Math.floor(WIN_CONDITION * winConditionModifier);
+    firstStage = FIRST_STAGE * firstStageModifier;
     ITEMCOST.forEach(item => {
         itemCostArray.push(item * costModifier);
     });
@@ -420,14 +434,20 @@ function updateLevel() {
         game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
     });
     if (areaGroup.countDead() > 0) {
-
-        areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
+        
+        if (score < firstStage){
+            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
+        }
+        else{
+            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height/1.75) - 50) + 50);
+        }
     }
     
+
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if (healthValue <= 0) {
         exitAnimationToFinal(() => { endGame(false); });
-    }else if(gems >= WIN_CONDITION) {
+    }else if(gems >= winCondition) {
         exitAnimationToFinal(() => {endGame(true);});
     }
 
@@ -475,7 +495,7 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, bulletGroup, hurtRobot, null, this);
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
-    game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true));
+    game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true, true));
     if (score < FIRST_STAGE) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
@@ -532,8 +552,8 @@ function collisionsSafeZone() {
 
 
 
-function hurtPlayer(player, source, killsource = false) {
-    if(killsource && source.key === 'robotBullet') {
+function hurtPlayer(player, source, killsource = false, isBullet = false) {
+    if(isBullet) {
       source.kill(); // Eliminar solo la bala que golpeó al jugador
     }
     if (game.time.now > nextHurt) {
@@ -554,6 +574,7 @@ function hurtZombie(enemy, bullet) {
     score += 5;
     if (enemy.health <= 0) {
         remainingTime += EXTRA_TIME_PER_KILL;
+        updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
         coin.reset(enemy.x - 10, enemy.y - 10);
         enemy.kill();
@@ -577,6 +598,7 @@ function hurtRobot(enemy, bullet) {
     score += 5;
     if (enemy.health <= 0) {
         remainingTime += EXTRA_TIME_PER_KILL;
+        updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
         coin.reset(enemy.x - 10, enemy.y - 10);
         enemy.kill();
@@ -591,7 +613,7 @@ function collectCoin(player, coin) {
     coin.kill();
     coinSound.play();
     coins += 15;
-    totalCoins++;
+    totalItems++;
     hudCoins.setText(coins);
 }
 
@@ -599,8 +621,8 @@ function collectGem(player, gem) {
     gem.kill();
     gemSound.play();
     gems++;
-    totalCoins++;
-    hudGems.setText(gems);
+    totalItems++;
+    hudGems.setText(gems + "/" + winCondition);
 
 }
 
@@ -619,12 +641,6 @@ function onSafeZoneOverlap() {
     safeZoneTimeIn.fixedToCamera = true;
 }
 
-// function generateAreaPositions(quantity) {
-//     for(let i = 0; i<quantity; i++) {
-//         //let point = game.add.(Math.random()*(game.world.width-50)+50, Math.random()*(game.world.height-50)+50);
-//         areaGroup.();
-//     }
-// }
 
 
 
@@ -666,7 +682,7 @@ function createHUD() {
 
     let gemIcon = hudGroup.create(game.canvas.width - 135, 95, 'gem');
     gemIcon.scale.setTo(1.5, 1.5);
-    hudGems = game.add.text(game.canvas.width - 100, 92, gems, {
+    hudGems = game.add.text(game.canvas.width - 100, 92, gems + "/" + winCondition, {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
@@ -758,7 +774,7 @@ function characterMovement() {
 function createEnemies() {
     zombieGroup = game.add.group();
     zombieGroup.enableBody = true;
-    zombieGroup.createMultiple(ENEMY_GROUP_SIZE, 'zombie');
+    zombieGroup.createMultiple(ZOMBIE_GROUP_SIZE, 'zombie');
     zombieGroup.forEach((enemy) => {
         enemy.animations.add('idle', [0]);
         enemy.animations.add('chase', [1]);
@@ -770,7 +786,7 @@ function createEnemies() {
 
     robotGroup = game.add.group();
     robotGroup.enableBody = true;
-    robotGroup.createMultiple(ENEMY_GROUP_SIZE / 2, 'robot');
+    robotGroup.createMultiple(ROBOT_GROUP_SIZE / 2, 'robot');
     robotGroup.forEach((enemy) => {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
@@ -864,7 +880,7 @@ function enemyChase() {
         //Los robotGroup te siguen para siempre cuando te ven por primera vez
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
             if (!robot.chasing) {
-                game.time.events.loop(750, () => robotShoot(robot));
+                game.time.events.loop(1500, () => robotShoot(robot));
                 robot.chasing = true;
             }
 
@@ -882,7 +898,7 @@ function robotShoot(robot) {
         let bullet = robotBullets.getFirstDead();
         bullet.reset(robot.x, robot.y);
         game.time.events.add(2000, ()=> {bullet.kill()})
-        game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED);
+        game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED/2);
     }
 }
 

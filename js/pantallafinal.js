@@ -9,7 +9,7 @@ function loadFinalAssets() {
 }
 
 let winOrLose = false;
-let totalCoins = 0;
+let totalItems = 0;
 /** @type {Phaser.Button} */
 let btnInicio;
 
@@ -69,7 +69,7 @@ function createLevelFinal() {
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3, ptexto, stylesub);
 
         scoretext2 = "Objetos Recogidos: ";
-        let otexto = " " + totalCoins;
+        let otexto = " " + totalItems;
         let puntuacionTexto2 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 120, scoretext2, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
