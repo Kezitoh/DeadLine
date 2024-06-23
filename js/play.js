@@ -33,6 +33,9 @@ const INITIAL_HEALTH_VALUE = 40;
 const INITIAL_SPEED_VALUE = 70;
 const ITEMCOST = [30, 50, 70];
 
+let initPosX;
+let initPosY;
+
 let playState = {
     preload: loadPlayAssets,
     create: createLevel,
@@ -106,10 +109,7 @@ let currentWeapon = 0;
 //Safe zone variables
 /** @type {Phaser.Sprite} */
 let safeZone;
-let safeZone1;
-let safeZone2;
-let safeZone3;
-let safeZone4;
+let safeZonePillars = [];
 let overlapSafeZone;
 let nextEntryIntoSafeZone;
 let weapon1Bought;
@@ -150,11 +150,13 @@ let timeModifier;
 //General variables
 let bg;
 let wall;
+let levelData;
 
 function loadPlayAssets() {
     loadSprites();
     loadImages();
     loadSounds();
+    game.load.json('jsonData', 'assets/levelData.json');
 }
 
 function loadSprites() {
@@ -178,10 +180,10 @@ function loadImages() {
     game.load.image('wall', "assets/sprites/tile_273.png");
     game.load.image('negro', 'assets/UI/ImagenNegraParaTransicion.jpg');
     game.load.spritesheet('safeZone', 'assets/UI/Zona_segura.png');
-    game.load.spritesheet('safeZone1', 'assets/UI/Zona_segura_abajo_derecha.png');
-    game.load.spritesheet('safeZone2', 'assets/UI/Zona_segura_abajo_izq.png');
-    game.load.spritesheet('safeZone3', 'assets/UI/Zona_segura_arriba_derecha.png');
-    game.load.spritesheet('safeZone4', 'assets/UI/Zona_segura_arriba_izq.png');
+    game.load.spritesheet('safeZone0', 'assets/UI/Zona_segura_abajo_derecha.png');
+    game.load.spritesheet('safeZone1', 'assets/UI/Zona_segura_abajo_izq.png');
+    game.load.spritesheet('safeZone2', 'assets/UI/Zona_segura_arriba_derecha.png');
+    game.load.spritesheet('safeZone3', 'assets/UI/Zona_segura_arriba_izq.png');
 
 
     game.load.spritesheet('buyWeapon1Button', 'assets/UI/MenuSZ/ConBuy/BuyVerde.png');
@@ -223,12 +225,15 @@ function createSounds() {
 
 
 function createLevel() {
+    levelData = game.cache.getJSON('jsonData');
     createSounds();
     setDifficulty(difficulty);
     setWeapons();
     setWorld();
+    zonaSegura();
+    console.log(initPosX, initPosY);
     setAreas();
-    game.camera.focusOnXY(game.world.width / 2, game.world.height - game.world.height / 7);
+    game.camera.focusOnXY(initPosX, initPosY);
     setPlayer();
     // maxAmmo = 50;
     // ammo = maxAmmo;
@@ -239,7 +244,6 @@ function createLevel() {
     // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingTime = updateTime(hudTime, remainingTime, timerClock, setRemainingTime); }, this);
     //game.add.sprite(game.world.width/2,game.world.height/2,"heart");
-    zonaSegura();
     createEnemies();
     createHUD();
     createMenu();
@@ -312,6 +316,8 @@ function setWorld() {
     // Smooth scrolling of the background in both X and Y axis
     bg.scrollFactorX = 0.7;
     bg.scrollFactorY = 0.7;
+    initPosX = game.world.width / 2; 
+    initPosY = game.world.height - game.world.height / 7;
 }
 
 function setPlayer() {
@@ -319,7 +325,7 @@ function setPlayer() {
     nextHurt = 0;
     coins = 0;
     gems = 0;
-    player = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'pc');
+    player = game.add.sprite(levelData.player.x, levelData.player.y, 'pc');
     player.anchor.setTo(0.4, 0.5);
     player.animations.add('holdGun', [5], 0, false);
     player.animations.add('shootRifle', [4], 0, false);
@@ -445,30 +451,19 @@ function switchWeapon() {
 function zonaSegura() {
     overlapSafeZone = false;
     nextEntryIntoSafeZone = 0;
-
-    safeZone = game.add.sprite(game.world.width / 2, game.world.height - game.world.height / 7, 'safeZone');
-    safeZone1 = game.add.sprite(game.world.width / 2 + 111, game.world.height - game.world.height / 7 + 111, 'safeZone1');
-    safeZone2 = game.add.sprite(game.world.width / 2 - 112, game.world.height - game.world.height / 7 + 106, 'safeZone2');
-    safeZone3 = game.add.sprite(game.world.width / 2 + 112, game.world.height - game.world.height / 7 - 101, 'safeZone3');
-    safeZone4 = game.add.sprite(game.world.width / 2 - 107, game.world.height - game.world.height / 7 - 104, 'safeZone4');
-
-    safeZone.anchor.setTo(0.5, 0.5);
-    safeZone1.anchor.setTo(0.5, 0.5);
-    safeZone2.anchor.setTo(0.5, 0.5);
-    safeZone3.anchor.setTo(0.5, 0.5);
-    safeZone4.anchor.setTo(0.5, 0.5);
-
+    safeZone = game.add.sprite(levelData.safeZone.position.x, levelData.safeZone.position.y, 'safeZone');
+    safeZone.anchor.setTo(0.5);
     game.physics.arcade.enable(safeZone);
-    game.physics.arcade.enable(safeZone1);
-    game.physics.arcade.enable(safeZone2);
-    game.physics.arcade.enable(safeZone3);
-    game.physics.arcade.enable(safeZone4);
-
     safeZone.body.immovable = true;
-    safeZone1.body.immovable = true;
-    safeZone2.body.immovable = true;
-    safeZone3.body.immovable = true;
-    safeZone4.body.immovable = true;
+    let i = 0;
+    levelData.safeZone.pillars.forEach(pillar => {
+        let safeZonePillar = game.add.sprite(pillar.x, pillar.y, 'safeZone'+i++);
+        safeZonePillar.anchor.setTo(0.5, 0.5);
+        game.physics.arcade.enable(safeZonePillar);
+        safeZonePillar.body.immovable = true;
+        safeZonePillars.push(safeZonePillar);
+    });
+    
 }
 
 function generalCollisions() {
@@ -492,7 +487,7 @@ function generalCollisions() {
 
 function collisionsSafeZone() {
     //Cuando Entra a la zona segura
-
+    console.log(game.physics.arcade.overlap(player, safeZone));
     if (game.time.now > nextEntryIntoSafeZone && !overlapSafeZone && game.physics.arcade.overlap(player, safeZone)) {
 
         overlapSafeZone = true;
@@ -523,15 +518,15 @@ function collisionsSafeZone() {
 
     //game.physics.arcade.collide(enemy, safeZone);
     bulletGroup.forEachAlive(bullet => {
-        game.physics.arcade.collide(bullet, safeZone1);
-        game.physics.arcade.collide(bullet, safeZone2);
-        game.physics.arcade.collide(bullet, safeZone3);
-        game.physics.arcade.collide(bullet, safeZone4);
+        game.physics.arcade.collide(bullet, safeZonePillars[0]);
+        game.physics.arcade.collide(bullet, safeZonePillars[1]);
+        game.physics.arcade.collide(bullet, safeZonePillars[2]);
+        game.physics.arcade.collide(bullet, safeZonePillars[3]);
     });
-    game.physics.arcade.collide(player, safeZone1);
-    game.physics.arcade.collide(player, safeZone2);
-    game.physics.arcade.collide(player, safeZone3);
-    game.physics.arcade.collide(player, safeZone4);
+    game.physics.arcade.collide(player, safeZonePillars[0]);
+    game.physics.arcade.collide(player, safeZonePillars[1]);
+    game.physics.arcade.collide(player, safeZonePillars[2]);
+    game.physics.arcade.collide(player, safeZonePillars[3]);
 
 }
 
@@ -616,15 +611,12 @@ function onSafeZoneOverlap() {
 
     timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2); }, this);
 
-
     safeZoneTimeIn = game.add.text(game.canvas.width / 2, 100, setRemainingTime2(remainingSZTime), {
         font: 'bold 35pt',
         fill: '#ffffff'
     });
 
-
     safeZoneTimeIn.fixedToCamera = true;
-
 }
 
 // function generateAreaPositions(quantity) {
@@ -724,7 +716,7 @@ function shoot() {
                     bullet.reset(player.x, player.y);
                     bullet.rotation = game.physics.arcade.angleToPointer(bullet);
 
-                    bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED);
+                    bullet.body.velocity = game.physics.arcade.velocityFromAngle(bullet.angle + (i / 4) * 20 - 10, BULLET_SPEED); //Divide las balas en un ángulo de -20 a 20 grados desde el puntero
                 }
                 weapon.ammo--;
 
@@ -747,18 +739,20 @@ function characterMovement() {
 
     player.rotation = game.physics.arcade.angleToPointer(player);
     if (cursors.up.isDown || keys.movement.w.isDown) {
-        player.body.velocity.y = -playerSpeed;
+        player.body.velocity.y = -1;
     }
     if (cursors.down.isDown || keys.movement.s.isDown) {
-        player.body.velocity.y = playerSpeed;
+        player.body.velocity.y = 1;
     }
     if (cursors.left.isDown || keys.movement.a.isDown) {
-        player.body.velocity.x = -playerSpeed;
+        player.body.velocity.x = -1;
     }
     if (cursors.right.isDown || keys.movement.d.isDown) {
-        player.body.velocity.x = playerSpeed;
+        player.body.velocity.x = 1;
     }
-
+    player.body.velocity.normalize(this, this);
+    player.body.velocity.x *= playerSpeed;
+    player.body.velocity.y *= playerSpeed;
 }
 
 function createEnemies() {
