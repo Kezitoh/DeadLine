@@ -13,6 +13,7 @@ const BULLET_GROUP_SIZE = 50;
 const FIRST_STAGE = 2500;
 const PLAYER_SPEED_UPGRADE_VALUE = 25;
 const PLAYER_HEALTH_UPGRADE_VALUE = 50;
+const PLAYER_SAFE_RADIUS = 200;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 15;
@@ -26,9 +27,9 @@ const ENEMY_TURN_PROBABILITY = 0.9;
 const ENEMY_STOP_TIME = 1500;
 const ENEMY_BASE_HURT = 15;
 const ROBOT_BASE_SPEED = 120;
-const ROBOT_BULLETS_GROUP_SIZE = 1000;
+const ROBOT_BULLETS_GROUP_SIZE = 100;
 const EXTRA_TIME_PER_KILL = 3;
-const PLAYER_SAFE_RADIUS = 200;
+const ROBOT_SHOOT_COOLDOWN = 1500;
 
 //Safe zone consts
 const SAFE_ZONE_OFFSET = 150;
@@ -80,6 +81,8 @@ let remainingSZTime;
 let safeZoneTimeIn;
 let timerClock;
 let timerClock2;
+let spawnRobotTimer;
+let spawnZombieTimer;
 
 //Player variables
 let coins;
@@ -288,10 +291,10 @@ function setGroups() {
 }
 
 function setControls() {
-    keys= {
-        movement:game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D }),
-        reload:game.input.keyboard.addKeys({e: Phaser.KeyCode.E, underscore: Phaser.KeyCode.UNDERSCORE}),
-        switchWeapon:game.input.keyboard.addKeys({shift: Phaser.KeyCode.SHIFT, ctrl: Phaser.KeyCode.CONTROL})
+    keys = {
+        movement: game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D }),
+        reload: game.input.keyboard.addKeys({ e: Phaser.KeyCode.E, underscore: Phaser.KeyCode.UNDERSCORE }),
+        switchWeapon: game.input.keyboard.addKeys({ shift: Phaser.KeyCode.SHIFT, ctrl: Phaser.KeyCode.CONTROL })
     };
     cursors = game.input.keyboard.createCursorKeys();
 }
@@ -305,7 +308,7 @@ function setAreas() {
         area.body.setCircle(1, area.width / 2.15, area.height / 2.15);
         area.scale.setTo(4, 4);
         area.anchor.setTo(0.5, 0.5);
-        area.reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height/2.25)+50)) + (game.world.height/2.25)+50);
+        area.reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height / 2.25) + 50)) + (game.world.height / 2.25) + 50);
     });
 }
 
@@ -321,7 +324,7 @@ function setWorld() {
     // Smooth scrolling of the background in both X and Y axis
     bg.scrollFactorX = 0.7;
     bg.scrollFactorY = 0.7;
-    initPosX = game.world.width / 2; 
+    initPosX = game.world.width / 2;
     initPosY = game.world.height - game.world.height / 7;
 }
 
@@ -344,7 +347,8 @@ function setPlayer() {
 }
 
 function setWeapons() {
-    weaponsBuy.forEach(weapon => { weapon.bought = false;
+    weaponsBuy.forEach(weapon => {
+        weapon.bought = false;
         weapon.ammo = weapon.maxAmmo;
     })
     weaponsBuy[0].bought = true;
@@ -356,7 +360,7 @@ function setWeapons() {
 function setDifficulty(difficulty) {
     // mas o menos vida--, mas o menos daño de los enemigos y la vida  la velocidad de los enemigos, cantidad de los enemigos precios
     itemCostArray = [];
-    
+
     switch (difficulty) {
         case DIFFICULTY.Normal || 'Normal':
             costModifier = 1;
@@ -424,7 +428,7 @@ function updateLevel() {
     generalCollisions();
     enemyChase();
 
-    
+
     shoot();
     characterMovement();
     areaGroup.forEachAlive(area => {
@@ -432,20 +436,20 @@ function updateLevel() {
     });
     if (areaGroup.countDead() > 0) {
 
-        if (score < firstStage){
-        areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height/2.25)+50)) + (game.world.height/2.25)+50);
-    }
-        else{
-            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height/1.75) - 50) + 50);
+        if (score < firstStage) {
+            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height / 2.25) + 50)) + (game.world.height / 2.25) + 50);
+        }
+        else {
+            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height / 1.75) - 50) + 50);
         }
     }
-    
-    
+
+
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if (healthValue <= 0) {
         exitAnimationToFinal(() => { endGame(false); });
-    }else if(gems >= winCondition) {
-        exitAnimationToFinal(() => {endGame(true);});
+    } else if (gems >= winCondition) {
+        exitAnimationToFinal(() => { endGame(true); });
     }
 
     if (keys.switchWeapon.shift.justDown || keys.switchWeapon.ctrl.justDown) {
@@ -474,13 +478,13 @@ function zonaSegura() {
     safeZone.body.immovable = true;
     let i = 0;
     levelData.safeZone.pillars.forEach(pillar => {
-        let safeZonePillar = game.add.sprite(pillar.x, pillar.y, 'safeZone'+i++);
+        let safeZonePillar = game.add.sprite(pillar.x, pillar.y, 'safeZone' + i++);
         safeZonePillar.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(safeZonePillar);
         safeZonePillar.body.immovable = true;
         safeZonePillars.push(safeZonePillar);
     });
-    
+
 }
 
 function generalCollisions() {
@@ -492,12 +496,14 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, bulletGroup, hurtRobot, null, this);
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
-    game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true, true));
+    robotBullets.forEachAlive(bullet => {
+        game.physics.arcade.collide(bullet, player, () => { hurtPlayer(player, bullet, true) });
+    })
     if (score <= firstStage) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
         game.physics.arcade.collide(zombieGroup, wall);
-    }else {
+    } else {
         wall.kill();
     }
 }
@@ -548,34 +554,35 @@ function collisionsSafeZone() {
 
 
 
-function hurtPlayer(player, source, killsource = false, isBullet = false) {
-    if(isBullet) {
-      source.kill(); // Eliminar solo la bala que golpeó al jugador
+function hurtPlayer(player, source, isBullet = false) {
+    if (isBullet) {
+        source.kill();
     }
     if (game.time.now > nextHurt) {
-      hitSound.play();
-      nextHurt = game.time.now + INVULNERABILITY_TIME;
-      healthValue -= enemyDamage;
-      updateHealthBar();
+        hitSound.play();
+        nextHurt = game.time.now + INVULNERABILITY_TIME;
+        healthValue -= enemyDamage;
+        updateHealthBar();
     }
 }
 
-function hurtZombie(enemy, bullet) {
+function hurtZombie(zombie, bullet) {
     bullet.kill();
     hitSound.play();
     //if the enemies aren't stopped when hit, the collision will send them flying
-    enemy.body.velocity.x = 0;
-    enemy.body.velocity.y = 0;
-    enemy.health -= weaponsBuy[currentWeapon].damage;
+    zombie.body.velocity.x = 0;
+    zombie.body.velocity.y = 0;
+    zombie.health -= weaponsBuy[currentWeapon].damage;
     score += 5;
-    if (enemy.health <= 0) {
+    if (zombie.health <= 0) {
+        game.time.events.remove(zombie.moveTimer);
         remainingTime += EXTRA_TIME_PER_KILL;
         updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
-        coin.reset(enemy.x - 10, enemy.y - 10);
-        enemy.kill();
+        coin.reset(zombie.x - 10, zombie.y - 10);
+        zombie.kill();
         if (Math.random() > 0.5) {
-            gemGroup.getFirstDead().reset(enemy.x + 10, enemy.y + 10);
+            gemGroup.getFirstDead().reset(zombie.x + 10, zombie.y + 10);
         }
         score += 100;
     }
@@ -593,6 +600,8 @@ function hurtRobot(robot, bullet) {
     robot.health -= weaponsBuy[currentWeapon].damage;
     score += 5;
     if (robot.health <= 0) {
+        game.time.events.remove(robot.shootTimer);
+        game.time.events.remove(robot.moveTimer);
         remainingTime += EXTRA_TIME_PER_KILL;
         updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
@@ -600,7 +609,7 @@ function hurtRobot(robot, bullet) {
         robot.kill();
         gemGroup.getFirstDead().reset(robot.x + 10, robot.y + 10);
         score += 100;
-        
+
     }
     updateScore();
 
@@ -793,6 +802,7 @@ function createEnemies() {
     robotGroup.forEach((enemy) => {
         enemy.anchor.setTo(0.5, 0.5);
         enemy.body.collideWorldBounds = true;
+        //enemy.nextRobotShoot = 0;
     });
 
     robotBullets = game.add.group();
@@ -804,9 +814,9 @@ function createEnemies() {
     });
     robotBullets.setAll('checkWorldBounds', true);
     robotBullets.setAll('outOfBoundsKill', true);
-    
-    game.time.events.loop(enemySpawnRate, spawnZombie, this);
-    game.time.events.loop(enemySpawnRate, spawnRobot, this);
+
+    spawnRobotTimer = game.time.events.loop(enemySpawnRate, spawnZombie, this);
+    spawnZombieTimer = game.time.events.loop(enemySpawnRate, spawnRobot, this);
 }
 
 function spawnZombie() {
@@ -817,7 +827,7 @@ function spawnZombie() {
         zombie.health = enemyHealth;
         zombie.rotation = Math.random() * 360;
         zombie.body.velocity = game.physics.arcade.velocityFromRotation(zombie.rotation, zombieSpeed);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(zombie), zombie);
+        zombie.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(zombie) }, this);
     }
 }
 
@@ -830,8 +840,14 @@ function spawnRobot() {
         robot.chasing = false;
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(robot));
-        game.time.events.loop(1500, () => robotShoot(robot));
+        robot.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(robot) }, this);
+        robot.shootTimer = game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => { robotShoot(robot) });
+        // game.time.events.events.forEach(event => {
+        //     if(event.callbackContext){
+        //         if(event.callbackContext.key == "robot")
+        //             console.log(event);   
+        //     }
+        // });
     }
 }
 
@@ -854,11 +870,11 @@ function enemyMovement(enemy) {
 function enemySpawnPositionCheck() {
     let posX = Math.random() * game.world.width;
     let posY = Math.random() * game.world.height;
-    if ((player.x- PLAYER_SAFE_RADIUS < posX && posX < player.x+ PLAYER_SAFE_RADIUS && player.y- PLAYER_SAFE_RADIUS < posY && posY < player.y+ PLAYER_SAFE_RADIUS) ||
+    if ((player.x - PLAYER_SAFE_RADIUS < posX && posX < player.x + PLAYER_SAFE_RADIUS && player.y - PLAYER_SAFE_RADIUS < posY && posY < player.y + PLAYER_SAFE_RADIUS) ||
         (safeZone.left - SAFE_ZONE_OFFSET < posX && posX < safeZone.right + SAFE_ZONE_OFFSET && safeZone.top - SAFE_ZONE_OFFSET < posY && posY < safeZone.bottom + SAFE_ZONE_OFFSET) ||
-        (score <= firstStage && posY < game.world.height/1.75)) {
+        (score <= firstStage && posY < game.world.height / 1.75)) {
         return enemySpawnPositionCheck(posX, posY);
-    }else {
+    } else {
         return { x: posX, y: posY }
     }
 
@@ -885,16 +901,23 @@ function enemyChase() {
     robotGroup.forEachAlive(robot => {
         //Los robotGroup te siguen para siempre cuando te ven por primera vez
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
-
             if (!robot.chasing) {
-                
                 robot.chasing = true;
-                console.log(game.time.events);
             }
 
-            robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
-            robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
+            // console.log(robotBullets.countDead(), robotBullets.countLiving());
+            // if(game.time.now > robot.nextRobotShoot){
+            //     robot.nextRobotShoot = game.time.now + ROBOT_SHOOT_COOLDOWN;
+            //robotShoot(robot);
+            // }
+
         }
+        // if(game.time.now > nextRobotShoot) {
+        //     nextRobotShoot = game.time.now + ROBOT_SHOOT_COOLDOWN;
+        // }
+
+        robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
+        robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         game.physics.arcade.collide(robot, safeZone);
         game.physics.arcade.collide(robot, bulletGroup, hurtRobot, null, this);
     })
@@ -904,10 +927,10 @@ function robotShoot(robot) {
     if (game.physics.arcade.distanceBetween(robot, player) > 200 && robot.chasing) {
         let bullet = robotBullets.getFirstDead();
         bullet.reset(robot.x, robot.y);
-        game.time.events.add(2000, ()=> {bullet.kill()});
-        console.log(bullet.x, bullet.y);
-        console.log(bullet.x + bullet.y == robot.x + robot.y);
-        game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED/2);
+        game.time.events.add(2000, () => bullet.kill());
+        // console.log(bullet.x, bullet.y);
+        // console.log(bullet.x + bullet.y == robot.x + robot.y);
+        game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED / 2);
     }
 }
 
@@ -1185,6 +1208,8 @@ function exitAnimationToFinal(a) {
 
 
 function endGame(victory) {
+    game.time.events.remove(spawnRobotTimer);
+    game.time.events.remove(spawnZombieTimer);
     remainingTime = 100;
     // añadir if conforme a al vida para decidir si es true o false la variable winOrLose
     winOrLose = victory;
