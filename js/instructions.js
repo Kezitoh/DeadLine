@@ -16,11 +16,11 @@ function loadInstructionsAssets(){
 }
 
 const SLIDE_TIME = 15000;
-const WEAPON_IMAGE_OFFSET = 200;
+const WEAPON_IMAGE_OFFSET = 275;
 
 let slideTextStyle = {
     font: 'Titan One',
-    fontSize: '25pt',
+    fontSize: '30pt',
     fill: '#FFFFFF',
     align: 'center'
 };
@@ -63,7 +63,7 @@ function showSlide1(){
     let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'homeBtn', () => {backBtnPress(slideNum)});
     backBtn.scale.setTo(1.5);
 
-    let wasdImage = game.add.sprite(game.canvas.width / 2, game.canvas.height/2 , 'wasdImagen');
+    let wasdImage = game.add.sprite(game.canvas.width / 2, game.canvas.height/1.75 , 'wasdImagen');
     wasdImage.anchor.set(0.5);
     wasdImage.scale.setTo(0.5);
     enterAnimation();
@@ -75,22 +75,22 @@ function showSlide2(){
     timer = game.time.events.add(SLIDE_TIME, () => {forwardBtnPress(slideNum)}, this);
 
     let slide2Text = "Enemies drop coins and gems." + 
-                     "\nCoins can be used to buy weapons and upgrades in the Safe Zone!" + 
-                     "\nYou can swap between weapons with the Q/Control keys." + 
-                     "\nEach weapon has different damage, ammo and fire rates.";
+                     "\nCoins can be used to buy weapons \nand upgrades in the Safe Zone!" + 
+                     "\nYou can swap between weapons \nwith the Q/Control keys." + 
+                     "\nEach weapon has different damage, \nammo and fire rates.";
 
-    let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide2Text, slideTextStyle);
+    let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5.5, slide2Text, slideTextStyle);
     slide2TextBox.anchor.setTo(0.5,0);
     slide2TextBox.setShadow(5,5);
 
-    let silencedPistolImage = game.add.sprite(game.canvas.width / 5, game.canvas.height/2, 'silencedPistolImage');
-    silencedPistolImage.scale.setTo(0.5);
-    let pistolImage = game.add.sprite(game.canvas.width / 5 + WEAPON_IMAGE_OFFSET, game.canvas.height/2, 'PistolImage');
-    pistolImage.scale.setTo(0.5);
-    let shotgunImage = game.add.sprite(game.canvas.width / 5 + WEAPON_IMAGE_OFFSET*2, game.canvas.height/2, 'shotgunImage');
-    shotgunImage.scale.setTo(0.5);
-    let assaultRifleImage = game.add.sprite(game.canvas.width / 5 + WEAPON_IMAGE_OFFSET*3, game.canvas.height/2, 'assaultRifeImage');
-    assaultRifleImage.scale.setTo(0.5);
+    let silencedPistolImage = game.add.sprite(game.canvas.width / 40, game.canvas.height/1.7, 'silencedPistolImage');
+    silencedPistolImage.scale.setTo(0.45);
+    let pistolImage = game.add.sprite(game.canvas.width / 40 + WEAPON_IMAGE_OFFSET, game.canvas.height/1.7, 'pistolImage');
+    pistolImage.scale.setTo(0.45);
+    let shotgunImage = game.add.sprite(game.canvas.width / 40 + WEAPON_IMAGE_OFFSET*1.9, game.canvas.height/1.7, 'shotgunImage');
+    shotgunImage.scale.setTo(0.45);
+    let assaultRifleImage = game.add.sprite(game.canvas.width / 40 + WEAPON_IMAGE_OFFSET*3, game.canvas.height/1.7, 'assaultRifleImage');
+    assaultRifleImage.scale.setTo(0.45);
 
 
 
