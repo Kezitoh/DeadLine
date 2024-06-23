@@ -15,7 +15,7 @@ const FIRST_STAGE = 2500;
 //Enemy consts
 const ENEMY_BASE_HEALTH = 15;
 const ENEMY_BASE_SPEED = 100;
-const ZOMBIE_GROUP_SIZE = 100;
+const ZOMBIE_GROUP_SIZE = 50;
 const ROBOT_GROUP_SIZE = 30;
 const ENEMY_SPAWN_TIMER = 100;
 const ENEMY_TURN_TIMER_MIN = 2000;
@@ -88,6 +88,7 @@ let player;
 let playerSpeed;
 let ammo;
 let maxAmmo;
+let maxHealth;
 let weaponsBuy = [
     { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500, damage: 5 },//predeterminada
     { image: 'weapon1', bought: false, ammo: 30, maxAmmo: 30, cooldown: 500, damage: 12 },
@@ -114,9 +115,6 @@ let safeZone;
 let safeZonePillars = [];
 let overlapSafeZone;
 let nextEntryIntoSafeZone;
-let weapon1Bought;
-let weapon2Bought;
-let weapon3Bought;
 let costRun;
 let costLife;
 let itemCostArray;
@@ -237,7 +235,6 @@ function createLevel() {
     setWeapons();
     setWorld();
     zonaSegura();
-    console.log(initPosX, initPosY);
     setAreas();
     game.camera.focusOnXY(initPosX, initPosY);
     setPlayer();
@@ -306,7 +303,7 @@ function setAreas() {
         area.body.setCircle(1, area.width / 2.15, area.height / 2.15);
         area.scale.setTo(4, 4);
         area.anchor.setTo(0.5, 0.5);
-        area.reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
+        area.reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height/2.25)+50)) + (game.world.height/2.25)+50);
     });
 }
 
@@ -345,14 +342,12 @@ function setPlayer() {
 }
 
 function setWeapons() {
-    weaponsBuy.forEach(weapon => { weapon.bought = false; })
+    weaponsBuy.forEach(weapon => { weapon.bought = false;
+        weapon.ammo = weapon.maxAmmo;
+    })
     weaponsBuy[0].bought = true;
     weaponsBuy[0].ammo = weaponsBuy[0].maxAmmo;
     currentWeapon = 0;
-
-    weapon1Bought = false;
-    weapon2Bought = false;
-    weapon3Bought = false;
     nextShoot = 0;
 }
 
@@ -434,16 +429,16 @@ function updateLevel() {
         game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
     });
     if (areaGroup.countDead() > 0) {
-        
+
         if (score < firstStage){
-            areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - 50) + 50);
-        }
+        areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height/2.25)+50)) + (game.world.height/2.25)+50);
+    }
         else{
             areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height/1.75) - 50) + 50);
         }
     }
     
-
+    
     //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
     if (healthValue <= 0) {
         exitAnimationToFinal(() => { endGame(false); });
@@ -496,7 +491,7 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
     game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true, true));
-    if (score < FIRST_STAGE) {
+    if (score <= firstStage) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
         game.physics.arcade.collide(zombieGroup, wall);
@@ -507,7 +502,6 @@ function generalCollisions() {
 
 function collisionsSafeZone() {
     //Cuando Entra a la zona segura
-    console.log(game.physics.arcade.overlap(player, safeZone));
     if (game.time.now > nextEntryIntoSafeZone && !overlapSafeZone && game.physics.arcade.overlap(player, safeZone)) {
 
         overlapSafeZone = true;
@@ -588,21 +582,21 @@ function hurtZombie(enemy, bullet) {
 }
 
 
-function hurtRobot(enemy, bullet) {
+function hurtRobot(robot, bullet) {
     bullet.kill();
     hitSound.play();
     //if the enemies aren't stopped when hit, the collision will send them flying
-    enemy.body.velocity.x = 0;
-    enemy.body.velocity.y = 0;
-    enemy.health -= weaponsBuy[currentWeapon].damage;
+    robot.body.velocity.x = 0;
+    robot.body.velocity.y = 0;
+    robot.health -= weaponsBuy[currentWeapon].damage;
     score += 5;
-    if (enemy.health <= 0) {
+    if (robot.health <= 0) {
         remainingTime += EXTRA_TIME_PER_KILL;
         updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
-        coin.reset(enemy.x - 10, enemy.y - 10);
-        enemy.kill();
-        gemGroup.getFirstDead().reset(enemy.x + 10, enemy.y + 10);
+        coin.reset(robot.x - 10, robot.y - 10);
+        robot.kill();
+        gemGroup.getFirstDead().reset(robot.x + 10, robot.y + 10);
         score += 100;
     }
     updateScore();
@@ -641,6 +635,12 @@ function onSafeZoneOverlap() {
     safeZoneTimeIn.fixedToCamera = true;
 }
 
+// function generateAreaPositions(quantity) {
+//     for(let i = 0; i<quantity; i++) {
+//         //let point = game.add.(Math.random()*(game.world.width-50)+50, Math.random()*(game.world.height-50)+50);
+//         areaGroup.();
+//     }
+// }
 
 
 
@@ -813,12 +813,12 @@ function spawnZombie() {
         zombie.health = enemyHealth;
         zombie.rotation = Math.random() * 360;
         zombie.body.velocity = game.physics.arcade.velocityFromRotation(zombie.rotation, zombieSpeed);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(zombie));
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(zombie), zombie);
     }
 }
 
 function spawnRobot() {
-    if (robotGroup.countDead() > 0 && score >= FIRST_STAGE) {
+    if (robotGroup.countDead() > 0 && score >= firstStage) {
         let robot = robotGroup.getFirstDead();
         let pos = enemySpawnPositionCheck();
         robot.reset(pos.x, pos.y);
@@ -826,7 +826,7 @@ function spawnRobot() {
         robot.chasing = false;
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(robot));
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(robot), robot);
     }
 }
 
@@ -850,7 +850,8 @@ function enemySpawnPositionCheck() {
     let posX = Math.random() * game.world.width;
     let posY = Math.random() * game.world.height;
     if ((player.x- PLAYER_SAFE_RADIUS < posX && posX < player.x+ PLAYER_SAFE_RADIUS && player.y- PLAYER_SAFE_RADIUS < posY && posY < player.y+ PLAYER_SAFE_RADIUS) ||
-        (safeZone.left - SAFE_ZONE_OFFSET < posX && posX < safeZone.right + SAFE_ZONE_OFFSET && safeZone.top - SAFE_ZONE_OFFSET < posY && posY < safeZone.bottom + SAFE_ZONE_OFFSET)) {
+        (safeZone.left - SAFE_ZONE_OFFSET < posX && posX < safeZone.right + SAFE_ZONE_OFFSET && safeZone.top - SAFE_ZONE_OFFSET < posY && posY < safeZone.bottom + SAFE_ZONE_OFFSET) ||
+        (score <= firstStage && posY < game.world.height/1.75)) {
         return enemySpawnPositionCheck(posX, posY);
     }else {
         return { x: posX, y: posY }
@@ -880,8 +881,9 @@ function enemyChase() {
         //Los robotGroup te siguen para siempre cuando te ven por primera vez
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
             if (!robot.chasing) {
-                game.time.events.loop(1500, () => robotShoot(robot));
+                game.time.events.loop(1500, () => robotShoot(robot), robot);
                 robot.chasing = true;
+                console.log(game.time.events);
             }
 
             //robot.animations.play('chase');
@@ -894,7 +896,7 @@ function enemyChase() {
 }
 
 function robotShoot(robot) {
-    if (game.physics.arcade.distanceBetween(robot, player) > 200) {
+    if (game.physics.arcade.distanceBetween(robot, player) > 200 && robot.chasing) {
         let bullet = robotBullets.getFirstDead();
         bullet.reset(robot.x, robot.y);
         game.time.events.add(2000, ()=> {bullet.kill()})
@@ -1059,15 +1061,15 @@ let costLifeText;
 let costRunText;
 
 function updateMenuButtons() {
-    //menuGroup.buyWeapon1Button = (weapon1Bought ? () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button');} : () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');})});
-    menuGroup.getAt(0).inputEnabled = !weapon1Bought;
-    menuGroup.getAt(0).alpha = (weapon1Bought ? 0.5 : 1);
+    //menuGroup.buyWeapon1Button = (weaponsBuy[1].bought ? () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button');} : () => {game.add.button(game.canvas.width - 50, game.canvas.height/2 - 200, 'buyWeapon1Button', () => {buyItem('weapon1');})});
+    menuGroup.getAt(0).inputEnabled = !weaponsBuy[1].bought;
+    menuGroup.getAt(0).alpha = (weaponsBuy[1].bought ? 0.5 : 1);
 
-    menuGroup.getAt(1).inputEnabled = !weapon2Bought;
-    menuGroup.getAt(1).alpha = (weapon2Bought ? 0.5 : 1);
+    menuGroup.getAt(1).inputEnabled = !weaponsBuy[2].bought;
+    menuGroup.getAt(1).alpha = (weaponsBuy[2].bought ? 0.5 : 1);
 
-    menuGroup.getAt(2).inputEnabled = !weapon3Bought;
-    menuGroup.getAt(2).alpha = (weapon3Bought ? 0.5 : 1);
+    menuGroup.getAt(2).inputEnabled = !weaponsBuy[3].bought;
+    menuGroup.getAt(2).alpha = (weaponsBuy[3].bought ? 0.5 : 1);
 
 
     //para actualizar el texto de lo que cuesta la vida y lo que cuesta mejorar la velocidad
@@ -1101,23 +1103,20 @@ function buyItem(item) {
         coins -= itemCostArray[item];
         switch (item) {
             case 0:
-                if (!weapon1Bought) {
-                    weapon1Bought = true;
+                if (!weaponsBuy[1].bought) {
                     weaponsBuy[1].bought = true;
                 }
                 hideMenu();
                 break;
             case 1:
-                if (!weapon2Bought) {
-                    weapon2Bought = true;
+                if (!weaponsBuy[2].bought) {
                     weaponsBuy[2].bought = true;
 
                 }
                 hideMenu();
                 break;
             case 2:
-                if (!weapon3Bought) {
-                    weapon3Bought = true;
+                if (!weaponsBuy[3].bought) {
                     weaponsBuy[3].bought = true;
                 }
                 hideMenu();
