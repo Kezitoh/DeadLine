@@ -17,7 +17,7 @@ function trushInitial() {
     imgtrustInitial.anchor.setTo(0.5, 0.5);
     imgtrustInitial.scale.setTo(20);
 
-    let textTitleInitial = '\n  DeadLine  \n';
+    let textTitleInitial = ' DeadLine ';
     let styleTitleInitial = {
         font: '90pt Titan One',
         fill: '#F9F9F9'
@@ -38,5 +38,13 @@ function trushInitial() {
     // Agregar evento de clic
     te.events.onInputDown.add(() => {
         botonesTween.start();
+    });
+
+    te.events.onInputOver.add(() => {
+        te.fill = '#FF0000'; // Cambia el color a rojo cuando el ratón está encima
+    });
+
+    te.events.onInputOut.add(() => {
+        te.fill = '#F9F9F9'; // Cambia el color de nuevo al original cuando el ratón sale
     });
 }
