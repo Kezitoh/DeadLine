@@ -11,6 +11,8 @@ const SHOOT_COOLDOWN = 150;
 const BULLET_SPEED = 600;
 const BULLET_GROUP_SIZE = 50;
 const FIRST_STAGE = 2500;
+const PLAYER_SPEED_UPGRADE_VALUE = 25;
+const PLAYER_HEALTH_UPGRADE_VALUE = 50;
 
 //Enemy consts
 const ENEMY_BASE_HEALTH = 15;
@@ -24,12 +26,12 @@ const ENEMY_TURN_PROBABILITY = 0.9;
 const ENEMY_STOP_TIME = 1500;
 const ENEMY_BASE_HURT = 15;
 const ROBOT_BASE_SPEED = 120;
-const ROBOT_BULLETS_GROUP_SIZE = 300;
+const ROBOT_BULLETS_GROUP_SIZE = 1000;
 const EXTRA_TIME_PER_KILL = 3;
 const PLAYER_SAFE_RADIUS = 200;
 
 //Safe zone consts
-const SAFE_ZONE_OFFSET = 50;
+const SAFE_ZONE_OFFSET = 150;
 const SAFE_ZONE_COUNTDOWN = 10;
 const INITIAL_HEALTH_COST = 40;
 const INITIAL_SPEED_COST = 50;
@@ -292,7 +294,7 @@ function setControls() {
     keys= {
         movement:game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D }),
         reload:game.input.keyboard.addKeys({e: Phaser.KeyCode.E, underscore: Phaser.KeyCode.UNDERSCORE}),
-        switchWeapon:game.input.keyboard.addKeys({q: Phaser.KeyCode.Q, ctrl: Phaser.KeyCode.CONTROL})
+        switchWeapon:game.input.keyboard.addKeys({shift: Phaser.KeyCode.SHIFT, ctrl: Phaser.KeyCode.CONTROL})
     };
     cursors = game.input.keyboard.createCursorKeys();
 }
@@ -451,7 +453,7 @@ function updateLevel() {
         exitAnimationToFinal(() => {endGame(true);});
     }
 
-    if (keys.switchWeapon.q.justDown || keys.switchWeapon.ctrl.justDown) {
+    if (keys.switchWeapon.shift.justDown || keys.switchWeapon.ctrl.justDown) {
         switchWeapon();
     }
 
@@ -496,7 +498,7 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
     game.physics.arcade.collide(robotBullets, player, ()=>hurtPlayer(player, robotBullets, true, true));
-    if (score < FIRST_STAGE) {
+    if (score < firstStage) {
         game.physics.arcade.collide(wall, player);
         game.physics.arcade.collide(wall, bulletGroup);
         game.physics.arcade.collide(zombieGroup, wall);
@@ -507,7 +509,7 @@ function generalCollisions() {
 
 function collisionsSafeZone() {
     //Cuando Entra a la zona segura
-    console.log(game.physics.arcade.overlap(player, safeZone));
+    //console.log(game.physics.arcade.overlap(player, safeZone));
     if (game.time.now > nextEntryIntoSafeZone && !overlapSafeZone && game.physics.arcade.overlap(player, safeZone)) {
 
         overlapSafeZone = true;
@@ -588,22 +590,23 @@ function hurtZombie(enemy, bullet) {
 }
 
 
-function hurtRobot(enemy, bullet) {
+function hurtRobot(robot, bullet) {
     bullet.kill();
     hitSound.play();
     //if the enemies aren't stopped when hit, the collision will send them flying
-    enemy.body.velocity.x = 0;
-    enemy.body.velocity.y = 0;
-    enemy.health -= weaponsBuy[currentWeapon].damage;
+    robot.body.velocity.x = 0;
+    robot.body.velocity.y = 0;
+    robot.health -= weaponsBuy[currentWeapon].damage;
     score += 5;
-    if (enemy.health <= 0) {
+    if (robot.health <= 0) {
         remainingTime += EXTRA_TIME_PER_KILL;
         updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
-        coin.reset(enemy.x - 10, enemy.y - 10);
-        enemy.kill();
-        gemGroup.getFirstDead().reset(enemy.x + 10, enemy.y + 10);
+        coin.reset(robot.x - 10, robot.y - 10);
+        robot.kill();
+        gemGroup.getFirstDead().reset(robot.x + 10, robot.y + 10);
         score += 100;
+        
     }
     updateScore();
 
@@ -801,6 +804,7 @@ function createEnemies() {
     });
     robotBullets.setAll('checkWorldBounds', true);
     robotBullets.setAll('outOfBoundsKill', true);
+    
     game.time.events.loop(enemySpawnRate, spawnZombie, this);
     game.time.events.loop(enemySpawnRate, spawnRobot, this);
 }
@@ -818,7 +822,7 @@ function spawnZombie() {
 }
 
 function spawnRobot() {
-    if (robotGroup.countDead() > 0 && score >= FIRST_STAGE) {
+    if (robotGroup.countDead() > 0 && score >= firstStage) {
         let robot = robotGroup.getFirstDead();
         let pos = enemySpawnPositionCheck();
         robot.reset(pos.x, pos.y);
@@ -827,6 +831,7 @@ function spawnRobot() {
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
         game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => enemyMovement(robot));
+        game.time.events.loop(1500, () => robotShoot(robot));
     }
 }
 
@@ -862,29 +867,29 @@ function enemySpawnPositionCheck() {
 
 function enemyChase() {
     //When player is close, zombieGroup chase the player
-    zombieGroup.forEach(enemy => {
-        enemy.chasing = false;
-        enemy.animations.play('idle');
-        if (game.physics.arcade.distanceBetween(enemy, player) < 300) {
-            enemy.chasing = true;
-            enemy.animations.play('chase');
+    zombieGroup.forEachAlive(zombie => {
+        zombie.chasing = false;
+        zombie.animations.play('idle');
+        if (game.physics.arcade.distanceBetween(zombie, player) < 300) {
+            zombie.chasing = true;
+            zombie.animations.play('chase');
             //USAMOS ESTO PORQUE LA FUNCIÓN game.physics.arcade.moveToObject() DA ERROR POR COSAS MÁS ALLÁ DE MI ENTENDIMIENTO
-            enemy.rotation = game.physics.arcade.angleToXY(enemy, player.x, player.y);
-            enemy.body.velocity = game.physics.arcade.velocityFromRotation(enemy.rotation, zombieSpeed);
+            zombie.rotation = game.physics.arcade.angleToXY(zombie, player.x, player.y);
+            zombie.body.velocity = game.physics.arcade.velocityFromRotation(zombie.rotation, zombieSpeed);
         }
-        game.physics.arcade.collide(enemy, safeZone);
-        game.physics.arcade.collide(enemy, bulletGroup, hurtZombie, null, this);
+        game.physics.arcade.collide(zombie, safeZone);
+        game.physics.arcade.collide(zombie, bulletGroup, hurtZombie, null, this);
     });
 
-    robotGroup.forEach(robot => {
+    robotGroup.forEachAlive(robot => {
         //Los robotGroup te siguen para siempre cuando te ven por primera vez
         if (game.physics.arcade.distanceBetween(robot, player) < 400 || robot.chasing) {
+
             if (!robot.chasing) {
-                game.time.events.loop(1500, () => robotShoot(robot));
+                
                 robot.chasing = true;
             }
 
-            //robot.animations.play('chase');
             robot.rotation = game.physics.arcade.angleToXY(robot, player.x, player.y);
             robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, robotSpeed);
         }
@@ -894,10 +899,12 @@ function enemyChase() {
 }
 
 function robotShoot(robot) {
-    if (game.physics.arcade.distanceBetween(robot, player) > 200) {
+    if (game.physics.arcade.distanceBetween(robot, player) > 200 && robot.chasing) {
         let bullet = robotBullets.getFirstDead();
         bullet.reset(robot.x, robot.y);
-        game.time.events.add(2000, ()=> {bullet.kill()})
+        game.time.events.add(2000, ()=> {bullet.kill()});
+        console.log(bullet.x, bullet.y);
+        console.log(bullet.x + bullet.y == robot.x + robot.y);
         game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED/2);
     }
 }
@@ -1136,8 +1143,8 @@ function buyItem(item) {
 function upgradeSpeed() {
     if (coins >= costRun) {
         coins -= costRun;
-        playerSpeed += 25;
-        costRun += 70;
+        playerSpeed += PLAYER_SPEED_UPGRADE_VALUE;
+        costRun = Math.floor(costRun * 1.5);
     } else {
     }
     hideMenu();
@@ -1150,10 +1157,10 @@ function upgradeSpeed() {
 function upgradeHealth() {
     if (coins >= costLife) {
         coins -= costLife;
-        maxHealth += 30;
+        maxHealth += PLAYER_HEALTH_UPGRADE_VALUE;
         healthValue = maxHealth;
         // Restaura la salud al máximo
-        costLife += 50;
+        costLife = Math.floor(costLife * 1.5);
         updateHealthBar();
     } else {
     }

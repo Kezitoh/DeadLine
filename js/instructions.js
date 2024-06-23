@@ -76,7 +76,7 @@ function showSlide2(){
 
     let slide2Text = "Enemies drop coins and gems." + 
                      "\nCoins can be used to buy weapons \nand upgrades in the Safe Zone!" + 
-                     "\nYou can swap between weapons \nwith the Q/Control keys." + 
+                     "\nYou can swap between weapons \nwith the SHIFT/Control keys." + 
                      "\nEach weapon has different damage, \nammo and fire rates.";
 
     let slide2TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5.5, slide2Text, slideTextStyle);
