@@ -434,6 +434,17 @@ function updateLevel() {
     areaGroup.forEachAlive(area => {
         game.physics.arcade.overlap(area, player, checkRechargeArea, null, this);
     });
+    rechargeAreaRespawn();
+
+    if (keys.switchWeapon.shift.justDown || keys.switchWeapon.ctrl.justDown) {
+        switchWeapon();
+    }
+
+    checkGameEnd();
+
+}
+
+function rechargeAreaRespawn() {
     if (areaGroup.countDead() > 0) {
 
         if (score < firstStage) {
@@ -443,20 +454,18 @@ function updateLevel() {
             areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height / 1.75) - 50) + 50);
         }
     }
+}
 
 
-    //Cuando la vida valga cero llamara la  funcion salidafinal y pone winorlose en false
+function checkGameEnd() {
     if (healthValue <= 0) {
         exitAnimationToFinal(() => { endGame(false); });
     } else if (gems >= winCondition) {
         exitAnimationToFinal(() => { endGame(true); });
     }
-
-    if (keys.switchWeapon.shift.justDown || keys.switchWeapon.ctrl.justDown) {
-        switchWeapon();
-    }
-
 }
+
+
 
 function switchWeapon() {
     do {
