@@ -12,8 +12,8 @@ let btnNormal;
 /** @type {Phaser.Button} */
 let btnHard;
 
-let levelToPlay;
 let img5;
+let playSoundBG = false;
 
 let p;
 let botonesGroup;
@@ -26,6 +26,7 @@ const DIFFICULTY = {
 
 let difficulty;
 let clickSound;
+let bgSound;
 
 function loadAssets() {
     game.load.image('fondo', 'assets/UI/Fondodejuego.png');
@@ -43,11 +44,12 @@ function loadAssets() {
 
 function loadSoundsWelcome(){
     game.load.audio('click', 'assets/sounds/click1.ogg');
+    game.load.audio('soundBg', 'assets/sounds/musicafondoinicio.mp3');
 }
 
 function displayScreen() {
     clickSound = game.add.audio('click');
-    levelToPlay = 1;
+    bgSound = game.add.audio('soundBg', 0.1, true);
     game.input.enabled = true;
     let img = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'fondo');
     img.anchor.setTo(0.5,0.5);
@@ -106,7 +108,10 @@ function displayScreen() {
 
     enterAnimation();
     enterAnimationPlayer();
-
+    if(!playSoundBG){
+        bgSound.play();
+        playSoundBG = true;
+    }
 }
 
 function botonesInicio(){
@@ -200,7 +205,16 @@ function enterAnimationPlayer(){
 function onDifficultySet(d){
     difficulty = d;
     let playerTween;
+    let soundTween;
     clickSound.play();
+    playSoundBG = false;
+    soundTween = game.add.tween(bgSound).to({
+        volume: 0
+    }, 3000, Phaser.Easing.Cubic.Out);
+    soundTween.onComplete.add(() => {
+        bgSound.stop();
+        playSoundBG = false;});
+    soundTween.start();
     if(difficulty == "Easy"){
         btnEasy.inputEnabled = false;
         btnHard.inputEnabled = false;

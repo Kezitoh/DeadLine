@@ -14,6 +14,7 @@ let totalItems = 0;
 let btnInicio;
 
 let clickSoundFinal;
+let sonidoFinal;
 
 
 function loadFinalImages() {
@@ -23,6 +24,8 @@ function loadFinalImages() {
 
     //sonido
     game.load.audio('click', 'assets/sounds/click1.ogg');
+    game.load.audio('soundWin', 'assets/sounds/winSOund.mp3');
+    game.load.audio('soundLose', 'assets/sounds/perdedorsonido.mp3');
 }
 
 function createLevelFinal() {
@@ -43,6 +46,8 @@ function createLevelFinal() {
     let textfinal;
     let scoretext;
     let scoretext2;
+    sonidoFinal = (winOrLose ? game.add.audio('soundWin', 0.3) : game.add.audio('soundLose', 0.3));
+    sonidoFinal.play();
     if(winOrLose){//aqui va si gana
         textfinal = "Victoria" ;
 
@@ -74,7 +79,14 @@ function createLevelFinal() {
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
         btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {
-            exitAnimation(() => {game.state.start('welcome');});
+            let localTween;
+            localTween = game.add.tween(sonidoFinal).to({
+                volume: 0
+            }, 1000, Phaser.Easing.Cubic.Out);
+            localTween.onComplete.add(() => {
+                sonidoFinal.stop();});
+                exitAnimation(() => {game.state.start('welcome');});
+            localTween.start();
             clickSoundFinal.play();
             btnInicio.inputEnabled = false;
         });

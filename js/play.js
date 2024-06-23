@@ -133,6 +133,7 @@ let coinSound;
 let shootSound;
 let gemSound;
 let soundSZ;
+let soundPlayBG;
 
 //Enemy variables
 let enemyHealth;
@@ -217,11 +218,20 @@ function loadSounds() {
     game.load.audio('coinSound', 'assets/sounds/pickupCoin.wav');
     game.load.audio('shootSound', 'assets/sounds/laserShoot.wav');
     game.load.audio('gemSound', 'assets/sounds/pickupGem.wav');
+    game.load.audio('playSoundBG', 'assets/sounds/musicaFondoJuego.mp3');
+
+    game.load.audio('buyItemsSound', '../assets/sounds/buyShop.mp3');
+    game.load.audio('deadEnemySound', '../assets/sounds/deadsound.mp3');
+    game.load.audio('playerHurtSound', '../assets/sounds/playerHurt.wav');
+    game.load.audio('shopMusic', '../assets/sounds/musicShop.mp3');
+    game.load.audio('recargeSound', '../assets/sounds/recargeZone.wav');
 }
 
-function loadLevel(level) {
-}
-
+let buySound;
+let deadSoundEnemy;
+let hurtPlayerSound;
+let waitSoundShop;
+let recargeSoundZone;
 
 function createSounds() {
     soundSZ = game.add.audio('danger');
@@ -229,6 +239,14 @@ function createSounds() {
     coinSound = game.add.audio('coinSound');
     shootSound = game.add.audio('shootSound');
     gemSound = game.add.audio('gemSound');
+    soundPlayBG = game.add.audio('playSoundBG', 0.5, true);
+
+    buySound = game.add.audio('buyItemsSound');
+    deadSoundEnemy = game.add.audio('deadEnemySound', 0.7);
+    hurtPlayerSound = game.add.audio('playerHurtSound', 0.3);
+    waitSoundShop = game.add.audio('shopMusic', 0.3, true);
+    recargeSoundZone = game.add.audio('recargeSound');
+
 }
 
 
@@ -244,15 +262,10 @@ function createLevel() {
     zonaSegura();
     game.camera.focusOnXY(initPosX, initPosY);
     setPlayer();
-    // maxAmmo = 50;
-    // ammo = maxAmmo;
-    //reload areas
-    //generateAreaPositions(areaGroup.length-1);
     setControls();
     setGroups();
     // Update elapsed time each second
     timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingTime = updateTime(hudTime, remainingTime, timerClock, setRemainingTime); }, this);
-    //game.add.sprite(game.world.width/2,game.world.height/2,"heart");
     createEnemies();
     createHUD();
     createMenu();
@@ -415,6 +428,7 @@ function setDifficulty(difficulty) {
     ITEMCOST.forEach(item => {
         itemCostArray.push(item * costModifier);
     });
+    alreadyGetOut = false;
 }
 
 function updateLevel() {
@@ -523,6 +537,12 @@ function collisionsSafeZone() {
 
         overlapSafeZone = true;
         onSafeZoneOverlap();
+        if(alreadyGetOut){
+            soundPlayBG.pause();
+        }else{
+            hideMenu();
+        }
+        waitSoundShop.play();
         showMenu();
 
     } else if (!overlapSafeZone) {
@@ -543,6 +563,13 @@ function collisionsSafeZone() {
         safeZoneTimeIn.setText("");
         soundSZ.stop();
         hideMenu();
+        waitSoundShop.stop();
+        if(!alreadyGetOut){
+            soundPlayBG.play();
+            alreadyGetOut = true;
+        }else{
+            soundPlayBG.resume();
+        }
     }
 
 
@@ -569,10 +596,11 @@ function hurtPlayer(player, source, isBullet = false) {
         source.kill();
     }
     if (game.time.now > nextHurt) {
-        hitSound.play();
-        nextHurt = game.time.now + INVULNERABILITY_TIME;
-        healthValue -= enemyDamage;
-        updateHealthBar();
+      hitSound.play();
+      nextHurt = game.time.now + INVULNERABILITY_TIME;
+      healthValue -= enemyDamage;
+      updateHealthBar();
+      hurtPlayerSound.play();
     }
 }
 
@@ -589,8 +617,9 @@ function hurtZombie(zombie, bullet) {
         remainingTime += EXTRA_TIME_PER_KILL;
         updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
         let coin = coinGroup.getFirstDead();
-        coin.reset(zombie.x - 10, zombie.y - 10);
-        zombie.kill();
+        coin.reset(enemy.x - 10, enemy.y - 10);
+        enemy.kill();
+        deadSoundEnemy.play();
         if (Math.random() > 0.5) {
             gemGroup.getFirstDead().reset(zombie.x + 10, zombie.y + 10);
         }
@@ -940,9 +969,9 @@ function updateTime(variableAcutalizar, valorActualizar, temporizador, funcionAc
 
     valorActualizar = Math.max(-1, valorActualizar - 1);
     variableAcutalizar.setText(funcionActulizado(valorActualizar));
-    if (valorActualizar < 0) {
+    if (valorActualizar <= 0) {
         game.time.events.remove(temporizador);
-        game.time.events.add(25, () => { exitAnimationToFinal(() => { endGame(); }); }, this);
+        game.time.events.add(25, () => { exitAnimationToFinal(() => { endGame(false); }); }, this);
     }
     return valorActualizar;
 }
@@ -1113,25 +1142,22 @@ function buyItem(item) {
                 if (!weaponsBuy[1].bought) {
                     weaponsBuy[1].bought = true;
                 }
-                hideMenu();
                 break;
             case 1:
                 if (!weaponsBuy[2].bought) {
                     weaponsBuy[2].bought = true;
 
                 }
-                hideMenu();
                 break;
             case 2:
                 if (!weaponsBuy[3].bought) {
                     weaponsBuy[3].bought = true;
                 }
-                hideMenu();
+
                 break;
         }
-        // Aquí añadir lógica para cambiar armas al jugador
-        // Por ejemplo: equipWeapon(item);
-    } else {
+        buySound.play();
+        hideMenu();
     }
     updateMenuButtons();
     updateCoinsText();
@@ -1144,10 +1170,9 @@ function upgradeSpeed() {
         coins -= costRun;
         playerSpeed += PLAYER_SPEED_UPGRADE_VALUE;
         costRun = Math.floor(costRun * 1.5);
-    } else {
+        buySound.play();
+        hideMenu();
     }
-    hideMenu();
-
     updateCoinsText();
 }
 
@@ -1161,10 +1186,9 @@ function upgradeHealth() {
         // Restaura la salud al máximo
         costLife = Math.floor(costLife * 1.5);
         updateHealthBar();
-    } else {
+        buySound.play();
+        hideMenu();
     }
-    hideMenu();
-
     updateCoinsText();
 }
 
@@ -1174,6 +1198,8 @@ function exitAnimationToFinal(a) {
     img5.anchor.setTo(0.5, 0.5);
     img5.scale.setTo(20);
     img5.alpha = 0;
+    soundPlayBG.stop();
+    waitSoundShop.stop();
 
     mainTween = game.add.tween(img5).to({
         alpha: 1
@@ -1189,6 +1215,8 @@ function endGame(victory) {
     game.time.events.remove(spawnZombieTimer);
     remainingTime = 100;
     winOrLose = victory;
+    soundPlayBG.stop();
+    waitSoundShop.stop();
     game.state.start('screenFinal');
 }
 
@@ -1205,6 +1233,7 @@ function checkRechargeArea(area) {
         weaponsBuy.forEach(weapon => {
             weapon.ammo = weapon.maxAmmo;
         });
+        recargeSoundZone.play();
 
         hudAmmo.setText(weapon.ammo + "/" + weapon.maxAmmo);
         area.kill();
