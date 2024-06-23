@@ -95,11 +95,38 @@ let playerSpeed;
 let ammo;
 let maxAmmo;
 let maxHealth;
-let weaponsBuy = [
-    { image: 'weapon0', bought: true, ammo: 50, maxAmmo: 50, cooldown: 500, damage: 5 },//predeterminada
-    { image: 'weapon1', bought: false, ammo: 30, maxAmmo: 30, cooldown: 500, damage: 12 },
-    { image: 'weapon2', bought: false, ammo: 10, maxAmmo: 10, cooldown: 1500, damage: 5 },
-    { image: 'weapon3', bought: false, ammo: 70, maxAmmo: 100, cooldown: 99, damage: 5 }
+let weaponsBuy = [{
+        image: 'weapon0',
+        bought: true,
+        ammo: 50,
+        maxAmmo: 50,
+        cooldown: 500,
+        damage: 5
+    }, //predeterminada
+    {
+        image: 'weapon1',
+        bought: false,
+        ammo: 30,
+        maxAmmo: 30,
+        cooldown: 500,
+        damage: 12
+    },
+    {
+        image: 'weapon2',
+        bought: false,
+        ammo: 10,
+        maxAmmo: 10,
+        cooldown: 1500,
+        damage: 5
+    },
+    {
+        image: 'weapon3',
+        bought: false,
+        ammo: 70,
+        maxAmmo: 100,
+        cooldown: 99,
+        damage: 5
+    }
 ];
 let currentWeaponSprite;
 
@@ -267,7 +294,9 @@ function createLevel() {
     setControls();
     setGroups();
     // Update elapsed time each second
-    timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingTime = updateTime(hudTime, remainingTime, timerClock, setRemainingTime); }, this);
+    timerClock = game.time.events.loop(Phaser.Timer.SECOND, () => {
+        remainingTime = updateTime(hudTime, remainingTime, timerClock, setRemainingTime);
+    }, this);
     createEnemies();
     createHUD();
     createMenu();
@@ -308,9 +337,20 @@ function setGroups() {
 
 function setControls() {
     keys = {
-        movement: game.input.keyboard.addKeys({ w: Phaser.KeyCode.W, a: Phaser.KeyCode.A, s: Phaser.KeyCode.S, d: Phaser.KeyCode.D }),
-        reload: game.input.keyboard.addKeys({ e: Phaser.KeyCode.E, underscore: Phaser.KeyCode.UNDERSCORE }),
-        switchWeapon: game.input.keyboard.addKeys({ shift: Phaser.KeyCode.SHIFT, ctrl: Phaser.KeyCode.CONTROL })
+        movement: game.input.keyboard.addKeys({
+            w: Phaser.KeyCode.W,
+            a: Phaser.KeyCode.A,
+            s: Phaser.KeyCode.S,
+            d: Phaser.KeyCode.D
+        }),
+        reload: game.input.keyboard.addKeys({
+            e: Phaser.KeyCode.E,
+            underscore: Phaser.KeyCode.UNDERSCORE
+        }),
+        switchWeapon: game.input.keyboard.addKeys({
+            shift: Phaser.KeyCode.SHIFT,
+            ctrl: Phaser.KeyCode.CONTROL
+        })
     };
     cursors = game.input.keyboard.createCursorKeys();
 }
@@ -443,10 +483,14 @@ function updateLevel() {
     generalCollisions();
     enemyChase();
 
-    if( score >= firstStage && !secondPhase) {
+    if (score >= firstStage && !secondPhase) {
         secondPhase = true;
         hudInfo.setText("Zona superior desbloqueada")
-        let hudInfoTween = game.add.tween(hudInfo).to({alpha:1},1000, Phaser.Easing.Cubic.InOut).to({alpha:0},1000, Phaser.Easing.Cubic.InOut).repeatAll(5);
+        let hudInfoTween = game.add.tween(hudInfo).to({
+            alpha: 1
+        }, 1000, Phaser.Easing.Cubic.InOut).to({
+            alpha: 0
+        }, 1000, Phaser.Easing.Cubic.InOut).repeatAll(5);
         hudInfoTween.start();
     }
     shoot();
@@ -469,8 +513,7 @@ function rechargeAreaRespawn() {
 
         if (score < firstStage) {
             areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * (game.world.height - ((game.world.height / 2.25) + 50)) + (game.world.height / 2.25) + 50);
-        }
-        else {
+        } else {
             areaGroup.getFirstDead().reset(Math.random() * (game.world.width - 50) + 50, Math.random() * ((game.world.height / 1.75) - 50) + 50);
         }
     }
@@ -479,9 +522,13 @@ function rechargeAreaRespawn() {
 
 function checkGameEnd() {
     if (healthValue <= 0) {
-        exitAnimationToFinal(() => { endGame(false); });
+        exitAnimationToFinal(() => {
+            endGame(false);
+        });
     } else if (gems >= winCondition) {
-        exitAnimationToFinal(() => { endGame(true); });
+        exitAnimationToFinal(() => {
+            endGame(true);
+        });
     }
 }
 
@@ -506,7 +553,7 @@ function zonaSegura() {
     safeZone.anchor.setTo(0.5);
     game.physics.arcade.enable(safeZone);
     safeZone.body.immovable = true;
-    safeZone.body.setSize((safeZone.width-70)/safeZone.scale.x,(safeZone.height-70)/safeZone.scale.y, 35, 35);
+    safeZone.body.setSize((safeZone.width - 70) / safeZone.scale.x, (safeZone.height - 70) / safeZone.scale.y, 35, 35);
     let i = 0;
     levelData.safeZone.pillars.forEach(pillar => {
         let safeZonePillar = game.add.sprite(pillar.x, pillar.y, 'safeZone' + i++);
@@ -527,8 +574,12 @@ function generalCollisions() {
     game.physics.arcade.collide(robotGroup, player, hurtPlayer);
     game.physics.arcade.collide(robotGroup, safeZone);
     robotBullets.forEachAlive(bullet => {
-        game.physics.arcade.collide(bullet, player, () => { hurtPlayer(player, bullet, true) });
-        game.physics.arcade.collide(bullet, safeZone, () => {bullet.kill()});
+        game.physics.arcade.collide(bullet, player, () => {
+            hurtPlayer(player, bullet, true)
+        });
+        game.physics.arcade.collide(bullet, safeZone, () => {
+            bullet.kill()
+        });
     })
     if (score <= firstStage) {
         game.physics.arcade.collide(wall, player);
@@ -544,9 +595,9 @@ function collisionsSafeZone() {
 
         overlapSafeZone = true;
         onSafeZoneOverlap();
-        if(alreadyGetOut){
+        if (alreadyGetOut) {
             soundPlayBG.pause();
-        }else{
+        } else {
             hideMenu();
         }
         waitSoundShop.play();
@@ -571,10 +622,10 @@ function collisionsSafeZone() {
         soundSZ.stop();
         hideMenu();
         waitSoundShop.stop();
-        if(!alreadyGetOut){
+        if (!alreadyGetOut) {
             soundPlayBG.play();
             alreadyGetOut = true;
-        }else{
+        } else {
             soundPlayBG.resume();
         }
     }
@@ -603,11 +654,11 @@ function hurtPlayer(player, source, isBullet = false) {
         source.kill();
     }
     if (game.time.now > nextHurt) {
-      hitSound.play();
-      nextHurt = game.time.now + INVULNERABILITY_TIME;
-      healthValue -= enemyDamage;
-      updateHealthBar();
-      hurtPlayerSound.play();
+        hitSound.play();
+        nextHurt = game.time.now + INVULNERABILITY_TIME;
+        healthValue -= enemyDamage;
+        updateHealthBar();
+        hurtPlayerSound.play();
     }
 }
 
@@ -684,7 +735,9 @@ function onSafeZoneOverlap() {
     safeZone.body.velocity.y = 0;
     remainingSZTime = SAFE_ZONE_COUNTDOWN;
 
-    timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => { remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2); }, this);
+    timerClock2 = game.time.events.loop(Phaser.Timer.SECOND, () => {
+        remainingSZTime = updateTime(safeZoneTimeIn, remainingSZTime, timerClock2, setRemainingTime2);
+    }, this);
 
     safeZoneTimeIn = game.add.text(game.canvas.width / 2, 100, setRemainingTime2(remainingSZTime), {
         font: 'bold 35pt',
@@ -745,11 +798,11 @@ function createHUD() {
     });
     hudGroup.add(hudInteractText);
 
-    hudInfo = game.add.text(game.canvas.width / 2, game.canvas.height/2, "", {
+    hudInfo = game.add.text(game.canvas.width / 2, game.canvas.height / 2, "", {
         font: 'bold 20pt',
         fill: '#ffffff'
     });
-    hudInfo.alpha =0;
+    hudInfo.alpha = 0;
     hudInfo.anchor.set(0.5);
     hudGroup.add(hudInfo);
 
@@ -764,9 +817,9 @@ function createHUD() {
 }
 
 function shoot() {
-    if ((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone) && !game.physics.arcade.isPaused)
-        || (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused)
-        || (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
+    if ((game.input.activePointer.isDown && !game.physics.arcade.overlap(player, safeZone) && !game.physics.arcade.isPaused) ||
+        (game.input.activePointer.isDown && !menuGroup.visible && !game.physics.arcade.isPaused) ||
+        (game.input.activePointer.isDown && !game.physics.arcade.isPaused && !game.physics.arcade.overlap(player, safeZone))) {
         switch (currentWeapon) {
             case 0:
                 player.animations.play('shootPistol');
@@ -873,7 +926,9 @@ function spawnZombie() {
         zombie.health = enemyHealth;
         zombie.rotation = Math.random() * 360;
         zombie.body.velocity = game.physics.arcade.velocityFromRotation(zombie.rotation, zombieSpeed);
-        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(zombie) }, this);
+        game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => {
+            enemyMovement(zombie)
+        }, this);
     }
 }
 
@@ -886,8 +941,12 @@ function spawnRobot() {
         robot.chasing = false;
         robot.rotation = Math.random() * 360;
         robot.body.velocity = game.physics.arcade.velocityFromRotation(robot.rotation, ENEMY_BASE_SPEED);
-        robot.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => { enemyMovement(robot) }, this);
-        robot.shootTimer = game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => { robotShoot(robot) });
+        robot.moveTimer = game.time.events.loop(Math.floor(Math.random() * (ENEMY_TURN_TIMER_MAX - ENEMY_TURN_TIMER_MIN) + ENEMY_TURN_TIMER_MIN), () => {
+            enemyMovement(robot)
+        }, this);
+        robot.shootTimer = game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => {
+            robotShoot(robot)
+        });
 
     }
 }
@@ -897,7 +956,9 @@ function enemyMovement(enemy) {
     enemy.body.velocity.y = 0;
     if (!enemy.chasing) {
         let giro = (Math.random() * 360) - 180;
-        game.add.tween(enemy).to({ angle: giro }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
+        game.add.tween(enemy).to({
+            angle: giro
+        }, 500, Phaser.Easing.Linear.None, true, 0, 0, false);
     }
     game.time.events.add(ENEMY_STOP_TIME, () => {
         if (Math.random() < ENEMY_TURN_PROBABILITY) {
@@ -915,7 +976,10 @@ function enemySpawnPositionCheck() {
         (score <= firstStage && posY < game.world.height / 1.75)) {
         return enemySpawnPositionCheck(posX, posY);
     } else {
-        return { x: posX, y: posY }
+        return {
+            x: posX,
+            y: posY
+        }
     }
 
 }
@@ -967,7 +1031,10 @@ function robotShoot(robot) {
 function updateHealthBar() {
     if (healthTween)
         healthTween.stop();
-    healthTween = game.add.tween(healthBar.scale).to({ x: healthValue / maxHealth, y: 1 }, 300, Phaser.Easing.Cubic.Out);
+    healthTween = game.add.tween(healthBar.scale).to({
+        x: healthValue / maxHealth,
+        y: 1
+    }, 300, Phaser.Easing.Cubic.Out);
     healthTween.start();
 
 }
@@ -987,7 +1054,11 @@ function updateTime(variableAcutalizar, valorActualizar, temporizador, funcionAc
     variableAcutalizar.setText(funcionActulizado(valorActualizar));
     if (valorActualizar <= 0) {
         game.time.events.remove(temporizador);
-        game.time.events.add(25, () => { exitAnimationToFinal(() => { endGame(false); }); }, this);
+        game.time.events.add(25, () => {
+            exitAnimationToFinal(() => {
+                endGame(false);
+            });
+        }, this);
     }
     return valorActualizar;
 }
@@ -1002,19 +1073,25 @@ let menuGroup;
 function createMenu() {
     menuGroup = game.add.group();
 
-    let buyWeapon1Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70 - 200, 'buyWeapon1Button', () => { buyItem(0); });
+    let buyWeapon1Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70 - 200, 'buyWeapon1Button', () => {
+        buyItem(0);
+    });
     buyWeapon1Button.anchor.set(0.5);
     buyWeapon1Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon1Button);
 
 
-    let buyWeapon2Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70, 'buyWeapon2Button', () => { buyItem(1); });
+    let buyWeapon2Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70, 'buyWeapon2Button', () => {
+        buyItem(1);
+    });
     buyWeapon2Button.anchor.set(0.5);
     buyWeapon2Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon2Button);
 
 
-    let buyWeapon3Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70 + 200, 'buyWeapon3Button', () => { buyItem(2); });
+    let buyWeapon3Button = game.add.button(game.canvas.width - 100, game.canvas.height / 2 + 70 + 200, 'buyWeapon3Button', () => {
+        buyItem(2);
+    });
     buyWeapon3Button.anchor.set(0.5);
     buyWeapon3Button.scale.setTo(0.25);
     menuGroup.add(buyWeapon3Button);
@@ -1089,27 +1166,27 @@ function createMenu() {
 
     let weapon1Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 - 200 - 25, 'weapon1');
     weapon1Image.anchor.set(0.5);
-    weapon1Image.scale.setTo(0.25); 
+    weapon1Image.scale.setTo(0.25);
     menuGroup.add(weapon1Image);
 
     let weapon2Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 - 25, 'weapon2');
     weapon2Image.anchor.set(0.5);
-    weapon2Image.scale.setTo(0.25); 
+    weapon2Image.scale.setTo(0.25);
     menuGroup.add(weapon2Image);
 
     let weapon3Image = game.add.sprite(game.canvas.width - 100, game.canvas.height / 2 + 200 - 25, 'weapon3');
     weapon3Image.anchor.set(0.5);
-    weapon3Image.scale.setTo(0.25); 
+    weapon3Image.scale.setTo(0.25);
     menuGroup.add(weapon3Image);
 
     let heartImageMenu = game.add.sprite(100, game.canvas.height / 2 - 25, 'heart');
     heartImageMenu.anchor.set(0.5);
-    heartImageMenu.scale.setTo(1); 
+    heartImageMenu.scale.setTo(1);
     menuGroup.add(heartImageMenu);
 
     let botasImagenAlas = game.add.sprite(100, game.canvas.height / 2 - 25 - 200, 'boots');
     botasImagenAlas.anchor.set(0.5);
-    botasImagenAlas.scale.setTo(0.04); 
+    botasImagenAlas.scale.setTo(0.04);
     menuGroup.add(botasImagenAlas);
 
     menuGroup.coinsText = coinsText;
@@ -1260,4 +1337,3 @@ function checkRechargeArea(area) {
 
 
 }
-

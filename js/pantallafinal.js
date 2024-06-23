@@ -48,8 +48,8 @@ function createLevelFinal() {
     let scoretext2;
     sonidoFinal = (winOrLose ? game.add.audio('soundWin', 0.3) : game.add.audio('soundLose', 0.3));
     sonidoFinal.play();
-    if(winOrLose){//aqui va si gana
-        textfinal = "Victoria" ;
+    if (winOrLose) { //aqui va si gana
+        textfinal = "Victoria";
 
         let scoretext3 = "Vida restante: \n ";
         let vidaRestantetexto = " " + healthValue;
@@ -59,14 +59,15 @@ function createLevelFinal() {
 
         textoFinalBoton();
 
-    } else {//aqui va si pierde
+    } else { //aqui va si pierde
         textfinal = "Derrota";
         textoFinalBoton();
     }
-    function textoFinalBoton(){
+
+    function textoFinalBoton() {
         let t = game.add.text(game.canvas.width / 2, game.canvas.height / 6, textfinal, styleTitle);
-        t.anchor.setTo(0.5,0.5);
-        t.setShadow(5,5);
+        t.anchor.setTo(0.5, 0.5);
+        t.setShadow(5, 5);
 
         scoretext = "Tu puntuacion es: ";
         let ptexto = " " + score;
@@ -78,14 +79,17 @@ function createLevelFinal() {
         let puntuacionTexto2 = game.add.text(game.canvas.width / 10, game.canvas.height / 3 + 120, scoretext2, stylesub);
         game.add.text(game.canvas.width / 1.5, game.canvas.height / 3 + 120, otexto, stylesub);
 
-        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25,'btnInicioA',() => {
+        btnInicio = game.add.button(game.canvas.width / 2, game.canvas.height / 1.25, 'btnInicioA', () => {
             let localTween;
             localTween = game.add.tween(sonidoFinal).to({
                 volume: 0
             }, 1000, Phaser.Easing.Cubic.Out);
             localTween.onComplete.add(() => {
-                sonidoFinal.stop();});
-                exitAnimation(() => {game.state.start('welcome');});
+                sonidoFinal.stop();
+            });
+            exitAnimation(() => {
+                game.state.start('welcome');
+            });
             localTween.start();
             clickSoundFinal.play();
             btnInicio.inputEnabled = false;
@@ -93,7 +97,7 @@ function createLevelFinal() {
 
         btnInicio.inputEnabled = true;
         btnInicio.scale.setTo(0.4);
-        btnInicio.anchor.setTo(0.5,0.5);
+        btnInicio.anchor.setTo(0.5, 0.5);
     }
 
     enterAnimation();

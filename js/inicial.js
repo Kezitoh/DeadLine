@@ -22,7 +22,7 @@ function trushInitial() {
         font: '90pt Titan One',
         fill: '#F9F9F9'
     };
-    let textTitleInitial2 = ' (Click on the game screen to continue...) ';
+    let textTitleInitial2 = ' Click on the game screen to continue ';
     let styleTitleInitial2 = {
         font: '15pt Titan One',
         fill: '#F9F9F9'
@@ -50,7 +50,9 @@ function trushInitial() {
     let botonesTween = game.add.tween(te).to({
         alpha: 0
     }, 1000, Phaser.Easing.Cubic.Out);
-    botonesTween.onComplete.add(() => { game.state.start('welcome');})
+    botonesTween.onComplete.add(() => {
+        game.state.start('welcome');
+    })
 
 
     // Agregar evento de clic
@@ -61,9 +63,9 @@ function trushInitial() {
     let eventInitial = () => {
         game.canvas.removeEventListener('pointerdown', eventInitial); //hostia puta joder tio no me lo puedo creer
         botonesTween.start();
-     }
+    }
 
-    game.canvas.addEventListener('pointerdown',  eventInitial);
+    game.canvas.addEventListener('pointerdown', eventInitial);
 
     te.events.onInputOver.add(() => {
         te.fill = '#00FF13'; // Cambia el color a rojo cuando el ratón está encima, fui obligado
