@@ -20,8 +20,8 @@ const WEAPON_IMAGE_OFFSET = 275;
 
 
 function createInstructions() {
-    enterAnimation();
     showSlide1();
+    enterAnimation();
 }
 
 
