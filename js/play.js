@@ -248,11 +248,12 @@ function loadSounds() {
     game.load.audio('gemSound', 'assets/sounds/pickupGem.wav');
     game.load.audio('playSoundBG', 'assets/sounds/musicaFondoJuego.mp3');
 
-    game.load.audio('buyItemsSound', '../assets/sounds/buyShop.mp3');
-    game.load.audio('deadEnemySound', '../assets/sounds/deadsound.mp3');
-    game.load.audio('playerHurtSound', '../assets/sounds/playerHurt.wav');
-    game.load.audio('shopMusic', '../assets/sounds/musicShop.mp3');
-    game.load.audio('recargeSound', '../assets/sounds/recargeZone.wav');
+    game.load.audio('buyItemsSound', 'assets/sounds/buyShop.mp3');
+    game.load.audio('deadEnemySound', 'assets/sounds/deadsound.mp3');
+    game.load.audio('playerHurtSound', 'assets/sounds/playerHurt.wav');
+    game.load.audio('shopMusic', 'assets/sounds/musicShop.mp3');
+    game.load.audio('recargeSound', 'assets/sounds/recargeZone.wav');
+    game.load.audio('robotShoot', 'assets/sounds/robotShoot.wav');
 }
 
 let buySound;
@@ -260,13 +261,14 @@ let deadSoundEnemy;
 let hurtPlayerSound;
 let waitSoundShop;
 let recargeSoundZone;
+let shootRobotSound;
 
 function createSounds() {
     soundSZ = game.add.audio('danger');
-    hitSound = game.add.audio('hitSound');
-    coinSound = game.add.audio('coinSound');
-    shootSound = game.add.audio('shootSound');
-    gemSound = game.add.audio('gemSound');
+    hitSound = game.add.audio('hitSound', 0.5);
+    coinSound = game.add.audio('coinSound', 0.5);
+    shootSound = game.add.audio('shootSound', 0.5);
+    gemSound = game.add.audio('gemSound', 0.5);
     soundPlayBG = game.add.audio('playSoundBG', 0.5, true);
 
     buySound = game.add.audio('buyItemsSound');
@@ -274,6 +276,7 @@ function createSounds() {
     hurtPlayerSound = game.add.audio('playerHurtSound', 0.3);
     waitSoundShop = game.add.audio('shopMusic', 0.3, true);
     recargeSoundZone = game.add.audio('recargeSound');
+    shootRobotSound = game.add.audio('robotShoot', 0.5);
 
 }
 
@@ -945,7 +948,7 @@ function spawnRobot() {
             enemyMovement(robot)
         }, this);
         robot.shootTimer = game.time.events.loop(ROBOT_SHOOT_COOLDOWN, () => {
-            robotShoot(robot)
+            robotShoot(robot);
         });
 
     }
@@ -1024,6 +1027,7 @@ function robotShoot(robot) {
         bullet.reset(robot.x, robot.y);
         game.time.events.add(2000, () => bullet.kill());
         game.physics.arcade.moveToXY(bullet, player.x, player.y, BULLET_SPEED / 2);
+        shootRobotSound.play();
     }
 }
 
