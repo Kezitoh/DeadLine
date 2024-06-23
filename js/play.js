@@ -129,6 +129,7 @@ let coinSound;
 let shootSound;
 let gemSound;
 let soundSZ;
+let soundPlayBG;
 
 //Enemy variables
 let enemyHealth;
@@ -213,6 +214,7 @@ function loadSounds() {
     game.load.audio('coinSound', 'assets/sounds/pickupCoin.wav');
     game.load.audio('shootSound', 'assets/sounds/laserShoot.wav');
     game.load.audio('gemSound', 'assets/sounds/pickupGem.wav');
+    game.load.audio('playSoundBG', 'assets/sounds/musicaFondoJuego.mp3');
 }
 
 function loadLevel(level) {
@@ -225,6 +227,8 @@ function createSounds() {
     coinSound = game.add.audio('coinSound');
     shootSound = game.add.audio('shootSound');
     gemSound = game.add.audio('gemSound');
+    soundPlayBG = game.add.audio('playSoundBG', 0.5, true);
+    soundPlayBG.play();
 }
 
 
@@ -924,9 +928,9 @@ function updateTime(variableAcutalizar, valorActualizar, temporizador, funcionAc
 
     valorActualizar = Math.max(-1, valorActualizar - 1);
     variableAcutalizar.setText(funcionActulizado(valorActualizar));
-    if (valorActualizar < 0) {
+    if (valorActualizar <= 0) {
         game.time.events.remove(temporizador);
-        game.time.events.add(25, () => { exitAnimationToFinal(() => { endGame(); }); }, this);
+        game.time.events.add(25, () => { exitAnimationToFinal(() => { endGame(false); }); }, this);
     }
     return valorActualizar;
 }
@@ -1168,6 +1172,7 @@ function exitAnimationToFinal(a) {
     img5.anchor.setTo(0.5, 0.5);
     img5.scale.setTo(20);
     img5.alpha = 0;
+    soundPlayBG.stop();
 
     mainTween = game.add.tween(img5).to({
         alpha: 1
