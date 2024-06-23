@@ -74,7 +74,7 @@ let bulletGroup;
 let gemGroup;
 
 //HUD variables
-let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins, hudInteractText, hudGems;
+let healthBar, healthValue, healthTween, hudTime, hudScore, hudDifficulty, hudAmmo, hudCoins, hudInteractText, hudGems, hudInfo;
 
 //Timer variables
 let remainingTime;
@@ -162,6 +162,7 @@ let wall;
 let levelData;
 let winCondition;
 let firstStage;
+let secondPhase;
 
 function loadPlayAssets() {
     loadSprites();
@@ -253,6 +254,7 @@ function createSounds() {
 
 
 function createLevel() {
+    secondPhase = false;
     levelData = game.cache.getJSON('jsonData');
     createSounds();
     setDifficulty(difficulty);
@@ -441,7 +443,12 @@ function updateLevel() {
     generalCollisions();
     enemyChase();
 
-
+    if( score >= firstStage && !secondPhase) {
+        secondPhase = true;
+        hudInfo.setText("Zona superior desbloqueada")
+        let hudInfoTween = game.add.tween(hudInfo).to({alpha:1},1000, Phaser.Easing.Cubic.InOut).to({alpha:0},1000, Phaser.Easing.Cubic.InOut).repeatAll(5);
+        hudInfoTween.start();
+    }
     shoot();
     characterMovement();
     areaGroup.forEachAlive(area => {
@@ -736,6 +743,14 @@ function createHUD() {
         fill: '#ffffff'
     });
     hudGroup.add(hudInteractText);
+
+    hudInfo = game.add.text(game.canvas.width / 2, game.canvas.height/2, "", {
+        font: 'bold 20pt',
+        fill: '#ffffff'
+    });
+    hudInfo.alpha =0;
+    hudInfo.anchor.set(0.5);
+    hudGroup.add(hudInfo);
 
     currentWeaponSprite = hudGroup.create(game.canvas.width - 155, game.canvas.height - 100, 'weapon0');
     currentWeaponSprite.anchor.setTo(0.5, 0.5);
