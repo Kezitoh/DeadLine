@@ -20,3 +20,4 @@ phaser*/
 *.rar
 *.tar
 *.zip
+js/obfuscated.js
