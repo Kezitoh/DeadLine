@@ -49,7 +49,7 @@ function loadSoundsWelcome() {
 
 function displayScreen() {
     clickSound = game.add.audio('click');
-    bgSound = game.add.audio('soundBg', 0.1, true);
+    
     game.input.enabled = true;
     let img = game.add.image(game.canvas.width / 2, game.canvas.height / 2, 'fondo');
     img.anchor.setTo(0.5, 0.5);
@@ -109,6 +109,7 @@ function displayScreen() {
     enterAnimation();
     enterAnimationPlayer();
     if (!playSoundBG) {
+        bgSound = game.add.audio('soundBg', 0.1, true);
         bgSound.play();
         playSoundBG = true;
     }
