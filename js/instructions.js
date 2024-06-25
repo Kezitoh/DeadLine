@@ -124,14 +124,38 @@ function showSlide3() {
         forwardBtnPress(slideNum)
     }, this);
 
-    let slide3Text = "When you have enough points, \nthe barrier dividing the game world will dissapear." +
-        "\nOnce it is gone, the robots will start spawning" +
-        "\nDefeat robots to have a guaranteed gem drop!" +
-        "\n\n You will win the game when you get enough gems!";
+    let slide3Text = "You can recharge your weapons \nwith the blue areas in the map." +
+        "\nJust press the E/- keys when prompted." +
+        "\nBe careful! Once the wall falls" +
+        "\nAll the recharge zones will be in the\n upper half of the map!";
 
     let slide3TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide3Text, slideTextStyle);
     slide3TextBox.anchor.setTo(0.5, 0);
     slide3TextBox.setShadow(5, 5);
+
+    let forwardBtn = game.add.button(game.canvas.width / 1.25, game.canvas.height / 1.25, 'forwardBtn', () => {
+        forwardBtnPress(slideNum)
+    });
+    let backBtn = game.add.button(game.canvas.width / 12.5, game.canvas.height / 1.25, 'backBtn', () => {
+        backBtnPress(slideNum)
+    });
+}
+
+function showSlide4() {
+    showBaseScreen();
+    slideNum = 4;
+    timer = game.time.events.add(SLIDE_TIME, () => {
+        forwardBtnPress(slideNum)
+    }, this);
+
+    let slide4Text = "When you have enough points, \nthe barrier dividing the game world will dissapear." +
+        "\nOnce it is gone, the robots will start spawning" +
+        "\nDefeat robots to have a guaranteed gem drop!" +
+        "\n\n You will win the game when you get enough gems!";
+
+    let slide4TextBox = game.add.text(game.canvas.width / 2, game.canvas.height / 5, slide4Text, slideTextStyle);
+    slide4TextBox.anchor.setTo(0.5, 0);
+    slide4TextBox.setShadow(5, 5);
 
     let forwardBtn = game.add.button(game.canvas.width / 1.25, game.canvas.height / 1.25, 'forwardBtn', () => {
         forwardBtnPress(slideNum)
@@ -151,6 +175,9 @@ function forwardBtnPress(slideOrigin) {
             showSlide3();
             break;
         case 3:
+            showSlide4();
+            break;
+        case 4:
             exitAnimation(() => {
                 game.state.start('welcome');
             });
@@ -171,6 +198,9 @@ function backBtnPress(slideOrigin) {
             break;
         case 3:
             showSlide2();
+            break;
+        case 4:
+            showSlide3();
             break;
     }
 }
